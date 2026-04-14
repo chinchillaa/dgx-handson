@@ -1,0 +1,126 @@
+
+<style>
+  .wrap { padding: 1rem 0; font-family: var(--font-sans); }
+  .chapter { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 1.25rem; overflow: hidden; }
+  .ch-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .ch-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .ch-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .ch-time { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
+  .ch-body { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .section { }
+  .sec-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); margin-bottom: 8px; }
+  .topic { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; font-size: 13px; color: var(--color-text-primary); line-height: 1.45; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .hands { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .hands-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--color-text-primary); line-height: 1.5; }
+  .hands-row:last-child { margin-bottom: 0; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; flex-shrink: 0; margin-top: 1px; }
+  .tag-code { background: #EEEDFE; color: #3C3489; }
+  .tag-quiz { background: #E1F5EE; color: #0F6E56; }
+  .tag-demo { background: #FAEEDA; color: #854F0B; }
+
+  @media (prefers-color-scheme: dark) {
+    .tag-code { background: #26215C; color: #CECBF6; }
+    .tag-quiz { background: #04342C; color: #9FE1CB; }
+    .tag-demo { background: #412402; color: #FAC775; }
+  }
+  @media (max-width: 520px) {
+    .ch-body { grid-template-columns: 1fr; }
+  }
+</style>
+<div class="wrap">
+
+  <div class="chapter">
+    <div class="ch-header">
+      <div class="ch-num" style="background:#EEEDFE;color:#3C3489;">1</div>
+      <div>
+        <div class="ch-title">機械学習(AI)の仕組み</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">数式ゼロで理解する「学習」の本質</div>
+      </div>
+      <div class="ch-time">約 2–3h</div>
+    </div>
+    <div class="ch-body">
+      <div class="section">
+        <div class="sec-label">トピック</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>機械学習とは「関数の最適化」である</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>損失関数・勾配降下法の直感的理解</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>ニューラルネットワーク：層・重み・活性化関数</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>Transformer：Attention機構とトークン化</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>LLMの事前学習：何をどう学んでいるか</div>
+        <div class="topic"><div class="dot" style="background:#7F77DD;"></div>推論時の挙動：temperature・sampling・context window</div>
+      </div>
+      <div class="section">
+        <div class="sec-label">ハンズオン</div>
+        <div class="hands">
+          <div class="hands-row"><span class="tag tag-code">実装</span>NumPyで線形回帰を0から実装、勾配降下を可視化</div>
+          <div class="hands-row"><span class="tag tag-code">実装</span>PyTorchでMNIST分類（2層NN）、損失曲線を観察</div>
+          <div class="hands-row"><span class="tag tag-demo">デモ</span>HuggingFace Transformersで既存LLMを推論、各パラメータの効果を確認</div>
+          <div class="hands-row"><span class="tag tag-quiz">課題</span>temperatureを変えてサンプリング分布を比較・考察</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter">
+    <div class="ch-header">
+      <div class="ch-num" style="background:#E1F5EE;color:#0F6E56;">2</div>
+      <div>
+        <div class="ch-title">AIを「強く」する</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">SFT・RLHF・RAG — 目的に応じた強化手法の選択</div>
+      </div>
+      <div class="ch-time">約 2–3h</div>
+    </div>
+    <div class="ch-body">
+      <div class="section">
+        <div class="sec-label">トピック</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>強化の選択肢マップ：SFT / RLHF(PPO) / DPO / RAG / Prompt Engineering</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>SFT：データセット設計・過学習・フォーマット</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>RLHF / DPO：人間フィードバックの組み込み方</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>RAG：Retrieval設計・チャンク戦略・Embeddingモデル選択</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>量子化・LoRA：リソース制約下での効率化</div>
+        <div class="topic"><div class="dot" style="background:#1D9E75;"></div>評価：BERTScore / ROUGE / LLM-as-judge</div>
+      </div>
+      <div class="section">
+        <div class="sec-label">ハンズオン</div>
+        <div class="hands">
+          <div class="hands-row"><span class="tag tag-code">実装</span>LLaMA 3をLoRA + SFTTrainerで日本語タスクにSFT（DGX上で実行）</div>
+          <div class="hands-row"><span class="tag tag-code">実装</span>DPO用のpreference datasetを作成・学習、SFTとの出力差を比較</div>
+          <div class="hands-row"><span class="tag tag-code">実装</span>LangChain + ChromaDBでRAGパイプライン構築、チャンクサイズ比較実験</div>
+          <div class="hands-row"><span class="tag tag-quiz">課題</span>SFT前後・RAG有無で同一質問に回答させ、評価指標で定量比較</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter">
+    <div class="ch-header">
+      <div class="ch-num" style="background:#FAEEDA;color:#854F0B;">3</div>
+      <div>
+        <div class="ch-title">AIエージェントを作ろう</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Tool use・メモリ・マルチエージェントで自律動作を実現</div>
+      </div>
+      <div class="ch-time">約 2–3h</div>
+    </div>
+    <div class="ch-body">
+      <div class="section">
+        <div class="sec-label">トピック</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>エージェントとは何か：ReAct / Plan-and-Execute / Reflexion</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>Tool use：function calling・MCP・APIの抽象化</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>メモリ：Short-term / Long-term / Episodic</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>マルチエージェント：オーケストレーションと役割分担</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>信頼性・安全性：ハルシネーション対策・ガードレール</div>
+        <div class="topic"><div class="dot" style="background:#EF9F27;"></div>本番運用：観測性・ログ・コスト管理</div>
+      </div>
+      <div class="section">
+        <div class="sec-label">ハンズオン</div>
+        <div class="hands">
+          <div class="hands-row"><span class="tag tag-code">実装</span>LangGraph + 検索ツールでReActエージェントを構築（Python）</div>
+          <div class="hands-row"><span class="tag tag-code">実装</span>外部API（天気・DB）をtool登録、エージェントが自律呼び出し</div>
+          <div class="hands-row"><span class="tag tag-code">実装</span>2エージェント構成（Planner + Executor）でレポート自動生成タスク</div>
+          <div class="hands-row"><span class="tag tag-quiz">課題</span>意図的なバグのあるtool定義を渡し、エラーリカバリの挙動を観察・修正</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

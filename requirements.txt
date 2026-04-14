@@ -1,0 +1,38 @@
+# MLハンズオン 全章共通依存パッケージ
+# インストール: uv pip install -r requirements.txt
+
+# 深層学習フレームワーク
+torch
+torchvision
+
+# HuggingFace エコシステム
+transformers
+datasets
+trl
+peft
+
+# LLMアプリケーションフレームワーク
+langchain
+langchain-community
+langgraph
+
+# ベクトルDB・埋め込み
+chromadb
+sentence-transformers
+
+# 実験ログ管理
+wandb
+
+# データ処理・可視化
+numpy
+pandas
+matplotlib
+scikit-learn
+
+# Notebook
+jupyter
+ipywidgets
+
+# 評価指標
+bert-score
+rouge-score
