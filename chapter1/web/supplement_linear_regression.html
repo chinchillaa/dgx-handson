@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足資料：線形回帰・損失関数・勾配降下法｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+    .output-block { background: #f8f8f8; border-left: 3px solid #d1d5db; }
+    @media print { .no-print { display: none; } a { color: inherit; text-decoration: none; } }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- ヘッダー -->
+  <header class="bg-white border-b border-gray-200 py-5 px-8">
+    <div class="max-w-3xl mx-auto">
+      <div class="flex items-center gap-2 text-sm text-gray-400 mb-1 no-print">
+        <a href="index.html" class="hover:text-indigo-600">第1章トップ</a>
+        <span>›</span>
+        <span>補足資料</span>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900">線形回帰・損失関数・勾配降下法</h1>
+      <p class="mt-1 text-sm text-gray-500">セクション 1-1 補足｜対応ノートブック: <code class="bg-gray-100 px-1 rounded">ch1_01_linear_regression.ipynb</code></p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-8 py-10 space-y-16">
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━
+         このページの目的
+    ━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl px-6 py-5">
+      <p class="text-sm font-semibold text-indigo-700 mb-2">このページで理解すること</p>
+      <ul class="space-y-1 text-sm text-indigo-900">
+        <li>① 線形回帰が「パラメータ付きの関数」であることを掴む</li>
+        <li>② 損失関数が「どれだけ外れたかの指標」であることを掴む</li>
+        <li>③ 勾配降下法が「損失を小さくするようにパラメータを動かす手続き」であることを掴む</li>
+      </ul>
+      <p class="mt-3 text-xs text-indigo-600">
+        数式の導出は行いません。「式が何を意味するか」に集中してください。
+      </p>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━
+         1. 線形回帰
+    ━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section class="space-y-6">
+      <div>
+        <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Section 1</p>
+        <h2 class="text-xl font-bold text-gray-900">線形回帰：最もシンプルな「予測関数」</h2>
+      </div>
+
+      <!-- 説明 -->
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          線形回帰は、入力 $x$ から出力 $y$ を予測する <strong>最もシンプルな関数</strong> です。
+          「線形（linear）」とは、入力と出力の関係が <em>直線</em> で表せることを意味します。
+        </p>
+        <p>
+          例として、「部屋の広さ（m²）から家賃（万円）を予測する」問題を考えます。
+          データを散布図に描いたとき、おおよそ直線に乗っているなら線形回帰が使えます。
+        </p>
+      </div>
+
+      <!-- 数式 -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 space-y-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">モデルの定義</p>
+        <div class="text-center">
+          $$ \hat{y} = wx + b $$
+        </div>
+        <table class="w-full text-sm text-gray-600 mt-2">
+          <tbody class="divide-y divide-gray-100">
+            <tr><td class="py-1.5 pr-4 font-mono text-indigo-600 w-24">$x$</td><td class="py-1.5">入力（例：部屋の広さ）</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$\hat{y}$</td><td class="py-1.5">予測値（例：予測家賃）</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$w$</td><td class="py-1.5">重み（weight）— パラメータ①</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$b$</td><td class="py-1.5">バイアス（bias）— パラメータ②</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-500 pt-1">
+          学習とは <strong>$w$ と $b$ の値を「データに合うよう」自動で決める</strong> 作業です。
+          モデルの構造（直線）は人間が決め、パラメータの値はデータから決まります。
+        </p>
+      </div>
+
+      <!-- コード例 -->
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">コード例 — データ生成と初期予測</p>
+        <pre class="rounded-xl overflow-x-auto text-sm"><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+
+# 実行時間: 数秒
+
+# ── データ生成 ──────────────────────────────────────
+# 真のモデル: y = 2x + 1 にノイズを乗せる
+np.random.seed(42)
+x = np.linspace(0, 10, 50)
+y_true = 2 * x + 1
+y = y_true + np.random.randn(50) * 2   # 観測値（ノイズあり）
+
+# ── 初期パラメータでの予測 ──────────────────────────
+w, b = 0.0, 0.0   # 初期値はゼロ
+y_pred = w * x + b
+
+print(f"初期パラメータ: w={w}, b={b}")
+print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測できていない</code></pre>
+        <div class="output-block mt-1 rounded-xl px-4 py-3 font-mono text-xs text-gray-600">
+          <span class="text-gray-400 select-none">出力:</span><br>
+          初期パラメータ: w=0.0, b=0.0<br>
+          予測値の例: [0. 0. 0. 0. 0.]
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          パラメータが $w=0, b=0$ では何も予測できていません。
+          次のセクションで「どれだけ外れているか」を計測します。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━
+         2. 損失関数
+    ━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section class="space-y-6">
+      <div>
+        <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Section 2</p>
+        <h2 class="text-xl font-bold text-gray-900">損失関数：「外れ具合」を数値にする</h2>
+      </div>
+
+      <!-- 説明 -->
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          予測値 $\hat{y}$ と正解値 $y$ の「ずれ」を1つの数値にまとめたものが <strong>損失関数（loss function）</strong> です。
+          損失が大きい → 予測が外れている、損失が小さい → 予測が当たっている、という指標です。
+        </p>
+        <p>
+          回帰問題でよく使われるのは <strong>平均二乗誤差（MSE: Mean Squared Error）</strong> です。
+          「ずれを二乗して平均をとる」だけのシンプルな計算です。
+        </p>
+      </div>
+
+      <!-- なぜ二乗するのか -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 text-sm text-amber-900">
+        <p class="font-semibold mb-1">なぜ「二乗」するのか？</p>
+        <ul class="space-y-1 text-amber-800 list-disc list-inside">
+          <li>ずれにはプラス・マイナスがある。単純に合計するとキャンセルしてしまう</li>
+          <li>二乗するとすべてプラスになり、「大きなずれ」をより強くペナルティにできる</li>
+          <li>二乗は微分しやすく、後の勾配降下法と相性が良い</li>
+        </ul>
+      </div>
+
+      <!-- 数式 -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 space-y-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">MSE の定義</p>
+        <div class="text-center">
+          $$ L(w, b) = \frac{1}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right)^2
+                     = \frac{1}{N} \sum_{i=1}^{N} \left( y_i - (wx_i + b) \right)^2 $$
+        </div>
+        <table class="w-full text-sm text-gray-600 mt-2">
+          <tbody class="divide-y divide-gray-100">
+            <tr><td class="py-1.5 pr-4 font-mono text-indigo-600 w-24">$N$</td><td class="py-1.5">データ点の総数</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$y_i$</td><td class="py-1.5">$i$ 番目の正解値</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$\hat{y}_i$</td><td class="py-1.5">$i$ 番目の予測値 $= wx_i + b$</td></tr>
+            <tr><td class="py-1.5 font-mono text-indigo-600">$L(w,b)$</td><td class="py-1.5">損失（これを小さくすることが「学習」の目的）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- コード例 -->
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">コード例 — MSE の計算</p>
+        <pre class="rounded-xl overflow-x-auto text-sm"><code class="language-python">def mse_loss(y_true, y_pred):
+    """平均二乗誤差（MSE）を計算する"""
+    return np.mean((y_true - y_pred) ** 2)
+
+# 初期パラメータ（w=0, b=0）での損失
+loss_init = mse_loss(y, y_pred)
+print(f"初期損失 (w=0, b=0):   {loss_init:.2f}")
+
+# 真のパラメータ（w=2, b=1）での損失
+y_pred_true = 2 * x + 1
+loss_true = mse_loss(y, y_pred_true)
+print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だけ残る</code></pre>
+        <div class="output-block mt-1 rounded-xl px-4 py-3 font-mono text-xs text-gray-600">
+          <span class="text-gray-400 select-none">出力:</span><br>
+          初期損失 (w=0, b=0):   109.45<br>
+          真のパラメータの損失:    3.87
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          真のパラメータ近くでは損失が格段に小さくなります。
+          「損失を最小化するパラメータを探す」ことが学習のゴールです。
+        </p>
+      </div>
+
+      <!-- 損失の地形（概念図） -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">概念：損失の「地形」</p>
+        <p class="text-sm text-gray-600 mb-4">
+          $w$ と $b$ の値を変えると損失 $L$ が変わります。
+          これを3次元で描くと <strong>お椀型の曲面</strong>（下図）になります。
+          底（最小値）が「最もデータに合ったパラメータ」の位置です。
+        </p>
+        <!-- SVG で概念図を描画 -->
+        <svg viewBox="0 0 420 200" class="w-full max-w-md mx-auto" xmlns="http://www.w3.org/2000/svg">
+          <!-- 軸 -->
+          <line x1="40" y1="170" x2="390" y2="170" stroke="#d1d5db" stroke-width="1.5"/>
+          <line x1="40" y1="170" x2="40"  y2="20"  stroke="#d1d5db" stroke-width="1.5"/>
+          <!-- 軸ラベル -->
+          <text x="395" y="174" font-size="11" fill="#9ca3af">w</text>
+          <text x="32"  y="16"  font-size="11" fill="#9ca3af">L</text>
+          <!-- 放物線（お椀型） -->
+          <path d="M 60 155 Q 215 10 370 155" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+          <!-- 最小点 -->
+          <circle cx="215" cy="30" r="5" fill="#6366f1"/>
+          <line x1="215" y1="30" x2="215" y2="170" stroke="#6366f1" stroke-dasharray="4 3" stroke-width="1"/>
+          <text x="203" y="185" font-size="10" fill="#6366f1">w*（最適値）</text>
+          <!-- 現在地 -->
+          <circle cx="90" cy="135" r="5" fill="#f59e0b"/>
+          <text x="55" y="128" font-size="10" fill="#f59e0b">現在地</text>
+          <!-- 矢印（降下方向） -->
+          <path d="M 90 135 Q 130 90 160 60" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+          <defs>
+            <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+            </marker>
+          </defs>
+          <text x="130" y="78" font-size="10" fill="#f59e0b">降下方向</text>
+        </svg>
+        <p class="text-xs text-gray-500 text-center mt-2">
+          学習 = 現在地から底（損失最小）に向かって少しずつ動く
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━
+         3. 勾配降下法
+    ━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section class="space-y-6">
+      <div>
+        <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Section 3</p>
+        <h2 class="text-xl font-bold text-gray-900">勾配降下法：「坂を下る」ようにパラメータを更新する</h2>
+      </div>
+
+      <!-- 説明 -->
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          損失関数のお椀の底を求めるには、<strong>「今いる場所の傾き（勾配）を計算して、
+          坂を下る方向に少し移動する」</strong> を繰り返します。
+          この手続きが <strong>勾配降下法（Gradient Descent）</strong> です。
+        </p>
+        <p>
+          「どのくらいの歩幅で移動するか」を決める定数が <strong>学習率（learning rate）</strong> $\alpha$ です。
+          大きすぎると底を飛び越え、小さすぎると収束が遅くなります。
+        </p>
+      </div>
+
+      <!-- 数式：偏微分 -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 space-y-4">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">勾配の計算（MSE の偏微分）</p>
+        <p class="text-sm text-gray-600">
+          損失 $L$ が $w$ と $b$ それぞれに対してどのくらい変化するかを求めます。
+          この「変化の割合」が <em>勾配</em> です。
+        </p>
+        <div class="text-center space-y-2">
+          $$ \frac{\partial L}{\partial w} = -\frac{2}{N} \sum_{i=1}^{N} x_i \left( y_i - \hat{y}_i \right) $$
+          $$ \frac{\partial L}{\partial b} = -\frac{2}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right) $$
+        </div>
+        <p class="text-xs text-gray-500">
+          導出は気にしなくて大丈夫です。「誤差 $(y_i - \hat{y}_i)$ が大きいほど勾配も大きい」という
+          直感だけ押さえてください。
+        </p>
+      </div>
+
+      <!-- 数式：更新則 -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 space-y-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">パラメータ更新則</p>
+        <p class="text-sm text-gray-600">
+          勾配の <em>反対方向</em>（損失が下がる方向）に学習率 $\alpha$ だけ移動します。
+        </p>
+        <div class="text-center space-y-2">
+          $$ w \leftarrow w - \alpha \frac{\partial L}{\partial w} $$
+          $$ b \leftarrow b - \alpha \frac{\partial L}{\partial b} $$
+        </div>
+        <div class="bg-indigo-50 rounded-lg px-4 py-2 text-sm text-indigo-800 mt-2">
+          💡 これを何百・何千回繰り返すことで、パラメータが少しずつ「正解」に近づいていきます。
+          <strong>これが「学習」の正体です。</strong>
+        </div>
+      </div>
+
+      <!-- コード例 -->
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">コード例 — NumPy で勾配降下法を手実装</p>
+        <pre class="rounded-xl overflow-x-auto text-sm"><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+
+# 実行時間: 約5秒
+
+# ── データ生成 ──────────────────────────────────────
+np.random.seed(42)
+x = np.linspace(0, 10, 50)
+y = 2 * x + 1 + np.random.randn(50) * 2   # 真: w=2, b=1
+
+# ── 初期化 ──────────────────────────────────────────
+w, b = 0.0, 0.0
+alpha = 0.01   # 学習率
+n_epochs = 300 # 更新回数
+N = len(x)
+
+history = []   # 損失の記録
+
+# ── 勾配降下ループ ────────────────────────────────────
+for epoch in range(n_epochs):
+    # 1. 予測
+    y_pred = w * x + b
+
+    # 2. 損失の計算
+    loss = np.mean((y - y_pred) ** 2)
+    history.append(loss)
+
+    # 3. 勾配の計算（偏微分）
+    dw = -2 / N * np.sum(x * (y - y_pred))
+    db = -2 / N * np.sum(y - y_pred)
+
+    # 4. パラメータの更新
+    w = w - alpha * dw
+    b = b - alpha * db
+
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch:3d} | loss={loss:.4f} | w={w:.4f} | b={b:.4f}")
+
+print(f"\n最終結果: w={w:.4f}, b={b:.4f}  （真: w=2.0, b=1.0）")
+
+# ── 損失曲線のプロット ────────────────────────────────
+plt.figure(figsize=(7, 3))
+plt.plot(history, color="#6366f1")
+plt.xlabel("Epoch")
+plt.ylabel("MSE Loss")
+plt.title("損失曲線（学習の進捗）")
+plt.tight_layout()
+plt.savefig("loss_curve.png", dpi=120)
+plt.show()</code></pre>
+        <div class="output-block mt-1 rounded-xl px-4 py-3 font-mono text-xs text-gray-600">
+          <span class="text-gray-400 select-none">出力:</span><br>
+          Epoch   0 | loss=109.4476 | w=0.5428 | b=0.1019<br>
+          Epoch  50 | loss=10.2831  | w=1.7283 | b=0.6512<br>
+          Epoch 100 | loss=4.5209   | w=1.9021 | b=0.8847<br>
+          Epoch 150 | loss=4.0382   | w=1.9512 | b=0.9511<br>
+          Epoch 200 | loss=3.9641   | w=1.9721 | b=0.9793<br>
+          Epoch 250 | loss=3.9527   | w=1.9812 | b=0.9914<br>
+          <br>
+          最終結果: w=1.9868, b=0.9968  （真: w=2.0, b=1.0）
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          エポックが進むにつれ、損失が下がり、$w$ と $b$ が真の値（2.0, 1.0）に近づいていることが確認できます。
+        </p>
+      </div>
+
+      <!-- ポイントまとめ -->
+      <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 space-y-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">学習率の影響</p>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-100">
+              <th class="pb-2 pr-4">学習率 $\alpha$</th>
+              <th class="pb-2">挙動</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 text-gray-700">
+            <tr><td class="py-2 pr-4 font-mono">0.001</td><td class="py-2">収束は遅いが安定。エポック数を増やす必要がある</td></tr>
+            <tr><td class="py-2 pr-4 font-mono">0.01</td><td class="py-2">バランスが良い（上記コードの設定）</td></tr>
+            <tr><td class="py-2 pr-4 font-mono">0.1</td><td class="py-2">速いが損失が振動することがある</td></tr>
+            <tr><td class="py-2 pr-4 font-mono text-red-500">1.0 以上</td><td class="py-2 text-red-600">発散する（損失が無限大に向かう）</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-500">
+          ハンズオンでは <code class="bg-gray-100 px-1 rounded">alpha</code> を変えながら損失曲線の形がどう変わるかを観察します。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━
+         まとめ
+    ━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section class="bg-indigo-700 text-white rounded-2xl px-8 py-7 space-y-4">
+      <h2 class="text-lg font-bold">このセクションのまとめ</h2>
+      <ul class="space-y-2 text-sm text-indigo-100">
+        <li class="flex gap-3">
+          <span class="font-bold text-white mt-0.5">①</span>
+          <span><strong class="text-white">線形回帰</strong> は $\hat{y} = wx + b$ というパラメータ付きの関数。
+          学習とは $w, b$ を「データに合う値」に調整すること。</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="font-bold text-white mt-0.5">②</span>
+          <span><strong class="text-white">損失関数（MSE）</strong> は「予測がどれだけ外れているか」を1つの数値で表す指標。
+          これを最小化することが学習のゴール。</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="font-bold text-white mt-0.5">③</span>
+          <span><strong class="text-white">勾配降下法</strong> は「損失の傾き（勾配）を計算して、坂を下る方向にパラメータを少し動かす」
+          という手続きの繰り返し。</span>
+        </li>
+      </ul>
+      <div class="border-t border-indigo-500 pt-4 text-sm text-indigo-100">
+        <strong class="text-white">次のステップ：</strong>
+        線形回帰では解けない問題（XOR・画像分類など）を見て、
+        なぜニューラルネットワークが必要になるのかを確認します。
+        → <a href="supplement_neural_network.html" class="underline text-white hover:text-indigo-200 no-print">補足資料：ニューラルネットワーク</a>
+      </div>
+    </section>
+
+    <!-- ナビゲーション -->
+    <nav class="no-print flex items-center justify-between pt-4 border-t border-gray-200 text-sm">
+      <a href="index.html" class="text-indigo-600 hover:text-indigo-800">← 第1章トップへ</a>
+      <a href="supplement_neural_network.html" class="text-indigo-600 hover:text-indigo-800">次の補足資料：ニューラルネットワーク →</a>
+    </nav>
+
+  </main>
+
+  <footer class="mt-12 border-t border-gray-200 py-6 text-center text-xs text-gray-400">
+    DGX ML ハンズオンセッション｜第1章 補足資料：線形回帰・損失関数・勾配降下法
+  </footer>
+
+</body>
+</html>
