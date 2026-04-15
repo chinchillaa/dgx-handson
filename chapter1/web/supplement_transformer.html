@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足資料：Transformer｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --red:          #991B1B;
+      --red-bg:       #FEF2F2;
+      --code-bg:      #18181B;
+      --code-out:     #27272A;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-rule .num {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+      opacity: 0.12;
+      min-width: 2.5rem;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .section-rule .titles { flex: 1; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-math {
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+    }
+
+    .note-green {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green-mid);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-amber {
+      background: var(--amber-bg);
+      border-left: 3px solid var(--amber-border);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-red {
+      background: var(--red-bg);
+      border-left: 3px solid #FCA5A5;
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+
+    .code-label {
+      background: var(--code-bg);
+      border-radius: 8px 8px 0 0;
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #3F3F46;
+    }
+    .code-label span { font-size: 0.7rem; color: #A1A1AA; letter-spacing: 0.08em; font-weight: 600; }
+    .code-dots { display: flex; gap: 4px; }
+    .code-dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+    pre.hljs-wrap { margin: 0; border-radius: 0 0 8px 8px; overflow-x: auto; }
+    pre.hljs-wrap code { font-size: 0.8rem; line-height: 1.65; }
+
+    .output-block {
+      background: var(--code-out);
+      border-radius: 0 0 8px 8px;
+      padding: 0.75rem 1rem;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.75rem;
+      color: #D4D4D8;
+      line-height: 1.65;
+    }
+    .output-label {
+      font-size: 0.65rem;
+      color: #71717A;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .var-table td { padding: 0.35rem 0; font-size: 0.85rem; vertical-align: top; }
+    .var-table td:first-child {
+      font-family: "SF Mono", "Menlo", monospace;
+      color: var(--green-mid);
+      padding-right: 1.5rem;
+      white-space: nowrap;
+      min-width: 4rem;
+    }
+
+    .summary-block {
+      background: var(--green);
+      color: #E8F3EF;
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+    }
+    .summary-block strong { color: #FFFFFF; }
+    .summary-block a { color: #7DD3B8; text-decoration: underline; text-underline-offset: 3px; }
+
+    @media print {
+      .no-print { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━ ヘッダー ━━━ -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-6 px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="no-print flex items-center gap-2 mb-3" style="font-size:0.75rem; color:var(--text-muted);">
+        <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章</a>
+        <span>›</span>
+        <span>補足資料</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+        <div>
+          <p class="label mb-1">Section 1-3 Supplement</p>
+          <h1 class="text-2xl font-bold" style="color:var(--text);">Transformer</h1>
+        </div>
+        <div class="no-print flex-shrink-0 text-right" style="font-size:0.7rem; color:var(--text-muted); line-height:1.6;">
+          <p>対応ノートブック</p>
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:0.68rem; color:var(--text-sub);">ch1_03_llm_inference.ipynb</code>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
+
+    <!-- ━━━ 目標ボックス ━━━ -->
+    <div class="note-green">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
+      <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
+        <li>自然言語をベクトルに変換することで、数学的な操作が可能になる仕組みを掴む</li>
+        <li>自己注意機構（Self-Attention）が「文脈」を数値で表す仕組みを掴む</li>
+        <li>Transformer の全体構造と LLM への接続を掴む</li>
+      </ol>
+      <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
+        数式の細部より<em>「なぜこうなっているか」という直感</em>を優先してください。
+      </p>
+    </div>
+
+    <!-- ━━━ 前置き：言語を数値に変換する ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">0</div>
+        <div class="titles">
+          <p class="label">前置き</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">自然言語を「数値」に変換する</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        これまで扱ってきた線形回帰や MNIST 分類は、入力がはじめから「数値」でした。
+        しかし自然言語——単語や文章——はそのままでは数学的な操作ができません。
+        <strong style="color:var(--text);">AI が言語を扱うためのカギは、言語を数値ベクトルに変換すること</strong>です。
+      </p>
+
+      <!-- 埋め込みの概念 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">単語埋め込み（Word Embedding）の考え方</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+          <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
+            <p style="margin-bottom:0.75rem;">
+              各単語を <strong style="color:var(--text);">高次元の実数ベクトル</strong> に対応させます。
+              ベクトルの各次元は「その単語の意味的な特性」を暗黙的に表現します。
+            </p>
+            <p style="margin-bottom:0.75rem;">
+              例えば 512 次元のベクトルなら、単語は 512 個の実数の組として表現されます。
+              <em>意味が近い単語は、ベクトル空間上でも近い位置に来る</em>ように学習されます。
+            </p>
+            <p>
+              ベクトルになると、<strong style="color:var(--text);">足し算・引き算・内積</strong>といった数学的操作が直接適用できます。
+            </p>
+          </div>
+          <!-- 意味空間のSVG図 -->
+          <svg viewBox="0 0 200 200" style="width:100%; max-width:200px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
+            <!-- 背景グリッド -->
+            <line x1="20" y1="180" x2="190" y2="180" stroke="var(--border)" stroke-width="1"/>
+            <line x1="20" y1="180" x2="20"  y2="10"  stroke="var(--border)" stroke-width="1"/>
+            <text x="186" y="192" font-size="9" fill="var(--text-muted)" font-style="italic">dim₁</text>
+            <text x="4"   y="12"  font-size="9" fill="var(--text-muted)" font-style="italic">dim₂</text>
+            <!-- 王様 -->
+            <circle cx="70" cy="60" r="5" fill="var(--green)"/>
+            <text x="78" y="64" font-size="10" fill="var(--green)" font-weight="600">王様</text>
+            <!-- 女王 -->
+            <circle cx="130" cy="60" r="5" fill="var(--green)"/>
+            <text x="138" y="64" font-size="10" fill="var(--green)" font-weight="600">女王</text>
+            <!-- 男性 -->
+            <circle cx="70" cy="130" r="5" fill="var(--text-muted)"/>
+            <text x="78" y="134" font-size="10" fill="var(--text-sub)">男性</text>
+            <!-- 女性 -->
+            <circle cx="130" cy="130" r="5" fill="var(--text-muted)"/>
+            <text x="138" y="134" font-size="10" fill="var(--text-sub)">女性</text>
+            <!-- 平行四辺形の矢印 -->
+            <line x1="70" y1="130" x2="70" y2="63" stroke="var(--green-border)" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <line x1="130" y1="130" x2="130" y2="63" stroke="var(--green-border)" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <line x1="70" y1="130" x2="127" y2="130" stroke="var(--amber-border)" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <line x1="70" y1="60" x2="127" y2="60" stroke="var(--amber-border)" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <!-- ラベル -->
+            <text x="90" y="195" font-size="8" fill="var(--amber)" text-anchor="middle">「性別」方向</text>
+            <text x="4"  y="98"  font-size="8" fill="var(--green-mid)" text-anchor="middle" transform="rotate(-90,4,98)">「地位」方向</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 有名な式 -->
+      <div class="card-math" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">ベクトル演算で意味の類推ができる</p>
+        <div style="text-align:center; margin-bottom:1rem;">
+          $$\vec{v}(\text{王様}) - \vec{v}(\text{男性}) + \vec{v}(\text{女性}) \approx \vec{v}(\text{女王})$$
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+          これは「王様ベクトルから男性的な方向を引き、女性的な方向を加えると、女王ベクトルに近づく」ことを意味します。
+          <strong style="color:var(--text);">意味の計算が、ベクトルの足し算・引き算として実現できる</strong>のです。
+          これはベクトル化によってはじめて可能になる操作です。
+        </p>
+      </div>
+
+      <!-- トークン化 → 埋め込みの流れ -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">テキストが数値になるまでの流れ</p>
+        <!-- パイプライン図 -->
+        <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; row-gap:0.75rem;">
+          <!-- ステップ1 -->
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">テキスト</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「猫が好き」</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <!-- ステップ2 -->
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--amber); font-weight:600;">トークン化</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「猫」「が」「好き」</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <!-- ステップ3 -->
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">トークンID</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[2847, 14, 391]</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <!-- ステップ4 -->
+          <div style="text-align:center; min-width:6.5rem;">
+            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--green); font-weight:600;">埋め込み</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[0.12, −0.84, …]×3</div>
+          </div>
+        </div>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:1rem; line-height:1.7;">
+          埋め込み（Embedding）は <strong style="color:var(--text-sub);">大きな行列の参照</strong> です。語彙サイズ × 次元数 の行列を学習し、
+          トークンIDを行インデックスとして対応するベクトルを取り出します。
+        </p>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜベクトル化が重要なのか</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          ニューラルネットワークの演算はすべて「行列の掛け算＋活性化関数」です。
+          テキストを実数ベクトルに変換することで、<strong>言語処理が NN の標準的な演算パイプラインに乗る</strong>ようになります。
+          Transformer はこのベクトル列を入力として受け取り、各ベクトルを文脈に応じて変換していく構造です。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 1：RNN の限界 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">1</div>
+        <div class="titles">
+          <p class="label">Section 1</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Transformer 以前の問題：RNN の限界</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        埋め込みでテキストをベクトル列にしても、次の課題が残ります——
+        <strong style="color:var(--text);">どうやって文脈（前後の関係）を捉えるか</strong>。
+        Transformer 以前は RNN（再帰型NN）がその役割を担っていましたが、根本的な限界がありました。
+      </p>
+
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">RNN の処理イメージ</p>
+        <!-- RNN 図 -->
+        <svg viewBox="0 0 480 110" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- トークン -->
+          <g font-size="10" fill="var(--text-sub)" text-anchor="middle">
+            <text x="50"  y="100">「私」</text>
+            <text x="140" y="100">「は」</text>
+            <text x="230" y="100">「昨日」</text>
+            <text x="320" y="100">「食べた」</text>
+            <text x="410" y="100">「寿司」</text>
+          </g>
+          <!-- ボックス（隠れ状態） -->
+          <g fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5">
+            <rect x="20"  y="30" width="60" height="40" rx="6"/>
+            <rect x="110" y="30" width="60" height="40" rx="6"/>
+            <rect x="200" y="30" width="60" height="40" rx="6"/>
+            <rect x="290" y="30" width="60" height="40" rx="6"/>
+            <rect x="380" y="30" width="60" height="40" rx="6"/>
+          </g>
+          <g font-size="9" fill="var(--green)" text-anchor="middle" font-weight="600">
+            <text x="50"  y="54">h₁</text>
+            <text x="140" y="54">h₂</text>
+            <text x="230" y="54">h₃</text>
+            <text x="320" y="54">h₄</text>
+            <text x="410" y="54">h₅</text>
+          </g>
+          <!-- 矢印（左→右） -->
+          <g stroke="var(--green-mid)" stroke-width="1.5" fill="var(--green-mid)">
+            <line x1="80"  y1="50" x2="107" y2="50"/><polygon points="107,46 114,50 107,54"/>
+            <line x1="170" y1="50" x2="197" y2="50"/><polygon points="197,46 204,50 197,54"/>
+            <line x1="260" y1="50" x2="287" y2="50"/><polygon points="287,46 294,50 287,54"/>
+            <line x1="350" y1="50" x2="377" y2="50"/><polygon points="377,46 384,50 377,54"/>
+          </g>
+          <!-- 上向き矢印（入力） -->
+          <g stroke="var(--border-strong)" stroke-width="1.2">
+            <line x1="50"  y1="88" x2="50"  y2="73"/>
+            <line x1="140" y1="88" x2="140" y2="73"/>
+            <line x1="230" y1="88" x2="230" y2="73"/>
+            <line x1="320" y1="88" x2="320" y2="73"/>
+            <line x1="410" y1="88" x2="410" y2="73"/>
+          </g>
+          <!-- 減衰矢印のラベル -->
+          <text x="240" y="18" font-size="9" fill="var(--amber)" text-anchor="middle">「私」の情報は薄れていく…</text>
+          <line x1="50" y1="22" x2="408" y2="22" stroke="var(--amber-border)" stroke-width="1" stroke-dasharray="3,2"/>
+          <polygon points="408,18 415,22 408,26" fill="var(--amber-border)"/>
+        </svg>
+      </div>
+
+      <!-- RNN の問題点 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+        <div class="note-red">
+          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題① 長距離依存の忘れ</p>
+          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
+            入力を逐次処理するため、文の先頭の情報は末尾に到達するまでに薄れます（勾配消失）。
+            「<em>私は…（長い文）…食べた</em>」の「私」と「食べた」の関係を捉えにくい。
+          </p>
+        </div>
+        <div class="note-red">
+          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題② 並列化できない</p>
+          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
+            $h_t$ は $h_{t-1}$ に依存するため、各ステップは順番に計算しなければなりません。
+            GPU の並列演算能力を活かせず、長い文では処理が遅くなります。
+          </p>
+        </div>
+      </div>
+
+      <div class="note-green">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Transformer が解決したこと</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          Transformer は RNN を使わず、<strong>「注意機構（Attention）」だけで文脈を捉えます。</strong>
+          全トークン間の関係を一度に計算するため、①長距離依存を直接扱え、②並列計算が可能になります。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 2：Self-Attention ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Section 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">自己注意機構（Self-Attention）</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        Self-Attention は「<strong style="color:var(--text);">あるトークンが、文中の他のどのトークンと強く関連しているか</strong>」を数値で計算する仕組みです。
+        「銀行に行く」の「銀行」は金融機関か川岸か——文脈によって意味が変わります。
+        Self-Attention はこの文脈依存の意味を埋め込みに反映させます。
+      </p>
+
+      <!-- Q/K/V の直感 -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Query・Key・Value の直感</p>
+        <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
+          <p style="margin-bottom:0.75rem;">
+            各トークンのベクトルから、3種類の異なるベクトルを生成します。
+          </p>
+          <table style="width:100%; font-size:0.83rem; border-collapse:collapse; margin-bottom:0.75rem;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700; width:5rem;">記号</th>
+                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">名前</th>
+                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">役割のたとえ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">Q</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text);">Query（質問）</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">「私はどの単語と関連しているか？」という問いかけ</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">K</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text);">Key（検索キー）</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">「私はこんな内容を持っている」という名札</td>
+              </tr>
+              <tr>
+                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">V</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text);">Value（値）</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">関連度に応じて取り出される実際の内容</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75;">
+            Query と Key の<strong style="color:var(--text);">内積</strong>がそのトークン間の「関連度スコア」になります。
+            スコアを softmax で確率分布に変換し、Value の加重和を取ることで
+            <em>文脈を反映した新しい表現ベクトル</em>が得られます。
+          </p>
+        </div>
+      </div>
+
+      <!-- 計算ステップの可視化 -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">「食べた」トークンが他のトークンに注目するようす</p>
+        <svg viewBox="0 0 460 160" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- トークンラベル（上段） -->
+          <g font-size="10" text-anchor="middle">
+            <rect x="15"  y="10" width="50" height="24" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+            <rect x="105" y="10" width="50" height="24" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+            <rect x="195" y="10" width="60" height="24" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+            <rect x="295" y="10" width="60" height="24" rx="5" fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5"/>
+            <rect x="395" y="10" width="50" height="24" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+            <text x="40"  y="26" fill="var(--text-sub)">私</text>
+            <text x="130" y="26" fill="var(--text-sub)">は</text>
+            <text x="225" y="26" fill="var(--text-sub)">昨日</text>
+            <text x="325" y="26" fill="var(--green)" font-weight="700">食べた</text>
+            <text x="420" y="26" fill="var(--text-sub)">寿司</text>
+          </g>
+          <!-- 注意スコアの弧 -->
+          <!-- 食べた → 私 (0.15) -->
+          <path d="M325,34 Q182,55 40,34" fill="none" stroke="var(--border-strong)" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+          <text x="155" y="68" font-size="9" fill="var(--text-muted)" text-anchor="middle">0.15</text>
+          <!-- 食べた → 昨日 (0.28) -->
+          <path d="M310,34 Q268,65 255,34" fill="none" stroke="var(--amber-border)" stroke-width="2"/>
+          <text x="278" y="72" font-size="9" fill="var(--amber)" text-anchor="middle" font-weight="600">0.28</text>
+          <!-- 食べた → 食べた (self) (0.12) -->
+          <path d="M325,34 Q325,60 325,34" fill="none" stroke="var(--border)" stroke-width="1" opacity="0.4"/>
+          <!-- 食べた → 寿司 (0.45) -->
+          <path d="M355,34 Q388,70 415,34" fill="none" stroke="var(--green-mid)" stroke-width="3"/>
+          <text x="393" y="75" font-size="9" fill="var(--green-mid)" text-anchor="middle" font-weight="700">0.45</text>
+
+          <!-- 注意の棒グラフ -->
+          <text x="20" y="100" font-size="9" fill="var(--text-muted)">注意の強さ（softmax後）</text>
+          <!-- 棒グラフ背景 -->
+          <rect x="20" y="108" width="420" height="40" rx="4" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+          <!-- 各トークンの棒 -->
+          <rect x="25"  y="112" width="63"  height="30" rx="3" fill="var(--border-strong)" opacity="0.5"/>
+          <rect x="113" y="122" width="63"  height="20" rx="3" fill="var(--border-strong)" opacity="0.3"/>
+          <rect x="201" y="115" width="67"  height="27" rx="3" fill="var(--amber-border)"  opacity="0.7"/>
+          <rect x="293" y="108" width="70"  height="34" rx="3" fill="var(--green)"          opacity="0.8"/>
+          <rect x="388" y="115" width="47"  height="27" rx="3" fill="var(--border-strong)" opacity="0.4"/>
+          <!-- 数値 -->
+          <g font-size="8" text-anchor="middle" font-weight="700">
+            <text x="56"  y="138" fill="var(--text-muted)">0.15</text>
+            <text x="144" y="138" fill="var(--text-muted)">0.10</text>
+            <text x="235" y="135" fill="var(--amber)">0.28</text>
+            <text x="328" y="125" fill="var(--surface)">0.45</text>
+            <text x="411" y="138" fill="var(--text-muted)">0.02</text>
+          </g>
+          <!-- トークン名 -->
+          <g font-size="8" text-anchor="middle" fill="var(--text-muted)">
+            <text x="56"  y="155">私</text>
+            <text x="144" y="155">は</text>
+            <text x="235" y="155">昨日</text>
+            <text x="328" y="155" fill="var(--green-mid)" font-weight="600">食べた</text>
+            <text x="411" y="155">寿司</text>
+          </g>
+        </svg>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; line-height:1.7;">
+          「食べた」は「寿司（0.45）」と「昨日（0.28）」に強く注目し、「は（0.10）」にはあまり注目しません。
+          この重みで Value を加重平均することで、<em>「何を・いつ食べたか」という文脈が埋め込まれた</em>新しいベクトルが得られます。
+        </p>
+      </div>
+
+      <!-- 数式 -->
+      <div class="card-math" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Attention の計算式</p>
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          $$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
+        </div>
+        <table class="var-table" style="width:100%;">
+          <tr>
+            <td>$Q, K, V$</td>
+            <td>入力行列 $X$ に学習済み重み行列 $W^Q, W^K, W^V$ を掛けて生成</td>
+          </tr>
+          <tr>
+            <td>$QK^\top$</td>
+            <td>全トークン間の「関連度スコア」行列（$n \times n$）</td>
+          </tr>
+          <tr>
+            <td>$\sqrt{d_k}$</td>
+            <td>次元数の平方根でスコアをスケーリング（勾配安定化のため）</td>
+          </tr>
+          <tr>
+            <td>softmax</td>
+            <td>スコアを確率分布（合計1）に変換</td>
+          </tr>
+          <tr>
+            <td>$(\cdots)V$</td>
+            <td>確率重みで Value を加重平均 → 文脈を反映した新しい表現</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- マルチヘッド -->
+      <div class="note-green">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Multi-Head Attention</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          実際には Self-Attention を複数の「ヘッド」で並列に実行します（例: 8ヘッド）。
+          各ヘッドは異なる $W^Q, W^K, W^V$ を持ち、<strong>異なる「注目パターン」を同時に学習</strong>できます。
+          一方のヘッドが「構文的な依存」を、別のヘッドが「意味的な類似性」を捉えるといった役割分担が生まれます。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 3：Transformer ブロック ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">3</div>
+        <div class="titles">
+          <p class="label">Section 3</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Transformer ブロックの全体構造</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        Transformer は Self-Attention を中核とした「ブロック」を積み重ねた構造です。
+        各ブロックは同じ構造を持ち、LLM ではこれを数十〜百層以上重ねます。
+      </p>
+
+      <!-- ブロック構造図 -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1.25rem;">Transformer ブロックの内部</p>
+        <svg viewBox="0 0 340 380" style="width:100%; max-width:340px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- 入力 -->
+          <text x="170" y="18" font-size="10" fill="var(--text-muted)" text-anchor="middle">入力（埋め込み＋位置エンコーディング）</text>
+          <line x1="170" y1="22" x2="170" y2="42" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,42 166,36 174,36" fill="var(--border-strong)"/>
+
+          <!-- 位置エンコーディング説明 -->
+          <rect x="10" y="26" width="110" height="24" rx="4" fill="var(--amber-bg)" stroke="var(--amber-border)" stroke-width="1"/>
+          <text x="65" y="41" font-size="8.5" fill="var(--amber)" text-anchor="middle" font-weight="600">位置エンコーディング加算済み</text>
+
+          <!-- Multi-Head Attention ブロック -->
+          <rect x="50" y="46" width="240" height="60" rx="8" fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5"/>
+          <text x="170" y="72" font-size="11" fill="var(--green)" text-anchor="middle" font-weight="700">Multi-Head Self-Attention</text>
+          <text x="170" y="88" font-size="9" fill="var(--green-mid)" text-anchor="middle">全トークン間の関連度を並列計算</text>
+
+          <!-- 残差接続 + LayerNorm -->
+          <line x1="170" y1="106" x2="170" y2="126" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,126 166,120 174,120" fill="var(--border-strong)"/>
+          <rect x="85" y="126" width="170" height="30" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+          <text x="170" y="146" font-size="10" fill="var(--text-sub)" text-anchor="middle">Add &amp; Layer Norm（残差接続）</text>
+
+          <!-- 残差の矢印 -->
+          <path d="M50,70 Q20,70 20,141 Q20,156 82,156" fill="none" stroke="var(--green-border)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <polygon points="82,152 76,156 82,160" fill="var(--green-border)"/>
+          <text x="8" y="116" font-size="8" fill="var(--green-border)" text-anchor="middle" transform="rotate(-90,8,116)">残差</text>
+
+          <!-- Feed-Forward -->
+          <line x1="170" y1="156" x2="170" y2="176" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,176 166,170 174,170" fill="var(--border-strong)"/>
+          <rect x="50" y="176" width="240" height="60" rx="8" fill="var(--surface2)" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <text x="170" y="202" font-size="11" fill="var(--text)" text-anchor="middle" font-weight="700">Feed-Forward Network</text>
+          <text x="170" y="218" font-size="9" fill="var(--text-sub)" text-anchor="middle">Linear → ReLU/GeLU → Linear</text>
+
+          <!-- 残差接続 + LayerNorm 2 -->
+          <line x1="170" y1="236" x2="170" y2="256" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,256 166,250 174,250" fill="var(--border-strong)"/>
+          <rect x="85" y="256" width="170" height="30" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+          <text x="170" y="276" font-size="10" fill="var(--text-sub)" text-anchor="middle">Add &amp; Layer Norm（残差接続）</text>
+
+          <!-- 残差の矢印 2 -->
+          <path d="M290,190 Q310,190 310,271 Q310,286 258,286" fill="none" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <polygon points="258,282 264,286 258,290" fill="var(--border-strong)"/>
+
+          <!-- 繰り返し矢印 -->
+          <line x1="170" y1="286" x2="170" y2="306" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,306 166,300 174,300" fill="var(--border-strong)"/>
+          <rect x="70" y="306" width="200" height="28" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5,2"/>
+          <text x="170" y="325" font-size="10" fill="var(--text-muted)" text-anchor="middle">×N ブロック（LLM では数十〜百層）</text>
+
+          <!-- 出力 -->
+          <line x1="170" y1="334" x2="170" y2="354" stroke="var(--border-strong)" stroke-width="1.5"/>
+          <polygon points="170,354 166,348 174,348" fill="var(--border-strong)"/>
+          <text x="170" y="368" font-size="10" fill="var(--text-muted)" text-anchor="middle">出力（文脈を反映したベクトル列）</text>
+        </svg>
+      </div>
+
+      <!-- 各コンポーネントの説明 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">残差接続（Residual Connection）</p>
+          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
+            入力をそのまま出力に足します（$x + \text{sublayer}(x)$）。
+            層が深くなっても勾配が消えにくくなり、安定した学習を可能にします。
+          </p>
+        </div>
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">位置エンコーディング</p>
+          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
+            Self-Attention は順序を考慮しないため、トークンの位置情報を埋め込みに加算して注入します。
+            「1番目の単語」「2番目の単語」という位置関係を表現します。
+          </p>
+        </div>
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Layer Normalization</p>
+          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
+            各層の出力を正規化し、学習を安定させます。
+            バッチ正規化と異なり、各トークンの特徴次元方向で正規化するため、可変長の入力でも動作します。
+          </p>
+        </div>
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Feed-Forward Network（FFN）</p>
+          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
+            2層の線形変換（中間次元は通常 $4 \times d_{model}$）を各トークンに独立して適用します。
+            Attention が「どのトークンに注目するか」を決める一方、FFN が「何を記憶・変換するか」を担います。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 4：LLM へのつながり ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">4</div>
+        <div class="titles">
+          <p class="label">Section 4</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">LLM へのつながり</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        Transformer は 2017 年に論文「Attention Is All You Need」で提案されました。
+        その後、このアーキテクチャをどう使うかによって異なる LLM が生まれました。
+      </p>
+
+      <!-- BERT / GPT の違い -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Transformer の使われ方</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <!-- Encoder -->
+          <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:1rem;">
+            <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; letter-spacing:0.08em; text-transform:uppercase;">Encoder-only</p>
+            <p style="font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:0.3rem;">BERT</p>
+            <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7; margin-bottom:0.5rem;">
+              入力テキスト全体を双方向で読み込み、<em>文の意味表現</em>を出力。
+              感情分析・質問応答・固有表現抽出などの分類タスクに強い。
+            </p>
+            <p style="font-size:0.7rem; color:var(--text-muted);">入力 → [Encoder × N] → 意味ベクトル</p>
+          </div>
+          <!-- Decoder -->
+          <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:1rem;">
+            <p style="font-size:0.75rem; font-weight:700; color:var(--green-mid); margin-bottom:0.4rem; letter-spacing:0.08em; text-transform:uppercase;">Decoder-only</p>
+            <p style="font-size:0.9rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">GPT / LLaMA / Claude</p>
+            <p style="font-size:0.78rem; color:#1C4A35; line-height:1.7; margin-bottom:0.5rem;">
+              左から右へ1トークンずつ予測する<em>テキスト生成</em>モデル。
+              Causal Attention で未来のトークンを参照しないよう制限。
+            </p>
+            <p style="font-size:0.7rem; color:var(--green-mid);">入力 → [Decoder × N] → 次のトークン確率</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LLM の基本的な仕組み -->
+      <div class="card-math" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">LLM（Decoder-only）が文章を生成する仕組み</p>
+        <div style="text-align:center; margin-bottom:1rem;">
+          $$P(\text{次のトークン} \mid \text{これまでのトークン列}) = \text{softmax}(W \cdot h_n)$$
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8;">
+          $h_n$ は最後の Transformer ブロックが出力した最終トークンの表現ベクトル、$W$ は語彙サイズ分の出力行列です。
+          <strong style="color:var(--text);">これを繰り返すことで、1トークンずつ文章を生成します</strong>——見かけ上「理解して答えている」ように見えますが、
+          本質は「次に来る確率の高いトークンを選び続ける」操作です。
+        </p>
+      </div>
+
+      <!-- スケーリング則 -->
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜ LLM は賢いのか：スケーリング則</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          Transformer ブロックを深く・広くし、大量のテキストで次のトークンを予測し続けるだけで、
+          翻訳・推論・コーディングなど多様な能力が<em>創発的</em>に現れます。
+          GPT-4 は約 1 兆パラメータ規模と推定されており、MNIST で使った 20 万パラメータとは規模が 500 万倍異なります。
+        </p>
+      </div>
+
+      <!-- 事前学習 → 微調整のプレビュー -->
+      <div class="card" style="margin-bottom:0;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">第2章へのつなぎ：事前学習 → 微調整</p>
+        <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; row-gap:0.75rem;">
+          <div style="text-align:center; min-width:7rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">事前学習</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">大量テキストで<br>次トークン予測</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <div style="text-align:center; min-width:7rem;">
+            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--amber); font-weight:600;">ファインチューニング</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">タスク固有データで<br>特定能力を強化</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <div style="text-align:center; min-width:7rem;">
+            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--green); font-weight:600;">RLHF / DPO</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">人間のフィードバックで<br>指示に従う能力を付与</div>
+          </div>
+        </div>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:1rem; line-height:1.7;">
+          第2章では、事前学習済みモデルを特定のタスクに合わせる<strong style="color:var(--text-sub);">ファインチューニング</strong>と、
+          外部知識と組み合わせる<strong style="color:var(--text-sub);">RAG（検索拡張生成）</strong>を実装します。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ まとめ ━━━ -->
+    <div class="summary-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
+      <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>言語→ベクトル変換</strong>によって、テキストが NN の標準演算パイプラインに乗る</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Self-Attention</strong> が全トークン間の関連度を一度に計算し、文脈を表現に反映させる</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + LayerNorm</strong> の組み合わせ</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成する</span></li>
+      </ul>
+    </div>
+
+    <!-- ━━━ ナビゲーション ━━━ -->
+    <nav class="no-print" style="display:flex; justify-content:space-between; font-size:0.8rem;">
+      <a href="supplement_neural_network.html" style="color:var(--green-mid);" class="hover:underline">← ニューラルネットワーク</a>
+      <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章トップへ →</a>
+    </nav>
+
+  </main>
+</body>
+</html>
