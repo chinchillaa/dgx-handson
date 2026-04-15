@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足資料：推論パラメータ｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --red:          #991B1B;
+      --red-bg:       #FEF2F2;
+      --code-bg:      #18181B;
+      --code-out:     #27272A;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-rule .num {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+      opacity: 0.12;
+      min-width: 2.5rem;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .section-rule .titles { flex: 1; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-math {
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+    }
+
+    .note-green {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green-mid);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-amber {
+      background: var(--amber-bg);
+      border-left: 3px solid var(--amber-border);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-red {
+      background: var(--red-bg);
+      border-left: 3px solid #FCA5A5;
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+
+    .code-label {
+      background: var(--code-bg);
+      border-radius: 8px 8px 0 0;
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #3F3F46;
+    }
+    .code-label span { font-size: 0.7rem; color: #A1A1AA; letter-spacing: 0.08em; font-weight: 600; }
+    .code-dots { display: flex; gap: 4px; }
+    .code-dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+    pre.hljs-wrap { margin: 0; border-radius: 0 0 8px 8px; overflow-x: auto; }
+    pre.hljs-wrap code { font-size: 0.8rem; line-height: 1.65; }
+
+    .output-block {
+      background: var(--code-out);
+      border-radius: 0 0 8px 8px;
+      padding: 0.75rem 1rem;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.75rem;
+      color: #D4D4D8;
+      line-height: 1.65;
+    }
+
+    .var-table td { padding: 0.35rem 0; font-size: 0.85rem; vertical-align: top; }
+    .var-table td:first-child {
+      font-family: "SF Mono", "Menlo", monospace;
+      color: var(--green-mid);
+      padding-right: 1.5rem;
+      white-space: nowrap;
+      min-width: 4rem;
+    }
+
+    .summary-block {
+      background: var(--green);
+      color: #E8F3EF;
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+    }
+    .summary-block strong { color: #FFFFFF; }
+
+    @media print {
+      .no-print { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━ ヘッダー ━━━ -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-6 px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="no-print flex items-center gap-2 mb-3" style="font-size:0.75rem; color:var(--text-muted);">
+        <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章</a>
+        <span>›</span>
+        <span>補足資料</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+        <div>
+          <p class="label mb-1">Section 1-5 Supplement</p>
+          <h1 class="text-2xl font-bold" style="color:var(--text);">推論パラメータ</h1>
+        </div>
+        <div class="no-print flex-shrink-0 text-right" style="font-size:0.7rem; color:var(--text-muted); line-height:1.6;">
+          <p>対応ノートブック</p>
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:0.68rem; color:var(--text-sub);">ch1_03_llm_inference.ipynb</code>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
+
+    <!-- ━━━ 目標ボックス ━━━ -->
+    <div class="note-green">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
+      <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
+        <li>LLM の出力がどのように「サンプリング」されるかを掴む</li>
+        <li>Temperature が確率分布の形状に与える影響を掴む</li>
+        <li>Top-p / Top-k の動作とユースケースを掴む</li>
+        <li>パラメータの組み合わせ方針を掴む</li>
+      </ol>
+    </div>
+
+    <!-- ━━━ 前置き ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">0</div>
+        <div class="titles">
+          <p class="label">前置き</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">推論パラメータとは何か</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        前の補足資料で「LLM は次トークンの確率分布を出力する」と学びました。
+        確率分布が得られた後、<strong style="color:var(--text);">どのトークンを実際に選ぶか</strong>を制御するのが推論パラメータです。
+        モデルの重みは変えずに、出力の傾向——創造性・多様性・一貫性——を外側から調整できます。
+      </p>
+
+      <!-- 推論の流れ -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">トークン生成の流れ</p>
+        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.83rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.75rem; font-weight:600; min-width:10rem; text-align:center; flex-shrink:0; color:var(--text);">Transformer 順伝播</div>
+            <div style="color:var(--text-muted);">コンテキストを処理し、語彙サイズ分の <strong style="color:var(--text-sub);">logit ベクトル</strong>を出力</div>
+          </div>
+          <div style="padding-left:5rem; color:var(--border-strong);">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:6px; padding:0.4rem 0.75rem; font-weight:600; min-width:10rem; text-align:center; flex-shrink:0; color:var(--amber);">Temperature 適用</div>
+            <div style="color:var(--text-muted);">logit を Temperature で割ることで分布の形状を変える</div>
+          </div>
+          <div style="padding-left:5rem; color:var(--border-strong);">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.75rem; font-weight:600; min-width:10rem; text-align:center; flex-shrink:0; color:var(--text);">Top-k / Top-p フィルタ</div>
+            <div style="color:var(--text-muted);">候補を絞り込み、低確率トークンを除外する</div>
+          </div>
+          <div style="padding-left:5rem; color:var(--border-strong);">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:6px; padding:0.4rem 0.75rem; font-weight:600; min-width:10rem; text-align:center; flex-shrink:0; color:var(--green);">サンプリング</div>
+            <div style="color:var(--text-muted);">残った確率分布から 1 トークンを確率的に選択</div>
+          </div>
+          <div style="padding-left:5rem; color:var(--border-strong);">↓  繰り返す</div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">Greedy 選択との違い</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          最も確率が高いトークンを常に選ぶ「Greedy デコーディング」は決定的（同じ入力から同じ出力）ですが、
+          繰り返しや退屈な表現が生まれやすくなります。
+          サンプリングを使うと<strong>毎回異なる出力が生成</strong>され、創造的なタスクに向きます。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 1：Temperature ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">1</div>
+        <div class="titles">
+          <p class="label">Section 1</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Temperature——分布の「シャープさ」を制御する</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        Temperature $T$ は softmax に渡す前に logit を割ることで、
+        確率分布の形状を変えます。
+        <strong style="color:var(--text);">低いと分布が鋭く（確実）、高いと分布が平たく（多様）</strong>なります。
+      </p>
+
+      <!-- 数式 -->
+      <div class="card-math" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Temperature つき softmax</p>
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          $$P(x_i) = \frac{\exp(z_i / T)}{\displaystyle\sum_j \exp(z_j / T)}$$
+        </div>
+        <table class="var-table" style="width:100%;">
+          <tr>
+            <td>$z_i$</td>
+            <td>トークン $i$ の logit（Transformer の生スコア）</td>
+          </tr>
+          <tr>
+            <td>$T \to 0$</td>
+            <td>最大 logit のトークンに確率 1 が集中 → Greedy 選択と等価</td>
+          </tr>
+          <tr>
+            <td>$T = 1$</td>
+            <td>logit をそのまま softmax にかける標準動作</td>
+          </tr>
+          <tr>
+            <td>$T \to \infty$</td>
+            <td>全トークンの確率が均一になり、ランダム選択と等価</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 分布の変化 SVG -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">同じ logit に異なる Temperature を適用した結果</p>
+        <svg viewBox="0 0 460 190" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- 共通設定: 5トークン, logits = [3.0, 2.0, 1.5, 0.8, 0.2] -->
+          <!-- T=0.5 後の確率(概算): [0.71, 0.17, 0.08, 0.03, 0.01] -->
+          <!-- T=1.0 後の確率(概算): [0.51, 0.23, 0.15, 0.07, 0.04] -->
+          <!-- T=2.0 後の確率(概算): [0.33, 0.24, 0.20, 0.14, 0.09] -->
+
+          <!-- === T=0.5 === -->
+          <text x="76" y="14" font-size="10" fill="var(--green)" text-anchor="middle" font-weight="700">T = 0.5（低温）</text>
+          <!-- 軸 -->
+          <line x1="20" y1="170" x2="132" y2="170" stroke="var(--border)" stroke-width="1"/>
+          <!-- 棒 -->
+          <rect x="25"  y="101" width="16" height="69" rx="2" fill="var(--green)" opacity="0.85"/>
+          <rect x="46"  y="152" width="16" height="18" rx="2" fill="var(--green)" opacity="0.5"/>
+          <rect x="67"  y="159" width="16" height="11" rx="2" fill="var(--green)" opacity="0.35"/>
+          <rect x="88"  y="165" width="16" height="5"  rx="2" fill="var(--green)" opacity="0.25"/>
+          <rect x="109" y="168" width="16" height="2"  rx="2" fill="var(--green)" opacity="0.18"/>
+          <!-- 確率ラベル -->
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="33"  y="97">0.71</text>
+            <text x="54"  y="148">0.17</text>
+            <text x="75"  y="155">0.08</text>
+            <text x="96"  y="161">0.03</text>
+            <text x="117" y="164">0.01</text>
+          </g>
+          <!-- トークン名 -->
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="33"  y="180">「猫」</text>
+            <text x="54"  y="180">「犬」</text>
+            <text x="75"  y="180">「鳥」</text>
+            <text x="96"  y="180">「魚」</text>
+            <text x="117" y="180">「虫」</text>
+          </g>
+          <!-- 注釈 -->
+          <text x="76" y="192" font-size="8" fill="var(--green-mid)" text-anchor="middle">確実・一貫性が高い</text>
+
+          <!-- 区切り -->
+          <line x1="153" y1="10" x2="153" y2="185" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- === T=1.0 === -->
+          <text x="230" y="14" font-size="10" fill="var(--text-sub)" text-anchor="middle" font-weight="700">T = 1.0（標準）</text>
+          <line x1="174" y1="170" x2="286" y2="170" stroke="var(--border)" stroke-width="1"/>
+          <rect x="179" y="116" width="16" height="54" rx="2" fill="var(--text-muted)" opacity="0.8"/>
+          <rect x="200" y="145" width="16" height="25" rx="2" fill="var(--text-muted)" opacity="0.6"/>
+          <rect x="221" y="154" width="16" height="16" rx="2" fill="var(--text-muted)" opacity="0.45"/>
+          <rect x="242" y="162" width="16" height="8"  rx="2" fill="var(--text-muted)" opacity="0.3"/>
+          <rect x="263" y="165" width="16" height="5"  rx="2" fill="var(--text-muted)" opacity="0.2"/>
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="187" y="112">0.51</text>
+            <text x="208" y="141">0.23</text>
+            <text x="229" y="150">0.15</text>
+            <text x="250" y="158">0.07</text>
+            <text x="271" y="161">0.04</text>
+          </g>
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="187" y="180">「猫」</text>
+            <text x="208" y="180">「犬」</text>
+            <text x="229" y="180">「鳥」</text>
+            <text x="250" y="180">「魚」</text>
+            <text x="271" y="180">「虫」</text>
+          </g>
+          <text x="230" y="192" font-size="8" fill="var(--text-muted)" text-anchor="middle">バランス型</text>
+
+          <!-- 区切り -->
+          <line x1="307" y1="10" x2="307" y2="185" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- === T=2.0 === -->
+          <text x="384" y="14" font-size="10" fill="var(--amber)" text-anchor="middle" font-weight="700">T = 2.0（高温）</text>
+          <line x1="328" y1="170" x2="440" y2="170" stroke="var(--border)" stroke-width="1"/>
+          <rect x="333" y="136" width="16" height="34" rx="2" fill="var(--amber)" opacity="0.7"/>
+          <rect x="354" y="143" width="16" height="27" rx="2" fill="var(--amber)" opacity="0.6"/>
+          <rect x="375" y="148" width="16" height="22" rx="2" fill="var(--amber)" opacity="0.5"/>
+          <rect x="396" y="155" width="16" height="15" rx="2" fill="var(--amber)" opacity="0.4"/>
+          <rect x="417" y="160" width="16" height="10" rx="2" fill="var(--amber)" opacity="0.3"/>
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="341" y="132">0.33</text>
+            <text x="362" y="139">0.24</text>
+            <text x="383" y="144">0.20</text>
+            <text x="404" y="151">0.14</text>
+            <text x="425" y="156">0.09</text>
+          </g>
+          <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+            <text x="341" y="180">「猫」</text>
+            <text x="362" y="180">「犬」</text>
+            <text x="383" y="180">「鳥」</text>
+            <text x="404" y="180">「魚」</text>
+            <text x="425" y="180">「虫」</text>
+          </g>
+          <text x="384" y="192" font-size="8" fill="var(--amber)" text-anchor="middle">多様・創造的</text>
+        </svg>
+      </div>
+
+      <!-- 推奨値 -->
+      <div class="card">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.875rem;">Temperature の推奨設定</p>
+        <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid var(--border-strong);">
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">値の目安</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">特性</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">適したユースケース</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">0.0 – 0.3</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">確実・再現性高</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">コード生成・ファクト抽出・分類</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--text-sub); font-weight:700;">0.7 – 1.0</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">バランス型</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">一般的な会話・要約・翻訳</td>
+            </tr>
+            <tr>
+              <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--amber); font-weight:700;">1.2 – 2.0</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">多様・創造的</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">創作・ブレインストーミング・詩</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 2：Top-p / Top-k ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Section 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Top-p と Top-k——候補を絞り込む</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        Temperature が分布の形を変えるのに対し、Top-p と Top-k は
+        <strong style="color:var(--text);">サンプリングの候補集合そのものを絞り込む</strong>フィルタです。
+        低確率の「外れ値トークン」が選ばれるのを防ぎ、出力品質を安定させます。
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+
+        <!-- Top-k -->
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.75rem;">Top-k サンプリング</p>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+            確率の高い上位 $k$ 個のトークンだけを残し、それ以外を除外してから再正規化してサンプリングします。
+          </p>
+          <!-- 図 -->
+          <svg viewBox="0 0 200 90" style="width:100%; display:block; margin-bottom:0.5rem;" xmlns="http://www.w3.org/2000/svg">
+            <text x="100" y="10" font-size="8.5" fill="var(--text-muted)" text-anchor="middle">k = 3 の場合</text>
+            <!-- 棒グラフ（5トークン） -->
+            <rect x="10"  y="30" width="22" height="45" rx="2" fill="var(--green)"          opacity="0.85"/>
+            <rect x="38"  y="48" width="22" height="27" rx="2" fill="var(--green)"          opacity="0.6"/>
+            <rect x="66"  y="56" width="22" height="19" rx="2" fill="var(--green)"          opacity="0.45"/>
+            <rect x="94"  y="67" width="22" height="8"  rx="2" fill="var(--border-strong)"  opacity="0.5"/>
+            <rect x="122" y="71" width="22" height="4"  rx="2" fill="var(--border-strong)"  opacity="0.4"/>
+            <!-- カットラインと斜線 -->
+            <line x1="83" y1="15" x2="83" y2="80" stroke="#FCA5A5" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="130" y="55" font-size="7.5" fill="#FCA5A5" text-anchor="middle">除外</text>
+            <!-- ラベル -->
+            <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+              <text x="21"  y="83">1位</text>
+              <text x="49"  y="83">2位</text>
+              <text x="77"  y="83">3位</text>
+              <text x="105" y="83">4位</text>
+              <text x="133" y="83">5位</text>
+            </g>
+          </svg>
+          <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.6;">
+            <strong style="color:var(--text-sub);">特徴:</strong> 候補数が常に固定。分布が広い場合でも低確率トークンが混入しにくい。
+          </p>
+        </div>
+
+        <!-- Top-p -->
+        <div class="card">
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.75rem;">Top-p サンプリング（Nucleus）</p>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+            確率の高いトークンから順に累積して、累積確率が $p$ を超えた時点以降を除外します。
+          </p>
+          <!-- 図 -->
+          <svg viewBox="0 0 200 90" style="width:100%; display:block; margin-bottom:0.5rem;" xmlns="http://www.w3.org/2000/svg">
+            <text x="100" y="10" font-size="8.5" fill="var(--text-muted)" text-anchor="middle">p = 0.9 の場合</text>
+            <rect x="10"  y="25" width="22" height="50" rx="2" fill="var(--green)"          opacity="0.85"/>
+            <rect x="38"  y="44" width="22" height="31" rx="2" fill="var(--green)"          opacity="0.6"/>
+            <rect x="66"  y="58" width="22" height="17" rx="2" fill="var(--green)"          opacity="0.45"/>
+            <rect x="94"  y="68" width="22" height="7"  rx="2" fill="var(--border-strong)"  opacity="0.5"/>
+            <rect x="122" y="72" width="22" height="3"  rx="2" fill="var(--border-strong)"  opacity="0.4"/>
+            <!-- 累積プロット -->
+            <polyline points="21,25 49,18 77,14 105,12 133,11" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <!-- p=0.9 ライン -->
+            <line x1="10" y1="20" x2="170" y2="20" stroke="#FCA5A5" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="172" y="22" font-size="7" fill="#FCA5A5">p=0.9</text>
+            <text x="130" y="55" font-size="7.5" fill="#FCA5A5" text-anchor="middle">除外</text>
+            <g font-size="7.5" fill="var(--text-muted)" text-anchor="middle">
+              <text x="21"  y="83">1位</text>
+              <text x="49"  y="83">2位</text>
+              <text x="77"  y="83">3位</text>
+              <text x="105" y="83">4位</text>
+              <text x="133" y="83">5位</text>
+            </g>
+          </svg>
+          <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.6;">
+            <strong style="color:var(--text-sub);">特徴:</strong> 候補数が分布に応じて動的に変化。確信度が高い時は少数候補から選ぶ。
+          </p>
+        </div>
+      </div>
+
+      <div class="note-green">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Top-p と Top-k の使い分け</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          多くの実装では <strong>Top-p（Nucleus Sampling）が推奨</strong>されます。
+          確率分布の形状に応じて候補数が自動調整されるため、
+          「鋭い分布のときは決定的に、広い分布のときは創造的に」という動作が自然に得られます。
+          Top-k は高速な推論が求められる場面で使われます。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 3：その他のパラメータ ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">3</div>
+        <div class="titles">
+          <p class="label">Section 3</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">その他の主要パラメータ</h2>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.25rem;">
+
+        <!-- max_new_tokens -->
+        <div class="card">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <code style="font-size:0.82rem; font-weight:700; color:var(--green-mid);">max_new_tokens</code>
+            <span style="font-size:0.75rem; color:var(--text-muted);">生成する最大トークン数</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+            生成を打ち切るトークン数の上限です。小さすぎると文章が途中で切れ、
+            大きすぎると不要な繰り返しや「埋め草」が生まれやすくなります。
+            タスクに合わせて設定します（要約: 128〜256、コード: 512〜2048）。
+          </p>
+        </div>
+
+        <!-- repetition_penalty -->
+        <div class="card">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <code style="font-size:0.82rem; font-weight:700; color:var(--green-mid);">repetition_penalty</code>
+            <span style="font-size:0.75rem; color:var(--text-muted);">繰り返しへのペナルティ</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+            直近に出現したトークンの logit を割り引くことで、同じ表現の繰り返しを抑制します。
+          </p>
+          <div style="text-align:center; font-size:0.85rem;">
+            $$z'_i = \begin{cases} z_i / r & \text{if } x_i \text{ は既出トークン} \\ z_i & \text{otherwise} \end{cases}$$
+          </div>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+            $r = 1.0$（変化なし）〜 $r = 1.3$（強めのペナルティ）。大きくしすぎると文が不自然になります。
+          </p>
+        </div>
+
+        <!-- do_sample -->
+        <div class="card">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <code style="font-size:0.82rem; font-weight:700; color:var(--green-mid);">do_sample</code>
+            <span style="font-size:0.75rem; color:var(--text-muted);">サンプリングの有効化</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+            <code style="font-size:0.78rem; background:var(--surface2); padding:1px 4px; border-radius:3px;">False</code>（デフォルト）のとき Greedy デコーディングになります。
+            Temperature / Top-p / Top-k を有効にするには
+            <code style="font-size:0.78rem; background:var(--surface2); padding:1px 4px; border-radius:3px;">do_sample=True</code> が必要です。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- コード例 -->
+      <div>
+        <div class="code-label">
+          <div class="code-dots">
+            <i style="background:#FF5F57;"></i>
+            <i style="background:#FEBC2E;"></i>
+            <i style="background:#28C840;"></i>
+          </div>
+          <span>HuggingFace generate() の典型的な設定例</span>
+        </div>
+        <pre class="hljs-wrap"><code class="language-python">from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+model_name = "meta-llama/Llama-3.2-1B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(
+    model_name, torch_dtype=torch.float16
+).to("cuda")
+
+prompt = "深層学習とは何か、一言で説明してください。"
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+
+# ── 創造的なタスク向け設定 ──────────────────────────────
+outputs_creative = model.generate(
+    **inputs,
+    max_new_tokens=200,
+    do_sample=True,
+    temperature=1.1,       # 高温 → 多様な表現
+    top_p=0.92,            # 上位 92% の累積確率から選択
+    repetition_penalty=1.1,
+)
+
+# ── 正確さが求められるタスク向け設定 ─────────────────────
+outputs_factual = model.generate(
+    **inputs,
+    max_new_tokens=200,
+    do_sample=True,
+    temperature=0.2,       # 低温 → 確実・再現性高
+    top_p=0.9,
+    repetition_penalty=1.0,
+)
+
+print(tokenizer.decode(outputs_creative[0], skip_special_tokens=True))
+print(tokenizer.decode(outputs_factual[0],  skip_special_tokens=True))</code></pre>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 4：組み合わせ方針 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">4</div>
+        <div class="titles">
+          <p class="label">Section 4</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">パラメータの組み合わせ方針</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        パラメータは互いに影響し合います。
+        「Temperature だけ下げれば品質が上がる」という単純な話ではなく、
+        <strong style="color:var(--text);">タスクの性質に合わせてセットで調整</strong>するのが基本です。
+      </p>
+
+      <!-- 組み合わせ表 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">タスク別推奨パラメータセット</p>
+        <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid var(--border-strong);">
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">タスク</th>
+              <th style="text-align:center; padding:0.4rem 0.5rem; color:var(--text-muted); font-weight:700;">Temperature</th>
+              <th style="text-align:center; padding:0.4rem 0.5rem; color:var(--text-muted); font-weight:700;">Top-p</th>
+              <th style="text-align:center; padding:0.4rem 0.5rem; color:var(--text-muted); font-weight:700;">rep. penalty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">コード生成・バグ修正</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--green-mid);">0.1 – 0.3</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.90</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">1.0</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">ファクト抽出・要約</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--green-mid);">0.2 – 0.5</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.90</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">1.1</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">一般的な Q&amp;A・会話</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.7 – 0.9</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.92</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">1.1</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">創作・ブレスト</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--amber);">1.0 – 1.3</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.95</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">1.15</td>
+            </tr>
+            <tr>
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">多様な候補を列挙</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--amber);">1.2 – 1.5</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">0.98</td>
+              <td style="padding:0.4rem 0.5rem; text-align:center; font-family:monospace; color:var(--text-sub);">1.2</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+          ※ 最適値はモデルによって異なります。ハンズオン③で実際に試してみましょう。
+        </p>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">よくある失敗パターン</p>
+        <ul style="font-size:0.83rem; color:#5C4200; line-height:1.85; padding-left:1.25rem; margin:0;">
+          <li><strong>Temperature を上げすぎる</strong>（≥ 2.0）→ 意味をなさないトークン列が生成される</li>
+          <li><strong>Top-p と Top-k を両方設定する</strong> → 制約が二重になり候補が極端に絞られる場合がある</li>
+          <li><strong>do_sample=False のまま Temperature を変える</strong> → Greedy のため Temperature は無効になる</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ━━━ まとめ ━━━ -->
+    <div class="summary-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
+      <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>Temperature</strong> は logit を割ることで分布形状を変える——低いと確実、高いと多様</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Top-p</strong>（Nucleus）は累積確率で候補を動的に絞る——分布の形に適応するため汎用性が高い</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>パラメータはタスクの性質に合わせてセットで調整する——単独で最大化・最小化するものではない</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>ハンズオン③では実際にパラメータを変えて出力の変化を体感する</span></li>
+      </ul>
+    </div>
+
+    <!-- ━━━ ナビゲーション ━━━ -->
+    <nav class="no-print" style="display:flex; justify-content:space-between; font-size:0.8rem;">
+      <a href="supplement_pretraining.html" style="color:var(--green-mid);" class="hover:underline">← 事前学習</a>
+      <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章トップへ →</a>
+    </nav>
+
+  </main>
+</body>
+</html>
