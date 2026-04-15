@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足資料：事前学習｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --red:          #991B1B;
+      --red-bg:       #FEF2F2;
+      --code-bg:      #18181B;
+      --code-out:     #27272A;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-rule .num {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+      opacity: 0.12;
+      min-width: 2.5rem;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .section-rule .titles { flex: 1; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-math {
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+    }
+
+    .note-green {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green-mid);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-amber {
+      background: var(--amber-bg);
+      border-left: 3px solid var(--amber-border);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-red {
+      background: var(--red-bg);
+      border-left: 3px solid #FCA5A5;
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+
+    .code-label {
+      background: var(--code-bg);
+      border-radius: 8px 8px 0 0;
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #3F3F46;
+    }
+    .code-label span { font-size: 0.7rem; color: #A1A1AA; letter-spacing: 0.08em; font-weight: 600; }
+    .code-dots { display: flex; gap: 4px; }
+    .code-dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+    pre.hljs-wrap { margin: 0; border-radius: 0 0 8px 8px; overflow-x: auto; }
+    pre.hljs-wrap code { font-size: 0.8rem; line-height: 1.65; }
+
+    .output-block {
+      background: var(--code-out);
+      border-radius: 0 0 8px 8px;
+      padding: 0.75rem 1rem;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.75rem;
+      color: #D4D4D8;
+      line-height: 1.65;
+    }
+    .output-label {
+      font-size: 0.65rem;
+      color: #71717A;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .var-table td { padding: 0.35rem 0; font-size: 0.85rem; vertical-align: top; }
+    .var-table td:first-child {
+      font-family: "SF Mono", "Menlo", monospace;
+      color: var(--green-mid);
+      padding-right: 1.5rem;
+      white-space: nowrap;
+      min-width: 4rem;
+    }
+
+    .summary-block {
+      background: var(--green);
+      color: #E8F3EF;
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+    }
+    .summary-block strong { color: #FFFFFF; }
+    .summary-block a { color: #7DD3B8; text-decoration: underline; text-underline-offset: 3px; }
+
+    @media print {
+      .no-print { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━ ヘッダー ━━━ -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-6 px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="no-print flex items-center gap-2 mb-3" style="font-size:0.75rem; color:var(--text-muted);">
+        <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章</a>
+        <span>›</span>
+        <span>補足資料</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+        <div>
+          <p class="label mb-1">Section 1-4 Supplement</p>
+          <h1 class="text-2xl font-bold" style="color:var(--text);">事前学習</h1>
+        </div>
+        <div class="no-print flex-shrink-0 text-right" style="font-size:0.7rem; color:var(--text-muted); line-height:1.6;">
+          <p>対応ノートブック</p>
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:0.68rem; color:var(--text-sub);">ch1_03_llm_inference.ipynb</code>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
+
+    <!-- ━━━ 目標ボックス ━━━ -->
+    <div class="note-green">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
+      <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
+        <li>事前学習が「ラベルなしで自己教師あり学習する」仕組みを掴む</li>
+        <li>次トークン予測がどのように教師信号を自動生成するかを掴む</li>
+        <li>スケーリング則——パラメータ・データ・計算量の三角関係を掴む</li>
+        <li>事前学習済みモデルをどう活用するかの選択肢を掴む</li>
+      </ol>
+    </div>
+
+    <!-- ━━━ 前置き：自己教師あり学習 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">0</div>
+        <div class="titles">
+          <p class="label">前置き</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">事前学習とは何か</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        ニューラルネットワークの学習には「正解ラベル」が必要です——線形回帰では正解値 $y$ が、
+        MNIST 分類では手書き数字の正解クラスが必要でした。
+        しかし LLM の事前学習は<strong style="color:var(--text);">ラベルを一切用意せず</strong>、
+        テキストそのものから教師信号を自動生成します。
+      </p>
+
+      <!-- 教師あり vs 自己教師あり -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+        <div class="card">
+          <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.6rem;">教師あり学習（これまで）</p>
+          <div style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+            <p style="margin-bottom:0.5rem;">入力 $x$ と正解ラベル $y$ のペアが必要。</p>
+            <div style="background:var(--surface2); border-radius:6px; padding:0.6rem 0.75rem; font-size:0.78rem; font-family:monospace; color:var(--text-sub);">
+              画像 → ラベル「猫」「犬」<br>
+              文章 → 感情「ポジティブ」
+            </div>
+            <p style="margin-top:0.5rem; font-size:0.78rem; color:var(--text-muted);">
+              ラベル付けには人手が必要——大規模化にコストがかかる
+            </p>
+          </div>
+        </div>
+        <div class="card" style="border-color:var(--green-border);">
+          <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.6rem;">自己教師あり学習（事前学習）</p>
+          <div style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+            <p style="margin-bottom:0.5rem;">テキスト自体から教師信号を自動生成。</p>
+            <div style="background:var(--green-bg); border-radius:6px; padding:0.6rem 0.75rem; font-size:0.78rem; font-family:monospace; color:var(--green);">
+              「猫が____」 → 正解「好き」<br>
+              「今日の____は晴れ」 → 正解「天気」
+            </div>
+            <p style="margin-top:0.5rem; font-size:0.78rem; color:var(--green-mid);">
+              インターネット上のテキストすべてが学習データになる
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">重要な視点</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          事前学習は「テキストの統計的なパターンを学ぶ」作業ですが、
+          大量・多様なテキストを学ぶ過程で<strong>推論・翻訳・コーディング</strong>といった能力が創発的に現れます。
+          これが LLM の能力の源泉です。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 1：次トークン予測 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">1</div>
+        <div class="titles">
+          <p class="label">Section 1</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">次トークン予測（Causal Language Modeling）</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        GPT 系モデル（Decoder-only Transformer）の事前学習タスクは極めてシンプルです——
+        <strong style="color:var(--text);">それまでのトークン列を与え、次に来るトークンを予測する</strong>。
+        1つの文章から複数の「問題」が自動的に生成されます。
+      </p>
+
+      <!-- 1文→複数サンプル -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">1文から複数の学習サンプルを自動生成</p>
+        <div style="font-size:0.83rem; color:var(--text-sub); line-height:1.9;">
+          <!-- 元の文 -->
+          <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.6rem 1rem; margin-bottom:1rem; font-family:monospace; font-size:0.82rem; color:var(--text);">
+            「 猫 &nbsp;が &nbsp;窓 &nbsp;の &nbsp;外 &nbsp;を &nbsp;眺め &nbsp;た 」
+          </div>
+          <!-- サンプル一覧 -->
+          <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left; padding:0.3rem 0.75rem; color:var(--text-muted); font-weight:700;">入力（コンテキスト）</th>
+                <th style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-muted); font-weight:700; width:1.5rem;">→</th>
+                <th style="text-align:left; padding:0.3rem 0.75rem; color:var(--text-muted); font-weight:700;">正解（次トークン）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--text-sub);">「猫」</td>
+                <td style="text-align:center; padding:0.35rem 0.5rem; color:var(--border-strong);">→</td>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">「が」</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--text-sub);">「猫」「が」</td>
+                <td style="text-align:center; padding:0.35rem 0.5rem; color:var(--border-strong);">→</td>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">「窓」</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--text-sub);">「猫」「が」「窓」</td>
+                <td style="text-align:center; padding:0.35rem 0.5rem; color:var(--border-strong);">→</td>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">「の」</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--text-sub);">「猫」「が」「窓」「の」</td>
+                <td style="text-align:center; padding:0.35rem 0.5rem; color:var(--border-strong);">→</td>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">「外」</td>
+              </tr>
+              <tr>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--text-sub);">「猫」…「外」「を」「眺め」</td>
+                <td style="text-align:center; padding:0.35rem 0.5rem; color:var(--border-strong);">→</td>
+                <td style="padding:0.35rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">「た」</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+            8トークンの文から7個の学習サンプルが自動生成される。
+            1兆トークンのデータセットなら、約1兆個の学習サンプルが得られる。
+          </p>
+        </div>
+      </div>
+
+      <!-- 損失関数 -->
+      <div class="card-math" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">事前学習の損失関数</p>
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          $$\mathcal{L} = -\frac{1}{T}\sum_{t=1}^{T} \log P(x_t \mid x_1, x_2, \ldots, x_{t-1};\, \theta)$$
+        </div>
+        <table class="var-table" style="width:100%;">
+          <tr>
+            <td>$x_t$</td>
+            <td>位置 $t$ の正解トークン</td>
+          </tr>
+          <tr>
+            <td>$x_1 \ldots x_{t-1}$</td>
+            <td>それまでのトークン列（コンテキスト）</td>
+          </tr>
+          <tr>
+            <td>$P(\cdot \mid \cdot;\,\theta)$</td>
+            <td>モデルが予測した確率分布（語彙サイズ分の softmax 出力）</td>
+          </tr>
+          <tr>
+            <td>$-\log P$</td>
+            <td>交差エントロピー損失——正解トークンの確率を最大化する方向にパラメータを更新</td>
+          </tr>
+        </table>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
+          MNIST の分類で使った CrossEntropyLoss と本質的に同じです。
+          クラス数が「10クラス」ではなく「語彙サイズ（数万〜数十万）」になっただけです。
+        </p>
+      </div>
+
+      <!-- Causal Masking -->
+      <div class="note-green">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Causal Masking（因果マスキング）</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          Decoder-only モデルでは Self-Attention の計算時に<strong>「未来のトークンを参照しない」</strong>よう
+          上三角行列でマスクします。これにより 1 回の順伝播で全ポジションの損失を同時に計算でき、
+          学習効率が大幅に向上します。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 2：データとスケール ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Section 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">学習データ——何を、どれだけ学ぶか</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        事前学習の能力は<strong style="color:var(--text);">データの量・質・多様性</strong>に大きく依存します。
+        現代の LLM は数千億〜数兆トークンのテキストで学習されています。
+      </p>
+
+      <!-- データソース -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">代表的なデータソース</p>
+        <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid var(--border-strong);">
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">データソース</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">特徴</th>
+              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">品質</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">Common Crawl</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">ウェブ全体のクロールデータ。量は最大だがノイズも多い</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right;">
+                <span style="background:var(--amber-bg); color:var(--amber); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">中</span>
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">書籍・論文</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">長い文脈・論理構造が豊富。推論能力の育成に寄与</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right;">
+                <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">コード（GitHub 等）</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">構造化された論理表現。コーディング・推論能力に寄与</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right;">
+                <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">Wikipedia</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">百科事典的な知識。ファクト精度に寄与</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right;">
+                <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">会話データ</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">対話形式。指示への応答能力に寄与</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right;">
+                <span style="background:var(--amber-bg); color:var(--amber); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">中</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- データ処理パイプライン -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">データ前処理パイプライン</p>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; color:var(--text); min-width:8rem; text-align:center; flex-shrink:0;">生データ収集</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">ウェブクロール・書籍スキャン・コードリポジトリ等</div>
+          </div>
+          <div style="padding-left:4rem; color:var(--border-strong); font-size:0.9rem;">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; color:var(--amber); min-width:8rem; text-align:center; flex-shrink:0;">品質フィルタリング</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">スパム・重複・有害コンテンツの除去、言語判定</div>
+          </div>
+          <div style="padding-left:4rem; color:var(--border-strong); font-size:0.9rem;">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; color:var(--text); min-width:8rem; text-align:center; flex-shrink:0;">重複除去</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">近似重複の検出・除去（モデルの丸暗記を防ぐ）</div>
+          </div>
+          <div style="padding-left:4rem; color:var(--border-strong); font-size:0.9rem;">↓</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; color:var(--green); min-width:8rem; text-align:center; flex-shrink:0;">トークナイズ</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">BPE / SentencePiece でテキストをトークン ID 列に変換</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">データ品質は量より重要</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          Meta の研究（LLaMA 3）では、低品質データを除外することで<strong>同じ計算コストで大幅な性能向上</strong>が
+          得られることが報告されています。10兆トークンの粗いデータより、
+          1兆トークンの高品質データの方が優れたモデルを生む場合があります。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 3：スケーリング則 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">3</div>
+        <div class="titles">
+          <p class="label">Section 3</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">スケーリング則——大きくするほど賢くなる</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        2020年にOpenAIが発見した「スケーリング則」は、LLM 開発の指針となっています——
+        <strong style="color:var(--text);">パラメータ数・学習トークン数・計算量を増やすと、損失が予測可能に低下する</strong>。
+      </p>
+
+      <!-- Kaplan vs Chinchilla -->
+      <div class="card-math" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">べき乗則（Power Law）</p>
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          $$L(N, D) \approx \frac{A}{N^\alpha} + \frac{B}{D^\beta} + L_\infty$$
+        </div>
+        <table class="var-table" style="width:100%;">
+          <tr>
+            <td>$N$</td>
+            <td>モデルのパラメータ数</td>
+          </tr>
+          <tr>
+            <td>$D$</td>
+            <td>学習トークン数</td>
+          </tr>
+          <tr>
+            <td>$\alpha,\,\beta$</td>
+            <td>スケーリング指数（実験的に決定）</td>
+          </tr>
+          <tr>
+            <td>$L_\infty$</td>
+            <td>データ自体のノイズによる理論的最小損失</td>
+          </tr>
+        </table>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
+          $N$ と $D$ をそれぞれ独立に増やすと損失が下がりますが、
+          一方だけ増やしても効率が悪くなります。
+        </p>
+      </div>
+
+      <!-- Chinchilla の比率 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Chinchilla 法則（2022年、DeepMind）</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.85; margin-bottom:1rem;">
+          固定した計算予算（FLOPs）のもとで損失を最小化するには、
+          パラメータ数 $N$ とトークン数 $D$ の<strong style="color:var(--text);">比率を約 1:20 に保つ</strong>のが最適と判明しました。
+        </p>
+        <!-- 比率図 -->
+        <svg viewBox="0 0 440 120" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- GPT-3 -->
+          <rect x="20" y="20" width="180" height="80" rx="8" fill="var(--red-bg)" stroke="#FCA5A5" stroke-width="1.5"/>
+          <text x="110" y="48" font-size="10" fill="var(--red)" text-anchor="middle" font-weight="700">GPT-3（2020年当時の設計）</text>
+          <text x="110" y="66" font-size="9" fill="var(--red)" text-anchor="middle">1750億パラメータ</text>
+          <text x="110" y="82" font-size="9" fill="var(--red)" text-anchor="middle">3000億トークン（約 1.7倍）</text>
+          <text x="110" y="97" font-size="8" fill="#B91C1C" text-anchor="middle">← パラメータ過多・データ不足</text>
+
+          <!-- 矢印 -->
+          <text x="220" y="65" font-size="18" fill="var(--border-strong)" text-anchor="middle">→</text>
+
+          <!-- Chinchilla -->
+          <rect x="240" y="20" width="180" height="80" rx="8" fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5"/>
+          <text x="330" y="48" font-size="10" fill="var(--green)" text-anchor="middle" font-weight="700">Chinchilla（最適設計）</text>
+          <text x="330" y="66" font-size="9" fill="var(--green)" text-anchor="middle">700億パラメータ</text>
+          <text x="330" y="82" font-size="9" fill="var(--green)" text-anchor="middle">1.4兆トークン（約 20倍）</text>
+          <text x="330" y="97" font-size="8" fill="var(--green-mid)" text-anchor="middle">← 同計算コストで GPT-3 を超越</text>
+        </svg>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
+          Chinchilla の発見以降、LLaMA・Mistral などの効率的なモデルが続々登場しました。
+          現在の主流は「小さいパラメータ＋大量データ」で、推論コストを下げながら高性能を実現しています。
+        </p>
+      </div>
+
+      <!-- 規模感の比較 -->
+      <div class="card" style="margin-bottom:0;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">規模感の比較</p>
+        <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid var(--border-strong);">
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">モデル</th>
+              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">パラメータ数</th>
+              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">学習トークン数</th>
+              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">GPU（A100換算）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">HO-2（MNIST）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">20 万</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">300 万</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">1（数分）</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">LLaMA 3 8B</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">80 億</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">15 兆</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 1,000（数週）</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">LLaMA 3 70B</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">700 億</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">15 兆</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 6,000（数ヶ月）</td>
+            </tr>
+            <tr>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">GPT-4（推定）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 1 兆</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">未公表</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 25,000（数ヶ月）</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+          ※ GPU 数・学習期間はすべて公開情報からの概算です。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 4：事前学習済みモデルの活用 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">4</div>
+        <div class="titles">
+          <p class="label">Section 4</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">事前学習済みモデルの活用方法</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        事前学習は莫大な計算資源を要します。
+        ほとんどの実務では<strong style="color:var(--text);">事前学習済みモデルを出発点として活用</strong>します。
+        目的・予算・性能要件によって4つのアプローチが使い分けられます。
+      </p>
+
+      <!-- 4つのアプローチ -->
+      <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+
+        <!-- ゼロショット -->
+        <div class="card" style="border-left:3px solid var(--border-strong);">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); flex-shrink:0;">① ゼロショット</span>
+            <div style="flex:1; height:1px; background:var(--border);"></div>
+            <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+            事前学習済みモデルをそのままプロンプトで指示する。
+            「このメールを要約してください」のように自然言語で指定するだけ。
+          </p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 汎用タスク・プロトタイピング。追加コストなし。</p>
+        </div>
+
+        <!-- Few-shot -->
+        <div class="card" style="border-left:3px solid var(--amber-border);">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); flex-shrink:0;">② Few-shot プロンプティング</span>
+            <div style="flex:1; height:1px; background:var(--border);"></div>
+            <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+            プロンプトに入出力の例を数件（2〜10件）示すことでタスクを定義する。
+            モデルはパターンを読み取りタスクを遂行する。
+          </p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 少数例で形式を揃えたいとき。コンテキスト長の消費に注意。</p>
+        </div>
+
+        <!-- ファインチューニング -->
+        <div class="card" style="border-left:3px solid var(--green-border);">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">③ ファインチューニング（SFT / LoRA）</span>
+            <div style="flex:1; height:1px; background:var(--border);"></div>
+            <span style="font-size:0.7rem; color:var(--text-muted);">追加学習あり</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+            タスク固有データでパラメータを更新し、特定ドメインへの適応・指示への応答能力を強化する。
+            LoRA（Low-Rank Adaptation）を使えば、更新するパラメータを全体の 1% 以下に絞れる。
+          </p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 社内文書・専門用語・特定スタイルへの適応。第2章のメインテーマ。</p>
+        </div>
+
+        <!-- RAG -->
+        <div class="card" style="border-left:3px solid var(--green-border);">
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">④ RAG（検索拡張生成）</span>
+            <div style="flex:1; height:1px; background:var(--border);"></div>
+            <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
+          </div>
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+            質問に関連する文書をベクトル検索で取得し、コンテキストとしてプロンプトに挿入する。
+            モデルのパラメータを変えずに「最新情報」「社内知識」を参照させられる。
+          </p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 知識ベースの頻繁な更新・ハルシネーション抑制。第2章のメインテーマ。</p>
+        </div>
+
+      </div>
+
+      <!-- 選択ガイド -->
+      <div class="card">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">アプローチ選択の目安</p>
+        <svg viewBox="0 0 440 160" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- 軸 -->
+          <text x="10" y="100" font-size="9" fill="var(--text-muted)" transform="rotate(-90,10,100)" text-anchor="middle">タスク特化度（高）</text>
+          <line x1="30" y1="140" x2="30"  y2="15"  stroke="var(--border)" stroke-width="1.5"/>
+          <line x1="30" y1="140" x2="420" y2="140" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="225" y="158" font-size="9" fill="var(--text-muted)" text-anchor="middle">必要なデータ量・計算コスト（大）→</text>
+
+          <!-- ゼロショット -->
+          <circle cx="70"  cy="120" r="18" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="70"  y="118" font-size="7.5" fill="var(--text-sub)" text-anchor="middle" font-weight="600">ゼロ</text>
+          <text x="70"  y="129" font-size="7.5" fill="var(--text-sub)" text-anchor="middle" font-weight="600">ショット</text>
+
+          <!-- Few-shot -->
+          <circle cx="160" cy="100" r="22" fill="var(--amber-bg)" stroke="var(--amber-border)" stroke-width="1.5"/>
+          <text x="160" y="98"  font-size="7.5" fill="var(--amber)" text-anchor="middle" font-weight="600">Few-</text>
+          <text x="160" y="109" font-size="7.5" fill="var(--amber)" text-anchor="middle" font-weight="600">shot</text>
+
+          <!-- RAG -->
+          <circle cx="280" cy="60" r="25" fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5"/>
+          <text x="280" y="58"  font-size="7.5" fill="var(--green)" text-anchor="middle" font-weight="600">RAG</text>
+          <text x="280" y="69"  font-size="7.5" fill="var(--green)" text-anchor="middle" font-weight="600">（検索）</text>
+
+          <!-- ファインチューニング -->
+          <circle cx="380" cy="35" r="28" fill="var(--green-bg)" stroke="var(--green)" stroke-width="2"/>
+          <text x="380" y="33"  font-size="7.5" fill="var(--green)" text-anchor="middle" font-weight="700">ファイン</text>
+          <text x="380" y="44"  font-size="7.5" fill="var(--green)" text-anchor="middle" font-weight="700">チューニング</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ━━━ まとめ ━━━ -->
+    <div class="summary-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
+      <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span>事前学習は<strong>次トークン予測</strong>という自己教師あり学習——ラベルなしで巨大テキストから学ぶ</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span>損失関数は MNIST と同じ CrossEntropy、ただしクラス数が語彙サイズ（数万〜数十万）</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>Chinchilla 法則</strong>：パラメータ数とトークン数の比率 1:20 が最適な計算効率を実現</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>実務では事前学習済みモデルに<strong>ファインチューニング・RAG</strong>を組み合わせて活用する（第2章）</span></li>
+      </ul>
+    </div>
+
+    <!-- ━━━ ナビゲーション ━━━ -->
+    <nav class="no-print" style="display:flex; justify-content:space-between; font-size:0.8rem;">
+      <a href="supplement_transformer.html" style="color:var(--green-mid);" class="hover:underline">← Transformer</a>
+      <a href="supplement_inference_params.html" style="color:var(--green-mid);" class="hover:underline">推論パラメータ →</a>
+    </nav>
+
+  </main>
+</body>
+</html>
