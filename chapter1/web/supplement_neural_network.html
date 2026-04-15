@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足資料：ニューラルネットワーク｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --red:          #991B1B;
+      --red-bg:       #FEF2F2;
+      --code-bg:      #18181B;
+      --code-out:     #27272A;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-rule .num {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+      opacity: 0.12;
+      min-width: 2.5rem;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .section-rule .titles { flex: 1; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-math {
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+    }
+
+    .note-green {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green-mid);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-amber {
+      background: var(--amber-bg);
+      border-left: 3px solid var(--amber-border);
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+    .note-red {
+      background: var(--red-bg);
+      border-left: 3px solid #FCA5A5;
+      border-radius: 0 8px 8px 0;
+      padding: 0.875rem 1.25rem;
+    }
+
+    .code-label {
+      background: var(--code-bg);
+      border-radius: 8px 8px 0 0;
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #3F3F46;
+    }
+    .code-label span { font-size: 0.7rem; color: #A1A1AA; letter-spacing: 0.08em; font-weight: 600; }
+    .code-dots { display: flex; gap: 4px; }
+    .code-dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+    pre.hljs-wrap { margin: 0; border-radius: 0 0 8px 8px; overflow-x: auto; }
+    pre.hljs-wrap code { font-size: 0.8rem; line-height: 1.65; }
+
+    .output-block {
+      background: var(--code-out);
+      border-radius: 0 0 8px 8px;
+      padding: 0.75rem 1rem;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.75rem;
+      color: #D4D4D8;
+      line-height: 1.65;
+    }
+    .output-label {
+      font-size: 0.65rem;
+      color: #71717A;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .var-table td { padding: 0.35rem 0; font-size: 0.85rem; vertical-align: top; }
+    .var-table td:first-child {
+      font-family: "SF Mono", "Menlo", monospace;
+      color: var(--green-mid);
+      padding-right: 1.5rem;
+      white-space: nowrap;
+      min-width: 4rem;
+    }
+
+    .summary-block {
+      background: var(--green);
+      color: #E8F3EF;
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+    }
+    .summary-block strong { color: #FFFFFF; }
+    .summary-block a { color: #7DD3B8; text-decoration: underline; text-underline-offset: 3px; }
+
+    @media print {
+      .no-print { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━ ヘッダー ━━━ -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-6 px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="no-print flex items-center gap-2 mb-3" style="font-size:0.75rem; color:var(--text-muted);">
+        <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章</a>
+        <span>›</span>
+        <span>補足資料</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+        <div>
+          <p class="label mb-1">Section 1-2 Supplement</p>
+          <h1 class="text-2xl font-bold" style="color:var(--text);">ニューラルネットワーク</h1>
+        </div>
+        <div class="no-print flex-shrink-0 text-right" style="font-size:0.7rem; color:var(--text-muted); line-height:1.6;">
+          <p>対応ノートブック</p>
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:0.68rem; color:var(--text-sub);">ch1_02_mnist_nn.ipynb</code>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
+
+    <!-- ━━━ 目標ボックス ━━━ -->
+    <div class="note-green">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
+      <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
+        <li>線形回帰では解けない問題が存在する理由を掴む</li>
+        <li>ニューラルネットワークが「関数を複雑にするための部品の組み合わせ」であることを掴む</li>
+        <li>活性化関数・順伝播・自動微分の役割を掴む</li>
+      </ol>
+      <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
+        PyTorch の実装は「最小構成」に絞ります。細部より<em>流れの理解</em>を優先してください。
+      </p>
+    </div>
+
+    <!-- ━━━ Section 0：線形回帰の限界 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">0</div>
+        <div class="titles">
+          <p class="label">前置き</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">線形回帰では解けない問題がある</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        前のセクションで「AI は関数である」という視点を得ました。
+        しかし、線形回帰（$\hat{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$）は
+        <strong style="color:var(--text);">直線・平面でしか境界を引けない</strong> という根本的な限界があります。
+        現実の問題の多くはこの限界を超えています。
+      </p>
+
+      <!-- XOR の説明 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.875rem;">例：XOR 問題（線形分離不可能）</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:center;">
+          <!-- 説明 -->
+          <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
+            <p style="margin-bottom:0.75rem;">
+              XOR は「2つの入力が異なるとき 1、同じとき 0」を返す演算です。
+              4点を散布図に描くと、<strong style="color:var(--text);">1本の直線で ○ と × を分けることは不可能</strong> です。
+            </p>
+            <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <th style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-muted); font-weight:600;">$x_1$</th>
+                  <th style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-muted); font-weight:600;">$x_2$</th>
+                  <th style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-muted); font-weight:600;">$y$（正解）</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0 ×</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">1</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--green-mid); font-weight:700;">1 ○</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">1</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--green-mid); font-weight:700;">1 ○</td></tr>
+                <tr><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">1</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">1</td><td style="text-align:center; padding:0.3rem 0.5rem; color:var(--text-sub);">0 ×</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- SVG 散布図 -->
+          <svg viewBox="0 0 180 180" style="width:100%; max-width:180px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
+            <!-- 軸 -->
+            <line x1="30" y1="150" x2="160" y2="150" stroke="var(--border)" stroke-width="1.5"/>
+            <line x1="30" y1="150" x2="30"  y2="20"  stroke="var(--border)" stroke-width="1.5"/>
+            <text x="155" y="163" font-size="10" fill="var(--text-muted)" font-style="italic">x₁</text>
+            <text x="18"  y="18"  font-size="10" fill="var(--text-muted)" font-style="italic">x₂</text>
+            <!-- グリッド点ラベル -->
+            <text x="54"  y="163" font-size="9" fill="var(--text-muted)">0</text>
+            <text x="114" y="163" font-size="9" fill="var(--text-muted)">1</text>
+            <text x="18"  y="128" font-size="9" fill="var(--text-muted)">0</text>
+            <text x="18"  y="68"  font-size="9" fill="var(--text-muted)">1</text>
+            <!-- × : (0,0) (1,1) -->
+            <text x="50"  y="132" font-size="18" fill="var(--text-muted)" text-anchor="middle" font-weight="700">×</text>
+            <text x="115" y="72"  font-size="18" fill="var(--text-muted)" text-anchor="middle" font-weight="700">×</text>
+            <!-- ○ : (0,1) (1,0) -->
+            <circle cx="52"  cy="63" r="10" fill="none" stroke="var(--green-mid)" stroke-width="2.5"/>
+            <circle cx="117" cy="127" r="10" fill="none" stroke="var(--green-mid)" stroke-width="2.5"/>
+            <!-- 「直線で分けられない」注釈 -->
+            <text x="90" y="175" font-size="8" fill="var(--amber)" text-anchor="middle">直線では分離不可能</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜ線形変換では解けないのか？</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          線形変換をいくつ重ねても、結果は常に「1回の線形変換」と数学的に等価です。
+          つまり、どれだけ層を増やしても <strong>曲線的な境界を表現できません</strong>。
+          この問題を解決するのが <strong>活性化関数（非線形変換）</strong> の導入です。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 1：NNの構造 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">1</div>
+        <div class="titles">
+          <p class="label">Section 1</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">ニューラルネットワークの構造</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        ニューラルネットワーク（NN）は「関数を複雑にするための部品」を積み重ねた構造です。
+        <strong style="color:var(--text);">線形変換 → 活性化関数 → 線形変換 → …</strong>
+        というブロックを繰り返すことで、任意の複雑な入出力関係を近似できます。
+      </p>
+
+      <!-- NN 構造図 SVG -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">2層ニューラルネットワークの構造</p>
+        <svg viewBox="0 0 480 200" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <!-- 層ラベル -->
+          <text x="60"  y="15" font-size="10" fill="var(--text-muted)" text-anchor="middle" font-weight="600">入力層</text>
+          <text x="240" y="15" font-size="10" fill="var(--text-muted)" text-anchor="middle" font-weight="600">隠れ層</text>
+          <text x="420" y="15" font-size="10" fill="var(--text-muted)" text-anchor="middle" font-weight="600">出力層</text>
+
+          <!-- エッジ（入力→隠れ） -->
+          <g stroke="#C5BFB2" stroke-width="1" opacity="0.7">
+            <line x1="75" y1="60"  x2="215" y2="60"/><line x1="75" y1="60"  x2="215" y2="100"/>
+            <line x1="75" y1="60"  x2="215" y2="140"/><line x1="75" y1="100" x2="215" y2="60"/>
+            <line x1="75" y1="100" x2="215" y2="100"/><line x1="75" y1="100" x2="215" y2="140"/>
+            <line x1="75" y1="140" x2="215" y2="60"/><line x1="75" y1="140" x2="215" y2="100"/>
+            <line x1="75" y1="140" x2="215" y2="140"/>
+          </g>
+          <!-- エッジ（隠れ→出力） -->
+          <g stroke="#A7CBB9" stroke-width="1.2" opacity="0.8">
+            <line x1="265" y1="60"  x2="405" y2="80"/> <line x1="265" y1="60"  x2="405" y2="120"/>
+            <line x1="265" y1="100" x2="405" y2="80"/> <line x1="265" y1="100" x2="405" y2="120"/>
+            <line x1="265" y1="140" x2="405" y2="80"/> <line x1="265" y1="140" x2="405" y2="120"/>
+          </g>
+
+          <!-- 入力層ノード -->
+          <g fill="var(--surface2)" stroke="var(--border-strong)" stroke-width="1.5">
+            <circle cx="75" cy="60"  r="18"/>
+            <circle cx="75" cy="100" r="18"/>
+            <circle cx="75" cy="140" r="18"/>
+          </g>
+          <text x="75" y="64"  font-size="10" fill="var(--text-sub)" text-anchor="middle">x₁</text>
+          <text x="75" y="104" font-size="10" fill="var(--text-sub)" text-anchor="middle">x₂</text>
+          <text x="75" y="144" font-size="10" fill="var(--text-sub)" text-anchor="middle">x₃</text>
+
+          <!-- 隠れ層ノード（活性化あり） -->
+          <g fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.8">
+            <circle cx="240" cy="60"  r="20"/>
+            <circle cx="240" cy="100" r="20"/>
+            <circle cx="240" cy="140" r="20"/>
+          </g>
+          <text x="240" y="57"  font-size="8" fill="var(--green)" text-anchor="middle">W·x</text>
+          <text x="240" y="67"  font-size="8" fill="var(--green)" text-anchor="middle">+b</text>
+          <text x="240" y="97"  font-size="8" fill="var(--green)" text-anchor="middle">W·x</text>
+          <text x="240" y="107" font-size="8" fill="var(--green)" text-anchor="middle">+b</text>
+          <text x="240" y="137" font-size="8" fill="var(--green)" text-anchor="middle">W·x</text>
+          <text x="240" y="147" font-size="8" fill="var(--green)" text-anchor="middle">+b</text>
+
+          <!-- 出力層ノード -->
+          <g fill="var(--green-bg)" stroke="var(--green)" stroke-width="2">
+            <circle cx="420" cy="80"  r="20"/>
+            <circle cx="420" cy="120" r="20"/>
+          </g>
+          <text x="420" y="84"  font-size="10" fill="var(--green)" text-anchor="middle" font-weight="700">ŷ₁</text>
+          <text x="420" y="124" font-size="10" fill="var(--green)" text-anchor="middle" font-weight="700">ŷ₂</text>
+
+          <!-- 活性化関数ラベル -->
+          <rect x="200" y="163" width="80" height="18" rx="4" fill="var(--amber-bg)" stroke="var(--amber-border)" stroke-width="1"/>
+          <text x="240" y="176" font-size="9" fill="var(--amber)" text-anchor="middle" font-weight="700">f（活性化関数）</text>
+          <line x1="240" y1="163" x2="240" y2="160" stroke="var(--amber-border)" stroke-width="1" stroke-dasharray="2 2"/>
+
+          <!-- 重みラベル -->
+          <text x="148" y="78" font-size="9" fill="var(--text-muted)" text-anchor="middle" font-style="italic">W¹, b¹</text>
+          <text x="333" y="78" font-size="9" fill="var(--text-muted)" text-anchor="middle" font-style="italic">W², b²</text>
+        </svg>
+        <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">
+          入力層（3ノード）→ 隠れ層（3ノード、活性化関数あり）→ 出力層（2ノード）
+        </p>
+      </div>
+
+      <!-- 各部品の説明 -->
+      <div class="card-math">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">各部品の役割</p>
+        <table class="var-table" style="width:100%;">
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding-top:0.6rem; padding-bottom:0.5rem;">ノード</td>
+              <td style="padding-top:0.6rem; padding-bottom:0.5rem; color:var(--text-sub);">1つの数値を保持する計算単位。「ニューロン」とも呼ぶ</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding-bottom:0.5rem;">$\mathbf{W}$</td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">重み行列。前の層の出力を次の層の入力に変換するパラメータ</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding-bottom:0.5rem;">$\mathbf{b}$</td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">バイアスベクトル。変換後の値を平行移動させるパラメータ</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding-bottom:0.5rem;">$f(\cdot)$</td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">活性化関数。線形変換の後に適用し、<strong style="color:var(--text);">非線形性を加える</strong></td>
+            </tr>
+            <tr>
+              <td style="padding-bottom:0.3rem;">層（layer）</td>
+              <td style="padding-bottom:0.3rem; color:var(--text-sub);">「線形変換 + 活性化関数」のセット。これを積み重ねる</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 2：活性化関数 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Section 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">活性化関数：「非線形にする部品」</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        活性化関数は各ノードの出力に適用される<strong style="color:var(--text);">非線形変換</strong>です。
+        これがなければ、何層重ねても1回の線形変換と等価になってしまいます。
+        代表的な2つを押さえておきましょう。
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+
+        <!-- ReLU -->
+        <div class="card">
+          <p style="font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.625rem;">ReLU</p>
+          <div style="text-align:center; margin:0.5rem 0 0.75rem;">
+            $$ f(x) = \max(0, x) $$
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+            負の値をすべて 0 に、正の値はそのまま通す。
+            <strong style="color:var(--text);">現代の NN で最も広く使われる</strong> 活性化関数。
+          </p>
+          <!-- SVG ReLU グラフ -->
+          <svg viewBox="0 0 160 100" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+            <line x1="80" y1="10" x2="80" y2="90" stroke="var(--border)" stroke-width="1"/>
+            <line x1="10" y1="75" x2="150" y2="75" stroke="var(--border)" stroke-width="1"/>
+            <text x="152" y="79" font-size="9" fill="var(--text-muted)">x</text>
+            <text x="73"  y="10" font-size="9" fill="var(--text-muted)">f</text>
+            <!-- ReLU 線 -->
+            <polyline points="10,75 80,75 145,15" fill="none" stroke="var(--green-mid)" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="95" y="35" font-size="8" fill="var(--green-mid)" font-weight="700">ReLU</text>
+          </svg>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+            計算が軽く、勾配消失が起きにくい。深い NN に向いている。
+          </p>
+        </div>
+
+        <!-- Sigmoid -->
+        <div class="card">
+          <p style="font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.625rem;">Sigmoid</p>
+          <div style="text-align:center; margin:0.5rem 0 0.75rem;">
+            $$ f(x) = \frac{1}{1 + e^{-x}} $$
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+            任意の実数を 0〜1 の範囲に押し込む。
+            出力を「確率」として解釈したい場合（2値分類の出力層）に使われる。
+          </p>
+          <!-- SVG Sigmoid グラフ -->
+          <svg viewBox="0 0 160 100" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
+            <line x1="80" y1="10" x2="80" y2="90" stroke="var(--border)" stroke-width="1"/>
+            <line x1="10" y1="75" x2="150" y2="75" stroke="var(--border)" stroke-width="1"/>
+            <!-- y=1 ライン -->
+            <line x1="10" y1="20" x2="150" y2="20" stroke="var(--border)" stroke-width="0.75" stroke-dasharray="3 2"/>
+            <text x="3" y="23" font-size="8" fill="var(--text-muted)">1</text>
+            <text x="152" y="79" font-size="9" fill="var(--text-muted)">x</text>
+            <text x="73"  y="10" font-size="9" fill="var(--text-muted)">f</text>
+            <!-- Sigmoid 曲線（近似） -->
+            <path d="M 12 73 C 30 73 45 72 60 68 C 70 65 75 55 80 47 C 85 40 90 25 100 22 C 115 19 130 19 148 19"
+                  fill="none" stroke="var(--border-strong)" stroke-width="2.5"/>
+            <text x="105" y="35" font-size="8" fill="var(--border-strong)" font-weight="700">Sigmoid</text>
+          </svg>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+            深い層では勾配消失が起きやすく、隠れ層では ReLU に置き換わった。
+          </p>
+        </div>
+      </div>
+
+      <div class="note-green">
+        <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
+          <strong>「どの活性化関数を使うか」は設計の選択です。</strong>
+          隠れ層はほぼ ReLU（またはその派生形）、出力層は問題に応じて選ぶのが現代の標準です。
+          大切なのは「<em>非線形変換が入ることで関数が複雑な形を表現できる</em>」という事実です。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 3：順伝播 + PyTorch実装 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">3</div>
+        <div class="titles">
+          <p class="label">Section 3</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">順伝播と PyTorch 実装</h2>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
+        入力から出力まで順番に計算を進めていく処理を <strong style="color:var(--text);">順伝播（Forward Propagation）</strong> と呼びます。
+        2層NN の場合、数式で書くと次のようになります。
+      </p>
+
+      <!-- 数式 -->
+      <div class="card-math" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">2層NN の順伝播</p>
+        <div style="display:flex; flex-direction:column; gap:0.5rem; text-align:center; margin:0.75rem 0 1.25rem;">
+          $$ \mathbf{h} = f\!\left(\mathbf{W}^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\right) \quad \text{（隠れ層）} $$
+          $$ \hat{\mathbf{y}} = \mathbf{W}^{(2)}\mathbf{h} + \mathbf{b}^{(2)} \quad \text{（出力層）} $$
+        </div>
+        <table class="var-table" style="width:100%; border-top:1px solid var(--border);">
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding-top:0.6rem;">$\mathbf{x}$</td><td style="padding-top:0.6rem; color:var(--text-sub);">入力ベクトル</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td>$\mathbf{W}^{(l)}, \mathbf{b}^{(l)}$</td><td style="color:var(--text-sub);">第 $l$ 層の重み行列・バイアスベクトル（学習対象）</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td>$f(\cdot)$</td><td style="color:var(--text-sub);">活性化関数（ReLU など）</td></tr>
+            <tr><td style="padding-bottom:0.3rem;">$\mathbf{h}$</td><td style="color:var(--text-sub); padding-bottom:0.3rem;">隠れ層の出力（次の層への入力）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PyTorch コード -->
+      <div style="margin-bottom:1rem;">
+        <div class="code-label">
+          <div class="code-dots">
+            <i style="background:#FF5F57;"></i><i style="background:#FEBC2E;"></i><i style="background:#28C840;"></i>
+          </div>
+          <span>コード例 — PyTorch で 2層NN を実装（nn.Module 最小構成）</span>
+        </div>
+        <pre class="hljs-wrap"><code class="language-python">import torch
+import torch.nn as nn
+
+# 実行時間: 数秒
+
+# ── モデルの定義 ────────────────────────────────────
+class TwoLayerNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        # 第1層: 線形変換
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        # 活性化関数
+        self.relu = nn.ReLU()
+        # 第2層: 線形変換
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        # 順伝播: 入力 → 隠れ層 → 活性化 → 出力
+        h = self.relu(self.fc1(x))   # h = ReLU(W¹x + b¹)
+        y = self.fc2(h)              # ŷ = W²h + b²
+        return y
+
+# ── インスタンス化 ──────────────────────────────────
+model = TwoLayerNN(input_dim=3, hidden_dim=8, output_dim=2)
+print(model)
+
+# ── パラメータ数の確認 ──────────────────────────────
+total_params = sum(p.numel() for p in model.parameters())
+print(f"\n総パラメータ数: {total_params}")
+
+# ── 順伝播のテスト ──────────────────────────────────
+x = torch.randn(1, 3)          # バッチサイズ1、入力3次元
+output = model(x)
+print(f"入力の形状:  {x.shape}")
+print(f"出力の形状:  {output.shape}")</code></pre>
+        <div class="output-block">
+          <div class="output-label">出力</div>
+          TwoLayerNN(<br>
+          &nbsp;&nbsp;(fc1): Linear(in_features=3, out_features=8, bias=True)<br>
+          &nbsp;&nbsp;(relu): ReLU()<br>
+          &nbsp;&nbsp;(fc2): Linear(in_features=8, out_features=2, bias=True)<br>
+          )<br>
+          <br>
+          総パラメータ数: 50<br>
+          入力の形状:  torch.Size([1, 3])<br>
+          出力の形状:  torch.Size([1, 2])
+        </div>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">forward()</code> メソッドに「どう計算するか」を書くだけです。
+          逆伝播（勾配計算）は PyTorch が自動で行います。
+        </p>
+      </div>
+    </section>
+
+    <!-- ━━━ Section 4：自動微分 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">4</div>
+        <div class="titles">
+          <p class="label">Section 4</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">自動微分（autograd）：手で微分しなくていい理由</h2>
+        </div>
+      </div>
+
+      <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.75rem;">
+        <p>
+          線形回帰のセクションでは、損失の勾配を <strong style="color:var(--text);">手で計算して</strong>
+          コードに書き下しました。しかし NN のパラメータは数百万〜数十億もあります。
+          それを人手で微分するのは現実的ではありません。
+        </p>
+        <p>
+          PyTorch の <strong style="color:var(--text);">autograd</strong> は、計算グラフを自動構築して
+          任意のパラメータに対する勾配を自動計算します。
+          研究者はモデルの構造（<code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">forward()</code>）を書くだけで、勾配計算は PyTorch が肩代わりします。
+        </p>
+      </div>
+
+      <div class="note-amber" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.8rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">autograd が実現したこと</p>
+        <p style="font-size:0.82rem; color:#5C4200; line-height:1.75;">
+          2012年以降の深層学習ブームの背景の一つは「自動微分フレームワークの普及」です。
+          研究者がモデルの構造設計に集中できるようになり、
+          100層を超えるネットワークの学習が現実的になりました。
+        </p>
+      </div>
+
+      <!-- autograd コード -->
+      <div>
+        <div class="code-label">
+          <div class="code-dots">
+            <i style="background:#FF5F57;"></i><i style="background:#FEBC2E;"></i><i style="background:#28C840;"></i>
+          </div>
+          <span>コード例 — autograd による勾配の自動計算</span>
+        </div>
+        <pre class="hljs-wrap"><code class="language-python">import torch
+import torch.nn as nn
+
+# 実行時間: 数秒
+
+# ── データ（ダミー） ────────────────────────────────
+x      = torch.randn(32, 3)   # バッチサイズ32、入力3次元
+y_true = torch.randn(32, 2)   # 正解ラベル（2次元）
+
+# ── モデル・損失関数・最適化アルゴリズム ────────────
+model     = TwoLayerNN(input_dim=3, hidden_dim=8, output_dim=2)
+criterion = nn.MSELoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+# ── 1ステップの学習ループ ────────────────────────────
+# 1. 順伝播
+y_pred = model(x)
+
+# 2. 損失計算
+loss = criterion(y_pred, y_true)
+print(f"損失: {loss.item():.4f}")
+
+# 3. 勾配を初期化（重要：前ステップの勾配が残るため）
+optimizer.zero_grad()
+
+# 4. 逆伝播（autograd が全パラメータの勾配を自動計算）
+loss.backward()
+
+# 5. パラメータ更新
+optimizer.step()
+
+# 勾配の確認（fc1 の重みに対する勾配）
+print(f"fc1.weight の勾配（形状）: {model.fc1.weight.grad.shape}")
+print(f"勾配の例: {model.fc1.weight.grad[0, :].detach().numpy().round(4)}")</code></pre>
+        <div class="output-block">
+          <div class="output-label">出力</div>
+          損失: 1.0823<br>
+          fc1.weight の勾配（形状）: torch.Size([8, 3])<br>
+          勾配の例: [ 0.0031 -0.0147  0.0089]
+        </div>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
+          <code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss.backward()</code> の1行で、全パラメータの勾配が自動計算されます。
+          線形回帰で手書きした偏微分式を、ここでは一切書いていません。
+        </p>
+      </div>
+
+      <!-- 学習ループの全体像 -->
+      <div class="card" style="margin-top:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">PyTorch 学習ループの5ステップ</p>
+        <ol style="font-size:0.85rem; color:var(--text-sub); line-height:2; padding-left:1.25rem;">
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">y_pred = model(x)</code> — 順伝播で予測を計算</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss = criterion(y_pred, y_true)</code> — 損失を計算</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.zero_grad()</code> — 前ステップの勾配をリセット</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss.backward()</code> — 逆伝播（autograd が勾配を自動計算）</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.step()</code> — 勾配に従いパラメータを更新</li>
+        </ol>
+        <div class="note-green" style="margin-top:0.875rem;">
+          <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
+            この5ステップは PyTorch の学習ループの<strong>黄金パターン</strong>です。
+            MNIST 分類でも LLM のファインチューニングでも、本質的にはこの繰り返しです。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ━━━ まとめ ━━━ -->
+    <section class="summary-block">
+      <h2 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:1rem; letter-spacing:0.02em;">このセクションのまとめ</h2>
+      <ol style="font-size:0.875rem; color:#C8E6DA; line-height:2; padding-left:1.25rem; margin-bottom:1.25rem;">
+        <li>
+          <strong>線形回帰の限界</strong>：直線で分離できない問題（XOR など）は解けない。
+          「非線形な関数」が必要。
+        </li>
+        <li>
+          <strong>ニューラルネットワーク</strong>は「線形変換 + 活性化関数」のブロックを積み重ねた構造。
+          層を深くするほど複雑な入出力関係を表現できる。
+        </li>
+        <li>
+          <strong>活性化関数</strong>（ReLU など）が非線形性を加える。これがなければ何層重ねても意味がない。
+        </li>
+        <li>
+          <strong>autograd</strong> により勾配は自動計算される。
+          <code style="background:rgba(255,255,255,0.15); border-radius:3px; padding:1px 5px; color:#FFFFFF;">forward()</code> を書けば PyTorch が逆伝播を肩代わりする。
+        </li>
+      </ol>
+      <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:1rem; font-size:0.85rem; color:#A7D4C0;">
+        <strong style="color:#FFFFFF;">次のステップ：</strong>
+        NN が「言語」を扱えるようになるには何が必要か？
+        語順や長距離依存を捉えるための仕組み ─ Transformer と Attention を確認します。<br>
+        <a href="supplement_transformer.html" class="no-print">→ 補足資料：Transformer / Attention</a>
+      </div>
+    </section>
+
+    <!-- ナビゲーション -->
+    <nav class="no-print" style="display:flex; justify-content:space-between; padding-top:1rem; border-top:1px solid var(--border); font-size:0.85rem;">
+      <a href="supplement_linear_regression.html" style="color:var(--green-mid);">← 補足資料：線形回帰・損失関数・勾配降下法</a>
+      <a href="supplement_transformer.html" style="color:var(--green-mid);">次の補足資料：Transformer / Attention →</a>
+    </nav>
+
+  </main>
+
+  <footer style="margin-top:3rem; border-top:1px solid var(--border); padding:1.5rem 2rem; text-align:center; font-size:0.72rem; color:var(--text-muted);">
+    DGX ML ハンズオンセッション｜第1章 補足資料：ニューラルネットワーク
+  </footer>
+
+</body>
+</html>
