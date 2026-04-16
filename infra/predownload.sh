@@ -144,7 +144,7 @@ else
   echo ""
   echo "  以下のいずれかでログインしてください:"
   echo ""
-  echo "    方法 1: huggingface-cli login"
+  echo "    方法 1: .venv/bin/hf auth login"
   echo "    方法 2: export HF_TOKEN=hf_xxxxxxxxxxxx  (アクセストークン)"
   echo ""
   echo "  また、以下の URL でモデルへのアクセス申請が必要です:"

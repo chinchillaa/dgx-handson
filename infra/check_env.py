@@ -85,32 +85,33 @@ except ImportError:
 section('3. パッケージバージョン')
 
 REQUIRED_PACKAGES = [
-    ('torch',               '2.0.0',  True),
-    ('torchvision',         '0.15.0', True),
-    ('transformers',        '4.35.0', True),
-    ('datasets',            '2.14.0', True),
-    ('numpy',               '1.24.0', True),
-    ('pandas',              '2.0.0',  True),
-    ('matplotlib',          '3.7.0',  True),
-    ('scikit-learn',        '1.3.0',  True),
-    ('jupyter',             '1.0.0',  False),  # False = 推奨だが必須ではない
-    ('ipywidgets',          '8.0.0',  False),
-    ('trl',                 '0.7.0',  True),
-    ('peft',                '0.6.0',  True),
-    ('langchain',           '0.1.0',  True),
-    ('chromadb',            '0.4.0',  True),
-    ('sentence_transformers','2.2.0', True),
-    ('wandb',               '0.16.0', False),
+    # (パッケージ名, 最低バージョン, 必須か, インポート名 or None)
+    ('torch',               '2.0.0',  True,  None),
+    ('torchvision',         '0.15.0', True,  None),
+    ('transformers',        '4.35.0', True,  None),
+    ('datasets',            '2.14.0', True,  None),
+    ('numpy',               '1.24.0', True,  None),
+    ('pandas',              '2.0.0',  True,  None),
+    ('matplotlib',          '3.7.0',  True,  None),
+    ('scikit-learn',        '1.3.0',  True,  'sklearn'),   # インポート名が異なる
+    ('jupyter',             '1.0.0',  False, None),
+    ('ipywidgets',          '8.0.0',  False, None),
+    ('trl',                 '0.7.0',  True,  None),
+    ('peft',                '0.6.0',  True,  None),
+    ('langchain',           '0.1.0',  True,  None),
+    ('chromadb',            '0.4.0',  True,  None),
+    ('sentence_transformers','2.2.0', True,  None),
+    ('wandb',               '0.16.0', False, None),
 ]
 
 import importlib
 import importlib.metadata
 
 all_ok = True
-for pkg_name, min_ver, required in REQUIRED_PACKAGES:
+for pkg_name, min_ver, required, import_alias in REQUIRED_PACKAGES:
     try:
         # インポート名とパッケージ名が異なるケースに対応
-        import_name = pkg_name.replace('-', '_')
+        import_name = import_alias if import_alias else pkg_name.replace('-', '_')
         mod = importlib.import_module(import_name)
         try:
             installed = importlib.metadata.version(pkg_name)
@@ -209,7 +210,7 @@ else:
     except Exception:
         warn('HuggingFace 未ログインです')
         warn('Llama モデルには認証が必要です:')
-        print(f'{AMBER}       huggingface-cli login{RESET}')
+        print(f'{AMBER}       hf auth login{RESET}')
         print(f'{AMBER}       # または: export HF_TOKEN=hf_xxxx{RESET}')
         ISSUES.append('HuggingFace にログインしてください: huggingface-cli login')
 
