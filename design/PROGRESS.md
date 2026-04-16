@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-04-16
+> 最終更新：2026-04-16（quiz_ch1・HO-3 完成）
 
 ---
 
@@ -46,16 +46,20 @@ dgx-handson/
 │   │   ├── supplement_neural_network.html        ✅ XOR問題・NN構造・活性化関数・PyTorch autograd
 │   │   ├── supplement_transformer.html           ✅ 埋め込み・Self-Attention・Transformerブロック・LLMへのつながり
 │   │   ├── supplement_pretraining.html           ✅ 自己教師あり学習・CLM・スケーリング則・活用方法
-│   │   └── supplement_inference_params.html      ✅ Temperature・Top-p/k・generate()パラメータ設定
+│   │   ├── supplement_inference_params.html      ✅ Temperature・Top-p/k・generate()パラメータ設定
+│   │   └── quiz_ch1.html                         ✅ 理解確認クイズ（選択式5・穴埋め5・記述式3）JS採点付き
 │   ├── notebooks/
 │   │   ├── ch1_01_linear_regression.ipynb        ✅ NumPy勾配降下・学習率実験（解説用）
-│   │   └── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
+│   │   ├── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
+│   │   └── ch1_03_llm_inference.ipynb            ✅ HuggingFace LLM推論パラメータ探索（解説用）
 │   ├── exercises/
 │   │   ├── ex_01_linear_regression.ipynb         ✅ 穴埋め: predict/mse_loss/dw/db/更新式
-│   │   └── ex_02_mnist_nn.ipynb                  ✅ 穴埋め: fc1/fc2定義・forward・5ステップループ・evaluate
+│   │   ├── ex_02_mnist_nn.ipynb                  ✅ 穴埋め: fc1/fc2定義・forward・5ステップループ・evaluate
+│   │   └── ex_03_llm_inference.ipynb             ✅ 穴埋め: generate_text/TTR/Jaccard計算
 │   └── solutions/
 │       ├── sol_01_linear_regression.ipynb        ✅ HO-1 解答
-│       └── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
+│       ├── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
+│       └── sol_03_llm_inference.ipynb            ✅ HO-3 解答
 ├── chapter2/  （空ディレクトリ + .gitkeep のみ）
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 └── infra/     （空ディレクトリ + .gitkeep のみ）
@@ -66,20 +70,6 @@ dgx-handson/
 ## 残タスク（chapter1）
 
 次のセッションでは以下を順番に作成し、**各ファイル完成ごとにユーザー確認を取る**。
-
-### web/ — クイズ
-
-| ファイル | 内容 | 状態 |
-|---|---|---|
-| `quiz_ch1.html` | 第1章 理解確認クイズ（選択式・穴埋め・記述式） | **次に作成** |
-
-### notebooks/ + exercises/ + solutions/（HO-3）
-
-| ファイル | 内容 | 状態 |
-|---|---|---|
-| `ch1_03_llm_inference.ipynb` | HuggingFace で LLM 推論パラメータ探索（解説用） | 未着手 |
-| `ex_03_llm_inference.ipynb` | 穴埋め課題③ | 未着手 |
-| `sol_03_llm_inference.ipynb` | 解答③ | 未着手 |
 
 ### infra/
 

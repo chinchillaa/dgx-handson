@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>理解確認クイズ｜第1章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --red:          #991B1B;
+      --red-bg:       #FEF2F2;
+      --red-border:   #FCA5A5;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-rule .num {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+      opacity: 0.12;
+      min-width: 2.5rem;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .section-rule .titles { flex: 1; }
+
+    /* ── 問題カード ── */
+    .q-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .q-card.correct  { border-color: var(--green-border); background: var(--green-bg); }
+    .q-card.incorrect { border-color: var(--red-border);   background: var(--red-bg); }
+
+    .q-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .q-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    /* ── 選択式 ── */
+    .choice-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .choice-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      background: var(--surface);
+      user-select: none;
+    }
+    .choice-label:hover { border-color: var(--green-border); background: var(--green-bg); }
+    .choice-label input[type="radio"] { margin-top: 0.15rem; accent-color: var(--green-mid); flex-shrink: 0; }
+    .choice-label.selected-correct  { border-color: var(--green-border); background: var(--green-bg); color: var(--green); font-weight: 600; }
+    .choice-label.selected-incorrect { border-color: var(--red-border);   background: var(--red-bg);  color: var(--red); }
+    .choice-label.reveal-correct    { border-color: var(--green-border); background: var(--green-bg); color: var(--green); }
+
+    /* ── 穴埋め ── */
+    .fill-input {
+      display: inline-block;
+      border: none;
+      border-bottom: 2px solid var(--border-strong);
+      background: transparent;
+      font-size: 0.9rem;
+      color: var(--text);
+      padding: 0 0.25rem 0.1rem;
+      min-width: 7rem;
+      text-align: center;
+      outline: none;
+      font-family: "SF Mono", "Menlo", monospace;
+    }
+    .fill-input:focus { border-bottom-color: var(--green-mid); }
+    .fill-input.correct-input   { border-bottom-color: var(--green-mid); color: var(--green-mid); }
+    .fill-input.incorrect-input { border-bottom-color: var(--red);       color: var(--red); }
+
+    /* ── 記述式 ── */
+    .desc-textarea {
+      width: 100%;
+      min-height: 5rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--surface);
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      line-height: 1.7;
+      margin-top: 0.5rem;
+    }
+    .desc-textarea:focus { border-color: var(--green-mid); }
+
+    /* ── フィードバック ── */
+    .feedback {
+      display: none;
+      margin-top: 0.875rem;
+      padding: 0.75rem 1rem;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+    .feedback.ok  { background: var(--green-bg); border-left: 3px solid var(--green-mid); color: var(--green); }
+    .feedback.ng  { background: var(--red-bg);   border-left: 3px solid var(--red-border); color: var(--red); }
+    .feedback.ref { background: var(--amber-bg); border-left: 3px solid var(--amber-border); color: var(--amber); }
+
+    /* ── ボタン ── */
+    .btn-check {
+      display: inline-block;
+      margin-top: 1.25rem;
+      padding: 0.6rem 1.5rem;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .btn-check:hover { background: var(--green-mid); }
+    .btn-check:disabled { background: var(--border-strong); cursor: default; }
+
+    .btn-section {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: var(--surface2);
+      color: var(--green-mid);
+      border: 1px solid var(--green-border);
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-section:hover { background: var(--green-bg); }
+
+    /* ── スコアバー ── */
+    .score-bar-bg {
+      background: var(--surface2);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--green-mid);
+    }
+
+    /* ── 最終結果 ── */
+    .result-block {
+      background: var(--green);
+      color: #E8F3EF;
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+      display: none;
+      margin-top: 2rem;
+    }
+    .result-block strong { color: #fff; }
+
+    @media print {
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━ ヘッダー ━━━ -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-6 px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="no-print flex items-center gap-2 mb-3" style="font-size:0.75rem; color:var(--text-muted);">
+        <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章</a>
+        <span>›</span>
+        <span>理解確認クイズ</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+        <div>
+          <p class="label mb-1">Chapter 1 Quiz</p>
+          <h1 class="text-2xl font-bold" style="color:var(--text);">理解確認クイズ</h1>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted); text-align:right; line-height:1.8;">
+          <p>全 <strong style="color:var(--text);">13 問</strong></p>
+          <p>選択式 5 ／ 穴埋め 5 ／ 記述式 3</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
+
+    <!-- 案内 -->
+    <div style="background:var(--green-bg); border-left:3px solid var(--green-mid); border-radius:0 8px 8px 0; padding:0.875rem 1.25rem;">
+      <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
+        各セクションの「採点する」ボタンで即時フィードバックを確認できます。
+        記述式は模範解答を参考に自己採点してください。
+        答えに迷ったときは各補足資料を見直してから挑戦してみましょう。
+      </p>
+    </div>
+
+    <!-- ━━━ セクション1：選択式 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">1</div>
+        <div class="titles">
+          <p class="label">Part 1</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">選択式</h2>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-card" id="card-q1">
+        <p class="q-num">Q1</p>
+        <p class="q-text">このハンズオンで繰り返し強調された「AI の本質」を最もよく表している説明はどれか。</p>
+        <div class="choice-list" id="choices-q1">
+          <label class="choice-label"><input type="radio" name="q1" value="a"> <span>大量のデータを記憶したデータベースである</span></label>
+          <label class="choice-label"><input type="radio" name="q1" value="b"> <span>複雑な入出力を扱えるようにした関数である</span></label>
+          <label class="choice-label"><input type="radio" name="q1" value="c"> <span>人間の脳を完全に模倣したシステムである</span></label>
+          <label class="choice-label"><input type="radio" name="q1" value="d"> <span>if-else の組み合わせで作られたルールエンジンである</span></label>
+        </div>
+        <div class="feedback" id="fb-q1"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card" id="card-q2">
+        <p class="q-num">Q2</p>
+        <p class="q-text">平均二乗誤差（MSE）の式として正しいものはどれか。</p>
+        <div class="choice-list" id="choices-q2">
+          <label class="choice-label"><input type="radio" name="q2" value="a"> <span>$L = \dfrac{1}{N}\displaystyle\sum_{i=1}^{N}|y_i - \hat{y}_i|$</span></label>
+          <label class="choice-label"><input type="radio" name="q2" value="b"> <span>$L = \dfrac{1}{N}\displaystyle\sum_{i=1}^{N}(y_i - \hat{y}_i)^2$</span></label>
+          <label class="choice-label"><input type="radio" name="q2" value="c"> <span>$L = -\dfrac{1}{N}\displaystyle\sum_{i=1}^{N} y_i \log \hat{y}_i$</span></label>
+          <label class="choice-label"><input type="radio" name="q2" value="d"> <span>$L = \displaystyle\sum_{i=1}^{N}(y_i - \hat{y}_i)$</span></label>
+        </div>
+        <div class="feedback" id="fb-q2"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card" id="card-q3">
+        <p class="q-num">Q3</p>
+        <p class="q-text">ニューラルネットワークに活性化関数が必要な最も本質的な理由はどれか。</p>
+        <div class="choice-list" id="choices-q3">
+          <label class="choice-label"><input type="radio" name="q3" value="a"> <span>計算を高速化するため</span></label>
+          <label class="choice-label"><input type="radio" name="q3" value="b"> <span>パラメータ数を減らすため</span></label>
+          <label class="choice-label"><input type="radio" name="q3" value="c"> <span>線形変換だけでは表現できない非線形な関係を学習するため</span></label>
+          <label class="choice-label"><input type="radio" name="q3" value="d"> <span>勾配消失問題を完全に解決するため</span></label>
+        </div>
+        <div class="feedback" id="fb-q3"></div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-card" id="card-q4">
+        <p class="q-num">Q4</p>
+        <p class="q-text">Transformer の Self-Attention が RNN に対して持つ最大の優位性はどれか。</p>
+        <div class="choice-list" id="choices-q4">
+          <label class="choice-label"><input type="radio" name="q4" value="a"> <span>パラメータ数が少ない</span></label>
+          <label class="choice-label"><input type="radio" name="q4" value="b"> <span>全トークン間の関係を並列に計算でき、長距離依存を直接扱える</span></label>
+          <label class="choice-label"><input type="radio" name="q4" value="c"> <span>テキストを画像に変換できる</span></label>
+          <label class="choice-label"><input type="radio" name="q4" value="d"> <span>データ拡張が不要になる</span></label>
+        </div>
+        <div class="feedback" id="fb-q4"></div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-card" id="card-q5">
+        <p class="q-num">Q5</p>
+        <p class="q-text">Chinchilla 法則が示す「最適な計算効率を得るための比率」として正しいものはどれか。</p>
+        <div class="choice-list" id="choices-q5">
+          <label class="choice-label"><input type="radio" name="q5" value="a"> <span>パラメータ数 : 学習トークン数 ≈ 1 : 1</span></label>
+          <label class="choice-label"><input type="radio" name="q5" value="b"> <span>パラメータ数 : 学習トークン数 ≈ 1 : 20</span></label>
+          <label class="choice-label"><input type="radio" name="q5" value="c"> <span>パラメータ数 : 学習トークン数 ≈ 10 : 1</span></label>
+          <label class="choice-label"><input type="radio" name="q5" value="d"> <span>パラメータ数 : 学習トークン数 ≈ 1 : 100</span></label>
+        </div>
+        <div class="feedback" id="fb-q5"></div>
+      </div>
+
+      <div style="margin-top:0.5rem;">
+        <button class="btn-section" onclick="gradeSection1()">セクション1を採点する</button>
+        <span id="score-s1" style="margin-left:1rem; font-size:0.82rem; color:var(--text-muted);"></span>
+      </div>
+    </section>
+
+    <!-- ━━━ セクション2：穴埋め ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Part 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">穴埋め</h2>
+        </div>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.5rem;">空欄に当てはまる語句・式・コードを入力してください。</p>
+
+      <!-- Q6 -->
+      <div class="q-card" id="card-q6">
+        <p class="q-num">Q6</p>
+        <p class="q-text">
+          NumPy で線形回帰の予測関数を実装するとき、<br>
+          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">def predict(x, w, b):</code><br>
+          の本体は <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">return</code>
+          <input class="fill-input" id="fill-q6" placeholder="　　式　　" style="width:9rem;">
+          の 1 行で書ける。
+        </p>
+        <div class="feedback" id="fb-q6"></div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card" id="card-q7">
+        <p class="q-num">Q7</p>
+        <p class="q-text">
+          MSE の勾配降下法において、重み $w$ の更新式は<br>
+          $w \leftarrow w -$
+          <input class="fill-input" id="fill-q7" placeholder="　　　" style="width:6rem;">
+          $\cdot \dfrac{\partial L}{\partial w}$
+          である。空欄に入る記号を答えよ。
+        </p>
+        <div class="feedback" id="fb-q7"></div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-card" id="card-q8">
+        <p class="q-num">Q8</p>
+        <p class="q-text">
+          PyTorch の学習ループで、前のステップの勾配を消去するために呼び出すメソッドは<br>
+          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">optimizer.</code><input class="fill-input" id="fill-q8" placeholder="メソッド名" style="width:8rem;"><code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">()</code>
+          である。
+        </p>
+        <div class="feedback" id="fb-q8"></div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-card" id="card-q9">
+        <p class="q-num">Q9</p>
+        <p class="q-text">
+          Self-Attention の計算式 $\text{Attention}(Q, K, V) = \text{softmax}\!\left(\dfrac{QK^\top}{\sqrt{d_k}}\right)V$ において、
+          $\sqrt{d_k}$ で割る目的は
+          <input class="fill-input" id="fill-q9" placeholder="　　　　　" style="width:12rem;">
+          のためである。
+        </p>
+        <div class="feedback" id="fb-q9"></div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-card" id="card-q10">
+        <p class="q-num">Q10</p>
+        <p class="q-text">
+          LLM 推論で <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">temperature</code> を低くすると、
+          確率分布は
+          <input class="fill-input" id="fill-q10" placeholder="　　" style="width:5rem;">
+          くなり、
+          出力の確実性が
+          <input class="fill-input" id="fill-q10b" placeholder="　　" style="width:5rem;">
+          がる。
+        </p>
+        <div class="feedback" id="fb-q10"></div>
+      </div>
+
+      <div style="margin-top:0.5rem;">
+        <button class="btn-section" onclick="gradeSection2()">セクション2を採点する</button>
+        <span id="score-s2" style="margin-left:1rem; font-size:0.82rem; color:var(--text-muted);"></span>
+      </div>
+    </section>
+
+    <!-- ━━━ セクション3：記述式 ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">3</div>
+        <div class="titles">
+          <p class="label">Part 3</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">記述式</h2>
+        </div>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.5rem;">
+        自分の言葉で説明してください。「採点する」で模範解答が表示されます（自己採点）。
+      </p>
+
+      <!-- Q11 -->
+      <div class="q-card" id="card-q11">
+        <p class="q-num">Q11</p>
+        <p class="q-text">
+          線形変換だけを何層重ねても「1回の線形変換」と等価になってしまうのはなぜか。
+          また、これを解決するために何を導入するか。
+        </p>
+        <textarea class="desc-textarea" id="desc-q11" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q11"></div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="q-card" id="card-q12">
+        <p class="q-num">Q12</p>
+        <p class="q-text">
+          LLM の事前学習が「自己教師あり学習」と呼ばれる理由を、
+          「教師信号」という言葉を使って説明してください。
+        </p>
+        <textarea class="desc-textarea" id="desc-q12" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q12"></div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="q-card" id="card-q13">
+        <p class="q-num">Q13</p>
+        <p class="q-text">
+          コード生成タスクで <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">temperature=1.5</code> に設定した場合に起こりうる問題と、
+          その理由を説明してください。
+        </p>
+        <textarea class="desc-textarea" id="desc-q13" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q13"></div>
+      </div>
+
+      <div style="margin-top:0.5rem;">
+        <button class="btn-section" onclick="gradeSection3()">模範解答を表示する</button>
+      </div>
+    </section>
+
+    <!-- ━━━ 最終結果 ━━━ -->
+    <div class="result-block" id="result-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">結果</p>
+      <p id="result-text" style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:1rem;"></p>
+      <div class="score-bar-bg"><div class="score-bar-fill" id="result-bar"></div></div>
+      <p id="result-sub" style="font-size:0.82rem; color:#A7CBB9; margin-top:0.75rem; line-height:1.75;"></p>
+    </div>
+
+    <!-- ナビゲーション -->
+    <nav class="no-print" style="display:flex; justify-content:space-between; font-size:0.8rem;">
+      <a href="index.html" style="color:var(--green-mid);" class="hover:underline">← 第1章トップへ</a>
+    </nav>
+
+  </main>
+
+  <script>
+    // ── 正解データ ──────────────────────────────────────────────
+    const ANSWERS = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'c',
+      q4: 'b',
+      q5: 'b',
+    };
+
+    const FILL_ANSWERS = {
+      q6:  { correct: ['w * x + b', 'w*x+b'],            hint: '線形モデルの式: $\\hat{y} = wx + b$' },
+      q7:  { correct: ['α', 'alpha', 'α（アルファ）', 'α（学習率）'],
+             hint: '更新式: $w \\leftarrow w - \\alpha \\frac{\\partial L}{\\partial w}$' },
+      q8:  { correct: ['zero_grad'],
+             hint: '<code>optimizer.zero_grad()</code> で勾配をリセットします' },
+      q9:  { correct: ['勾配安定化', 'スケーリング', '勾配の安定化', 'スコアが大きくなりすぎるのを防ぐ', '勾配消失を防ぐ', 'スコアのスケーリング'],
+             hint: '次元数が大きいと内積値が大きくなり、softmax の勾配が消えやすくなります' },
+      q10: { correct_a: ['シャープ', '鋭', '急峻'],
+             correct_b: ['上', '高'],
+             hint: '低い temperature → 分布がシャープ → 高い確率のトークンに集中 → 確実性が上がる' },
+    };
+
+    const REFERENCES = {
+      q11: '線形変換 $y = Wx + b$ を何回重ねても、行列の積は1つの行列にまとめられるため、結果は常に1回の線形変換と等価です。これを解決するために<strong>活性化関数（ReLU・Sigmoid など）</strong>を各層の出力に適用します。活性化関数は非線形変換であるため、層を重ねるごとに表現能力が真の意味で拡張されます。',
+      q12: '通常の教師あり学習では人間が付けたラベル（正解）が必要ですが、LLM の事前学習では<strong>テキスト自体から教師信号を自動生成</strong>します。具体的には「これまでのトークン列を入力として、次のトークンを予測する」タスクを設定し、実際の次トークンが正解ラベルとして機能します。そのため人手でのラベル付けが不要で、インターネット上の大量テキストをそのまま学習データとして利用できます。',
+      q13: 'temperature が高いほど確率分布が平坦になり、低確率のトークンが選ばれやすくなります。<strong>コード生成では構文の正確性が求められる</strong>ため、temperature=1.5 のような高い値では文法エラーや意味不明なコードが生成されやすくなります。コード生成には temperature=0.1〜0.3 程度の低い値が推奨されます。',
+    };
+
+    // ── スコア管理 ──────────────────────────────────────────────
+    let scores = { s1: null, s2: null, s3: false };
+
+    // ── セクション1採点 ──────────────────────────────────────────
+    function gradeSection1() {
+      let correct = 0;
+      ['q1','q2','q3','q4','q5'].forEach(qid => {
+        const selected = document.querySelector(`input[name="${qid}"]:checked`);
+        const card = document.getElementById(`card-${qid}`);
+        const fb   = document.getElementById(`fb-${qid}`);
+        // すべての選択肢をリセット
+        document.querySelectorAll(`#choices-${qid} .choice-label`).forEach(el => {
+          el.classList.remove('selected-correct','selected-incorrect','reveal-correct');
+        });
+        if (!selected) {
+          fb.className = 'feedback ng';
+          fb.textContent = '選択してください。';
+          fb.style.display = 'block';
+          return;
+        }
+        const val = selected.value;
+        const isOk = val === ANSWERS[qid];
+        if (isOk) correct++;
+
+        // 選択した選択肢に色付け
+        selected.closest('.choice-label').classList.add(isOk ? 'selected-correct' : 'selected-incorrect');
+        // 不正解の場合は正解を緑で表示
+        if (!isOk) {
+          document.querySelector(`input[name="${qid}"][value="${ANSWERS[qid]}"]`)
+            .closest('.choice-label').classList.add('reveal-correct');
+        }
+
+        const feedbacks = {
+          q1: { ok: '正解です。AI は「複雑な入出力を扱えるようにした関数」という視点がこのコースの核心です。', ng: '「関数」という視点が核心です。補足資料: 1-1 を復習してみましょう。' },
+          q2: { ok: '正解です。MSE は予測誤差の二乗の平均です。', ng: '選択肢 a は MAE（平均絶対誤差）、c は交差エントロピーです。補足資料: 線形回帰 Section 2 を確認しましょう。' },
+          q3: { ok: '正解です。線形変換をいくつ重ねても1回の線形変換と等価なため、非線形性の導入が不可欠です。', ng: '補足資料: ニューラルネットワーク Section 0 の「なぜ線形変換では解けないのか」を確認しましょう。' },
+          q4: { ok: '正解です。全トークン間の関連度を一度に（並列に）計算できる点が最大の優位性です。', ng: '補足資料: Transformer Section 2 を確認しましょう。RNN の逐次処理との違いが重要です。' },
+          q5: { ok: '正解です。Chinchilla 研究によりパラメータ : トークン ≈ 1 : 20 が最適と示されました。', ng: '補足資料: 事前学習 Section 3 の Chinchilla 法則を確認しましょう。' },
+        };
+
+        fb.className = `feedback ${isOk ? 'ok' : 'ng'}`;
+        fb.innerHTML = feedbacks[qid][isOk ? 'ok' : 'ng'];
+        fb.style.display = 'block';
+      });
+
+      scores.s1 = correct;
+      document.getElementById('score-s1').textContent = `${correct} / 5 問正解`;
+      updateResult();
+    }
+
+    // ── セクション2採点 ──────────────────────────────────────────
+    function gradeSection2() {
+      let correct = 0;
+
+      // Q6〜Q9（単一入力）
+      ['q6','q7','q8','q9'].forEach(qid => {
+        const input = document.getElementById(`fill-${qid}`);
+        const val   = input.value.trim().replace(/\s/g, '');
+        const ans   = FILL_ANSWERS[qid];
+        const ok    = ans.correct.some(a => val.toLowerCase() === a.toLowerCase().replace(/\s/g,''));
+        if (ok) correct++;
+        input.className = 'fill-input ' + (ok ? 'correct-input' : 'incorrect-input');
+        const fb = document.getElementById(`fb-${qid}`);
+        fb.className = `feedback ${ok ? 'ok' : 'ng'}`;
+        fb.innerHTML = ok
+          ? '正解です。'
+          : `不正解です。ヒント: ${ans.hint}`;
+        fb.style.display = 'block';
+      });
+
+      // Q10（2つの入力）
+      const val10a = document.getElementById('fill-q10').value.trim();
+      const val10b = document.getElementById('fill-q10b').value.trim();
+      const ok10a  = FILL_ANSWERS.q10.correct_a.some(a => val10a.includes(a));
+      const ok10b  = FILL_ANSWERS.q10.correct_b.some(a => val10b.includes(a));
+      const ok10   = ok10a && ok10b;
+      if (ok10) correct++;
+      document.getElementById('fill-q10').className  = 'fill-input ' + (ok10a ? 'correct-input' : 'incorrect-input');
+      document.getElementById('fill-q10b').className = 'fill-input ' + (ok10b ? 'correct-input' : 'incorrect-input');
+      const fb10 = document.getElementById('fb-q10');
+      fb10.className = `feedback ${ok10 ? 'ok' : 'ng'}`;
+      fb10.innerHTML = ok10 ? '正解です。' : `不正解です。ヒント: ${FILL_ANSWERS.q10.hint}`;
+      fb10.style.display = 'block';
+
+      scores.s2 = correct;
+      document.getElementById('score-s2').textContent = `${correct} / 5 問正解`;
+      updateResult();
+    }
+
+    // ── セクション3：模範解答表示 ─────────────────────────────────
+    function gradeSection3() {
+      ['q11','q12','q13'].forEach(qid => {
+        const fb = document.getElementById(`fb-${qid}`);
+        fb.className = 'feedback ref';
+        fb.innerHTML = '<strong>模範解答:</strong> ' + REFERENCES[qid];
+        fb.style.display = 'block';
+      });
+      scores.s3 = true;
+      updateResult();
+    }
+
+    // ── 結果ブロックの更新 ──────────────────────────────────────
+    function updateResult() {
+      if (scores.s1 === null || scores.s2 === null || !scores.s3) return;
+
+      const total   = (scores.s1 || 0) + (scores.s2 || 0);
+      const pct     = Math.round(total / 10 * 100);
+      const block   = document.getElementById('result-block');
+      const textEl  = document.getElementById('result-text');
+      const barEl   = document.getElementById('result-bar');
+      const subEl   = document.getElementById('result-sub');
+
+      block.style.display = 'block';
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      textEl.textContent = `客観問題スコア: ${total} / 10 問（${pct}%）`;
+      barEl.style.width  = `${pct}%`;
+
+      if (pct >= 90) {
+        subEl.innerHTML = '優秀です。第1章の内容をしっかり理解できています。第2章のファインチューニング・RAG へ進みましょう。';
+      } else if (pct >= 70) {
+        subEl.innerHTML = '良好です。いくつか復習が必要な箇所があります。不正解だった問題の補足資料を見直してから次へ進みましょう。';
+      } else {
+        subEl.innerHTML = '補足資料を読み直しましょう。特に不正解だったセクションの補足資料を重点的に確認してください。';
+      }
+    }
+  </script>
+</body>
+</html>
