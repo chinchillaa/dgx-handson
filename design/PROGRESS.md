@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-04-16（第1章・infra 完成）
+> 最終更新：2026-04-16（infra 動作確認・バグ修正・Llama アクセス申請中）
 
 ---
 
@@ -66,6 +66,39 @@ dgx-handson/
     ├── setup.sh                                      ✅ 環境構築（uv + venv + パッケージ + Jupyter カーネル）
     ├── predownload.sh                                ✅ MNIST + Llama-3.2-1B-Instruct 事前ダウンロード
     └── check_env.py                                  ✅ 環境確認（GPU・パッケージ・共有ストレージ・HF認証）
+```
+
+---
+
+## infra 動作確認ログ（2026-04-16）
+
+ローカル環境（CPU のみ・GPU なし）で以下を検証済み。
+
+| 手順 | 結果 |
+|---|---|
+| `setup.sh` — Python 3.11.10 + .venv 作成 + 全パッケージインストール | ✅ |
+| `check_env.py` — 全パッケージ検出・動作テスト | ✅（GPU なし・HF 未ログインのみ警告） |
+| `predownload.sh` — MNIST ダウンロード（63.5 MB） | ✅ `./data/MNIST` に保存 |
+| `sol_01_linear_regression.ipynb` — 完全実行 | ✅ エラーなし・グラフ出力確認 |
+| `sol_02_mnist_nn.ipynb` — 完全実行 | ✅ エラーなし・学習曲線出力確認 |
+| `sol_03_llm_inference.ipynb` — インポート・ロジック関数 | ✅ TTR / Jaccard 正常動作 |
+| `sol_03` — Llama モデルロード以降 | ⏳ Meta アクセス申請中（承認待ち） |
+
+### 修正済みバグ
+
+| ファイル | バグ内容 | 修正内容 |
+|---|---|---|
+| `check_env.py` | `scikit-learn` が `scikit_learn` でインポートされ常に未検出 | パッケージ定義にインポート名フィールドを追加、`sklearn` に対応 |
+| `check_env.py` / `predownload.sh` | `huggingface-cli login` が新バージョンで廃止 | `hf auth login` に更新 |
+| `predownload.sh` | `except:` が `SystemExit` を捕捉し `exit(0)` が `exit(1)` に化ける | `except Exception:` + `sys.exit()` に修正 |
+
+### Llama アクセス申請後の手順
+
+```bash
+bash infra/predownload.sh          # Llama ダウンロード（約 2.5 GB）
+.venv/bin/jupyter nbconvert --to notebook --execute \
+  --ExecutePreprocessor.timeout=600 \
+  chapter1/solutions/sol_03_llm_inference.ipynb
 ```
 
 ---
