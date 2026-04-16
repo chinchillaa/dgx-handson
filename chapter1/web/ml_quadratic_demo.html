@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML 二次関数学習デモ | 第1章</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg:           #F7F5F0;
+    --surface:      #FFFFFF;
+    --surface2:     #F0EDE6;
+    --border:       #DDD8CE;
+    --border-strong:#C5BFB2;
+    --text:         #1C1917;
+    --text-sub:     #57534E;
+    --text-muted:   #A8A29E;
+    --green:        #0D4A38;
+    --green-mid:    #1A6B52;
+    --green-bg:     #EAF3EF;
+    --green-border: #A7CBB9;
+    --amber:        #7C5C00;
+    --amber-bg:     #FFF8E6;
+    --amber-border: #E8C96A;
+    --amber-text:   #92400E;
+    --code-bg:      #18181B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                 "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 { letter-spacing: -0.02em; }
+
+  .label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-mid);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .note-green {
+    background: var(--green-bg);
+    border-left: 3px solid var(--green-mid);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--green);
+    line-height: 1.7;
+  }
+
+  /* スライダー */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--green-border);
+    cursor: pointer;
+  }
+  input[type="range"]:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px var(--green-mid);
+  }
+
+  /* メトリクスカード */
+  .metric-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+  .metric-label-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+  .metric-value {
+    font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .metric-value.loss { color: var(--amber); }
+  .metric-value.converged { color: var(--green-mid); }
+
+  /* ボタン */
+  .btn {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.875rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-sub);
+    cursor: pointer;
+    line-height: 1.5;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #FFFFFF;
+  }
+  .btn-primary:hover { background: var(--green-mid); border-color: var(--green-mid); }
+  .btn-stop {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+    color: var(--amber-text);
+  }
+  .btn-stop:hover { background: #FEF3C7; }
+
+  /* プログレスバー */
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    width: 0%;
+  }
+
+  /* 収束バッジ */
+  .converged-badge {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: 6px;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .converged-badge.show { display: flex; }
+
+  /* チャートパネル */
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .chart-panel-header {
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: var(--surface2);
+  }
+  .chart-panel-body {
+    padding: 1rem 1.25rem 0.875rem;
+  }
+
+  /* 凡例 */
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .legend-dash {
+    width: 16px; height: 0;
+    display: inline-block;
+    flex-shrink: 0;
+    border-top: 2px dashed var(--border-strong);
+    margin-bottom: 1px;
+  }
+  .legend-line {
+    width: 16px; height: 2px;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 540px) {
+    .ctrl-grid { grid-template-columns: 1fr !important; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ── ヘッダー ── -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border);" class="py-5 px-8">
+    <div class="max-w-3xl mx-auto">
+      <p class="label mb-1" style="display:flex; gap:0.4rem; align-items:center;">
+        <a href="index.html" style="color:var(--green-mid); text-decoration:none;">第1章</a>
+        <span style="color:var(--text-muted);">›</span>
+        <a href="index.html" style="color:var(--green-mid); text-decoration:none;">1-1 関数として AI を捉える</a>
+        <span style="color:var(--text-muted);">›</span>
+        <span>インタラクティブデモ</span>
+      </p>
+      <h1 style="font-size:1.4rem; font-weight:800; color:var(--text); margin-top:0.3rem;">
+        二次関数の学習過程を可視化する
+      </h1>
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.2rem;">
+        真の関数
+        <code style="background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:0.78rem; font-family: 'SF Mono','Menlo',monospace;">y = 1.2x² − 2.0x + 3.0</code>
+        を勾配降下法でモデルが近似していく様子
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-8 py-8" style="display:flex; flex-direction:column; gap:1.5rem;">
+
+    <!-- ── 概要ノート ── -->
+    <div class="note-green">
+      💡 <strong>操作方法：</strong>「▶ 自動再生」で学習がスタートします。
+      <strong>学習率を変えると</strong>収束速度の違いが観察できます。
+      「↺ リセット」でノイズ入りのデータが再生成されます。
+    </div>
+
+    <!-- ── コントロールパネル ── -->
+    <div class="card" style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <!-- スライダー 2列 -->
+      <div class="ctrl-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">学習率 (Learning Rate)</span>
+            <code style="font-size:0.8rem; background:var(--green-bg); border:1px solid var(--green-border); border-radius:4px; padding:1px 7px; color:var(--green); font-family:'SF Mono','Menlo',monospace;" id="lr-out">0.05000</code>
+          </div>
+          <input type="range" id="lr-slider" min="-5" max="-0.699" value="-1.301" step="0.01">
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">ノイズ量 (Noise)</span>
+            <code style="font-size:0.8rem; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 7px; color:var(--text-sub); font-family:'SF Mono','Menlo',monospace;" id="noise-out">10</code>
+          </div>
+          <input type="range" id="noise-slider" min="0" max="30" value="10" step="1">
+        </div>
+      </div>
+
+      <!-- メトリクス 4列 -->
+      <div class="metrics-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.625rem;">
+        <div class="metric-card">
+          <div class="metric-label-text">MSE 損失</div>
+          <div class="metric-value loss" id="loss-val">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label-text">param a</div>
+          <div class="metric-value" id="a-val">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label-text">param b</div>
+          <div class="metric-value" id="b-val">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label-text">param c</div>
+          <div class="metric-value" id="c-val">—</div>
+        </div>
+      </div>
+
+      <!-- ボタン列 -->
+      <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+        <button class="btn" id="btn-reset">↺ リセット</button>
+        <button class="btn" id="btn-step">+1 Epoch</button>
+        <button class="btn btn-primary" id="btn-play">▶ 自動再生</button>
+        <span style="margin-left:auto; font-size:0.8rem; color:var(--text-muted);">
+          Epoch <strong style="color:var(--text-sub); font-family:'SF Mono','Menlo',monospace;" id="epoch-num">0</strong> / 100
+        </span>
+      </div>
+
+      <!-- プログレスバー -->
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <!-- 収束バッジ -->
+      <div class="converged-badge" id="converged-badge">
+        ✓ 収束完了 — 真の関数に近似しました
+      </div>
+
+    </div>
+
+    <!-- ── チャート 1: 予測曲線 ── -->
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <span class="label">予測曲線の変化</span>
+        <div style="display:flex; gap:1rem; margin-left:auto; align-items:center;">
+          <span style="display:flex; align-items:center; gap:4px; font-size:0.72rem; color:var(--text-muted);">
+            <span class="legend-dot" style="background:var(--green-mid);"></span>観測データ
+          </span>
+          <span style="display:flex; align-items:center; gap:4px; font-size:0.72rem; color:var(--text-muted);">
+            <span class="legend-line" style="background:#D97706;"></span>予測曲線
+          </span>
+          <span style="display:flex; align-items:center; gap:4px; font-size:0.72rem; color:var(--text-muted);">
+            <span class="legend-dash"></span>真の関数
+          </span>
+        </div>
+      </div>
+      <div class="chart-panel-body" style="position:relative; height:280px;">
+        <canvas id="main-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- ── チャート 2: 損失推移 ── -->
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <span class="label">損失 (MSE) の推移</span>
+      </div>
+      <div class="chart-panel-body" style="position:relative; height:180px;">
+        <canvas id="loss-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- ── ナビゲーション ── -->
+    <nav style="display:flex; justify-content:space-between; padding-top:1rem; border-top:1px solid var(--border); font-size:0.875rem;">
+      <a href="index.html" style="color:var(--green-mid); font-weight:600;">← 章の目次に戻る</a>
+      <a href="supplement_linear_regression.html" style="color:var(--green-mid); font-weight:600;">補足資料：線形回帰 →</a>
+    </nav>
+
+  </main>
+
+  <footer style="margin-top:3rem; border-top:1px solid var(--border); padding:1.5rem 2rem; text-align:center; font-size:0.72rem; color:var(--text-muted);">
+    DGX ML ハンズオンセッション｜第1章：機械学習(AI)の仕組み
+  </footer>
+
+<script>
+const TRUE_A = 1.2, TRUE_B = -2.0, TRUE_C = 3.0;
+const N = 40, MAX_EPOCH = 100;
+
+let data, params, epoch, lossHistory, playing, timer;
+
+function getNoise() { return parseInt(document.getElementById('noise-slider').value); }
+function getLR()    { return Math.pow(10, parseFloat(document.getElementById('lr-slider').value)); }
+
+function genData(noise) {
+  const xs = [], ys = [];
+  for (let i = 0; i < N; i++) {
+    const x = -4 + 8 * (i / (N - 1));
+    const y = TRUE_A*x*x + TRUE_B*x + TRUE_C + (Math.random()-0.5)*noise;
+    xs.push(x); ys.push(y);
+  }
+  return { xs, ys };
+}
+
+function mse() {
+  let s = 0;
+  data.xs.forEach((x, i) => {
+    const e = params.a*x*x + params.b*x + params.c - data.ys[i];
+    s += e*e;
+  });
+  return s / N;
+}
+
+function gradStep() {
+  if (epoch >= MAX_EPOCH) return;
+  const lr = getLR();
+  let da=0, db=0, dc=0;
+  data.xs.forEach((x, i) => {
+    const e = params.a*x*x + params.b*x + params.c - data.ys[i];
+    da += e * x*x;
+    db += e * x;
+    dc += e;
+  });
+  params.a -= lr * (2/N) * da;
+  params.b -= lr * (2/N) * db;
+  params.c -= lr * (2/N) * dc;
+  epoch++;
+  lossHistory.push(mse());
+  updateAll();
+}
+
+function reset() {
+  if (timer) clearInterval(timer);
+  playing = false;
+  const btn = document.getElementById('btn-play');
+  btn.textContent = '▶ 自動再生';
+  btn.className = 'btn btn-primary';
+  document.getElementById('converged-badge').classList.remove('show');
+  data = genData(getNoise());
+  params = { a: 0.1, b: 0.0, c: 0.0 };
+  epoch = 0;
+  lossHistory = [];
+  updateAll();
+}
+
+function buildCurve(a, b, c) {
+  const pts = [];
+  for (let i = 0; i <= 100; i++) {
+    const x = -4 + 8*(i/100);
+    pts.push({ x, y: a*x*x + b*x + c });
+  }
+  return pts;
+}
+
+const scaleOpts = {
+  grid: { color: 'rgba(0,0,0,0.05)' },
+  ticks: { color: '#A8A29E', font: { family: 'system-ui', size: 11 } },
+  border: { color: '#DDD8CE' }
+};
+
+let mainChart, lossChart;
+
+function initCharts() {
+  if (mainChart) mainChart.destroy();
+  if (lossChart)  lossChart.destroy();
+
+  const scatterPts = data.xs.map((x, i) => ({ x, y: data.ys[i] }));
+
+  mainChart = new Chart(document.getElementById('main-chart'), {
+    data: {
+      datasets: [
+        {
+          type: 'scatter', label: '観測データ', data: scatterPts,
+          backgroundColor: 'rgba(26,107,82,0.65)', pointRadius: 4,
+          pointHoverRadius: 5, order: 3
+        },
+        {
+          type: 'line', label: '予測曲線', data: buildCurve(params.a, params.b, params.c),
+          borderColor: '#D97706', borderWidth: 2.5, pointRadius: 0, tension: 0.4, order: 1
+        },
+        {
+          type: 'line', label: '真の関数', data: buildCurve(TRUE_A, TRUE_B, TRUE_C),
+          borderColor: '#C5BFB2', borderWidth: 1.5,
+          borderDash: [6, 4], pointRadius: 0, tension: 0.4, order: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...scaleOpts, type: 'linear', min: -4.3, max: 4.3,
+          title: { display: true, text: 'x', color: '#A8A29E', font: { size: 12 } } },
+        y: { ...scaleOpts, min: -8, max: 22,
+          title: { display: true, text: 'y', color: '#A8A29E', font: { size: 12 } } }
+      }
+    }
+  });
+
+  lossChart = new Chart(document.getElementById('loss-chart'), {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [], borderColor: '#D97706', borderWidth: 2,
+        pointRadius: 0, fill: true,
+        backgroundColor: 'rgba(217,119,6,0.08)'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...scaleOpts,
+          title: { display: true, text: 'Epoch', color: '#A8A29E', font: { size: 12 } },
+          ticks: { ...scaleOpts.ticks, maxTicksLimit: 10 }
+        },
+        y: { ...scaleOpts,
+          title: { display: true, text: 'MSE', color: '#A8A29E', font: { size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+function updateAll() {
+  if (!mainChart) { initCharts(); return; }
+
+  mainChart.data.datasets[1].data = buildCurve(params.a, params.b, params.c);
+  mainChart.update('none');
+
+  lossChart.data.labels = lossHistory.map((_, i) => i + 1);
+  lossChart.data.datasets[0].data = lossHistory;
+  lossChart.update('none');
+
+  const loss = mse();
+  document.getElementById('loss-val').textContent = loss.toFixed(3);
+  document.getElementById('a-val').textContent    = params.a.toFixed(3);
+  document.getElementById('b-val').textContent    = params.b.toFixed(3);
+  document.getElementById('c-val').textContent    = params.c.toFixed(3);
+  document.getElementById('epoch-num').textContent = epoch;
+  document.getElementById('progress-fill').style.width = (epoch / MAX_EPOCH * 100).toFixed(1) + '%';
+
+  if (epoch >= MAX_EPOCH) {
+    document.getElementById('converged-badge').classList.add('show');
+    document.getElementById('loss-val').className = 'metric-value converged';
+  }
+}
+
+document.getElementById('lr-slider').addEventListener('input', e => {
+  const val = Math.pow(10, parseFloat(e.target.value));
+  document.getElementById('lr-out').textContent = val >= 0.01 ? val.toFixed(4) : val.toExponential(2);
+});
+document.getElementById('noise-slider').addEventListener('input', e => {
+  document.getElementById('noise-out').textContent = e.target.value;
+  reset(); initCharts();
+});
+document.getElementById('btn-reset').addEventListener('click', () => { reset(); initCharts(); });
+document.getElementById('btn-step').addEventListener('click', gradStep);
+document.getElementById('btn-play').addEventListener('click', () => {
+  const btn = document.getElementById('btn-play');
+  if (playing) {
+    clearInterval(timer); playing = false;
+    btn.textContent = '▶ 自動再生';
+    btn.className = 'btn btn-primary';
+  } else {
+    if (epoch >= MAX_EPOCH) return;
+    playing = true;
+    btn.textContent = '⏸ 停止';
+    btn.className = 'btn btn-stop';
+    timer = setInterval(() => {
+      if (epoch >= MAX_EPOCH) {
+        clearInterval(timer); playing = false;
+        btn.textContent = '▶ 自動再生';
+        btn.className = 'btn btn-primary';
+        return;
+      }
+      gradStep();
+    }, 80);
+  }
+});
+
+reset();
+initCharts();
+</script>
+</body>
+</html>
