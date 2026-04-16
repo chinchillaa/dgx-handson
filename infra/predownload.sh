@@ -129,13 +129,14 @@ if [ -n "${HF_TOKEN:-}" ]; then
   info "HF_TOKEN 環境変数が設定されています"
   HF_LOGGED_IN=true
 elif "${VENV_PYTHON}" -c "
+import sys
 from huggingface_hub import whoami
 try:
     info = whoami()
     print(f'  ログイン済み: {info[\"name\"]}')
-    exit(0)
-except:
-    exit(1)
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
 " 2>/dev/null; then
   HF_LOGGED_IN=true
 else
