@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-04-14
+> 最終更新：2026-04-16
 
 ---
 
@@ -40,9 +40,22 @@ dgx-handson/
 │   ├── DESIGN.md                                 ✅ 設計仕様書（変更不可）
 │   └── PROGRESS.md                               ✅ このファイル
 ├── chapter1/
-│   └── web/
-│       ├── index.html                            ✅ 章の進行ガイド・目次
-│       └── supplement_linear_regression.html     ✅ 線形回帰・損失関数・勾配降下法
+│   ├── web/
+│   │   ├── index.html                            ✅ 章の進行ガイド・目次
+│   │   ├── supplement_linear_regression.html     ✅ 線形回帰・損失関数・勾配降下法
+│   │   ├── supplement_neural_network.html        ✅ XOR問題・NN構造・活性化関数・PyTorch autograd
+│   │   ├── supplement_transformer.html           ✅ 埋め込み・Self-Attention・Transformerブロック・LLMへのつながり
+│   │   ├── supplement_pretraining.html           ✅ 自己教師あり学習・CLM・スケーリング則・活用方法
+│   │   └── supplement_inference_params.html      ✅ Temperature・Top-p/k・generate()パラメータ設定
+│   ├── notebooks/
+│   │   ├── ch1_01_linear_regression.ipynb        ✅ NumPy勾配降下・学習率実験（解説用）
+│   │   └── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
+│   ├── exercises/
+│   │   ├── ex_01_linear_regression.ipynb         ✅ 穴埋め: predict/mse_loss/dw/db/更新式
+│   │   └── ex_02_mnist_nn.ipynb                  ✅ 穴埋め: fc1/fc2定義・forward・5ステップループ・evaluate
+│   └── solutions/
+│       ├── sol_01_linear_regression.ipynb        ✅ HO-1 解答
+│       └── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
 ├── chapter2/  （空ディレクトリ + .gitkeep のみ）
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 └── infra/     （空ディレクトリ + .gitkeep のみ）
@@ -54,31 +67,34 @@ dgx-handson/
 
 次のセッションでは以下を順番に作成し、**各ファイル完成ごとにユーザー確認を取る**。
 
-### web/ — 補足資料・クイズ
+### web/ — クイズ
 
 | ファイル | 内容 | 状態 |
 |---|---|---|
-| `supplement_neural_network.html` | ニューラルネットワーク（層・重み・活性化関数・XOR問題） | **次に作成** |
-| `supplement_transformer.html` | Transformer / Self-Attention | 未着手 |
-| `supplement_pretraining.html` | 事前学習の概念・SFTとの対比 | 未着手 |
-| `supplement_inference_params.html` | temperature / top_p / max_new_tokens | 未着手 |
-| `quiz_ch1.html` | 第1章 理解確認クイズ（選択式・穴埋め・記述式） | 未着手 |
+| `quiz_ch1.html` | 第1章 理解確認クイズ（選択式・穴埋め・記述式） | **次に作成** |
 
-### notebooks/
+### notebooks/ + exercises/ + solutions/（HO-3）
 
 | ファイル | 内容 | 状態 |
 |---|---|---|
-| `ch1_01_linear_regression.ipynb` | NumPy で勾配降下を手実装 | 未着手 |
-| `ch1_02_mnist_nn.ipynb` | PyTorch で 2層NN・MNIST 分類 | 未着手 |
-| `ch1_03_llm_inference.ipynb` | HuggingFace で LLM 推論パラメータ探索 | 未着手 |
+| `ch1_03_llm_inference.ipynb` | HuggingFace で LLM 推論パラメータ探索（解説用） | 未着手 |
+| `ex_03_llm_inference.ipynb` | 穴埋め課題③ | 未着手 |
+| `sol_03_llm_inference.ipynb` | 解答③ | 未着手 |
 
-### exercises/ + solutions/
+### infra/
 
 | ファイル | 内容 | 状態 |
 |---|---|---|
-| `ex_01_linear_regression.ipynb` + `sol_` | 穴埋め課題①・解答① | 未着手 |
-| `ex_02_mnist_nn.ipynb` + `sol_` | 穴埋め課題②・解答② | 未着手 |
-| `ex_03_llm_inference.ipynb` + `sol_` | 穴埋め課題③・解答③ | 未着手 |
+| `setup.sh` | 環境構築スクリプト（uv + 仮想環境 + パッケージインストール） | 未着手 |
+| `predownload.sh` | モデル・データセット事前ダウンロード（共有ストレージへ） | 未着手 |
+| `check_env.py` | 環境確認スクリプト（GPU・パッケージバージョン・共有ストレージ） | 未着手 |
+
+### chapter2・chapter3
+
+| 章 | 状態 |
+|---|---|
+| 第2章（SFT・DPO・RAG） | 未着手 |
+| 第3章（AI エージェント） | 未着手 |
 
 ---
 
