@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足: DPO の理論と preference data — 第2章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: #DDD8CE; --border-strong: #C5BFB2;
+      --text: #1C1917; --text-sub: #57534E; --text-muted: #A8A29E;
+      --green: #0D4A38; --green-mid: #1A6B52; --green-bg: #EAF3EF; --green-border: #A7CBB9;
+      --amber: #7C5C00; --amber-bg: #FFF8E6; --amber-border: #E8C96A; --amber-text: #92400E;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+    .label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-mid); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; }
+    .card-green { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .card-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .section-heading { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--green); margin-bottom: 1.5rem; }
+    .section-number { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    pre { border-radius: 0.5rem; overflow-x: auto; }
+    code.hljs { border-radius: 0.5rem; font-size: 0.82rem; }
+    .key-point { border-left: 3px solid var(--green); padding-left: 1rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { background: var(--surface2); padding: 0.6rem 1rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 0.6rem 1rem; border: 1px solid var(--border); }
+    tr:nth-child(even) td { background: var(--surface2); }
+    .pair-box { border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.82rem; }
+    .chosen-box { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .rejected-box { background: #FEF2F2; border: 1px solid #FCA5A5; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-3xl mx-auto px-6 py-4">
+      <div class="flex items-center gap-2 mb-1">
+        <a href="index.html" class="label" style="text-decoration: none;">← 第2章トップ</a>
+        <span style="color: var(--text-muted);">›</span>
+        <span class="label">補足資料</span>
+      </div>
+      <h1 class="text-2xl font-bold">DPO の理論と preference data</h1>
+      <p class="text-sm mt-1" style="color: var(--text-sub);">フィードバックから応答スタイルを学習する手法</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- RLHF との比較 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">1</div>
+        <h2 class="text-xl font-bold">RLHF vs DPO</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        人間のフィードバックを学習に反映する方法として <strong>RLHF</strong> が広く知られていますが、
+        報酬モデルの学習と PPO という強化学習が必要で、実装が複雑です。
+        <strong>DPO</strong> はこれを大幅に簡略化した手法です。
+      </p>
+      <div class="card mb-4">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>手法</th><th>必要なもの</th><th>複雑さ</th><th>安定性</th></tr></thead>
+            <tbody>
+              <tr><td>RLHF (PPO)</td><td>報酬モデル + PPO 実装 + 参照モデル</td><td>高</td><td>不安定になりやすい</td></tr>
+              <tr><td><strong>DPO</strong></td><td>preference データ + 参照モデル</td><td>低</td><td>安定</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="key-point">
+        <p class="text-sm">DPO は「報酬モデル不要」「強化学習不要」。通常の教師ありファインチューニングとほぼ同じ手順で実行できます。</p>
+      </div>
+    </section>
+
+    <!-- DPO の目的関数 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">2</div>
+        <h2 class="text-xl font-bold">DPO の目的関数</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        DPO の損失関数は以下の形をとります。
+        chosen（好ましい）回答の確率を上げ、rejected（好ましくない）回答の確率を下げます。
+      </p>
+      <div class="card mb-4">
+        $$\mathcal{L}_{\text{DPO}}(\pi_\theta) = -\mathbb{E}_{(x, y_w, y_l)} \left[\log \sigma \left( \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} - \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} \right) \right]$$
+        <div class="mt-4 text-sm space-y-1" style="color: var(--text-sub);">
+          <p>$\pi_\theta$：学習中のモデル、$\pi_{\text{ref}}$：参照モデル（SFT 済み）</p>
+          <p>$y_w$：chosen（好ましい回答）、$y_l$：rejected（好ましくない回答）</p>
+          <p>$\beta$：KL ペナルティ係数（参照モデルからの逸脱を制御）</p>
+        </div>
+      </div>
+      <div class="card-green">
+        <p class="text-sm" style="color: var(--green);">
+          <strong>直感的な理解</strong><br>
+          参照モデルと比べて「chosen の確率の上昇幅」が「rejected の確率の上昇幅」を上回ればロスが下がります。
+          $\beta$ が大きいほど参照モデルへの保守性が強くなります（過剰適応を防ぐ）。
+        </p>
+      </div>
+    </section>
+
+    <!-- Preference データセットの作り方 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">3</div>
+        <h2 class="text-xl font-bold">Preference データセットの作り方</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        DPO に必要なデータは <strong>（prompt, chosen, rejected）の3つ組</strong> です。
+        質より量よりも、<strong>chosen と rejected の差が明確</strong> であることが重要です。
+      </p>
+      <div class="space-y-4">
+        <div>
+          <p class="text-sm font-bold mb-2">例: コード説明タスク</p>
+          <div class="pair-box chosen-box mb-2">
+            <span class="text-xs font-bold" style="color: var(--green);">✓ chosen（良い回答）</span>
+            <p class="mt-1 text-sm">「<code>sorted()</code> は元のリストを変更せず新しいリストを返します。一方 <code>.sort()</code> はリスト自体を変更し None を返します。...（具体的な例とコードを含む）」</p>
+          </div>
+          <div class="pair-box rejected-box">
+            <span class="text-xs font-bold" style="color: #DC2626;">✗ rejected（悪い回答）</span>
+            <p class="mt-1 text-sm">「sorted か sort 使えばいいです。どちらも同じです。」</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <p class="text-sm font-bold mb-3">JSON フォーマット（<code>scripts/train_dpo.py</code> に渡す形式）</p>
+        <pre><code class="language-json">[
+  {
+    "prompt": "Pythonでリストを逆順にする方法を教えてください。",
+    "chosen": "Pythonでリストを逆順にするには主に2つの方法があります...",
+    "rejected": "reverse を使います。my_list.reverse() と書けばなります。"
+  }
+]</code></pre>
+      </div>
+
+      <div class="card-amber mt-4">
+        <p class="text-sm font-bold mb-1" style="color: var(--amber-text);">データ作成時の注意</p>
+        <ul class="text-sm space-y-1" style="color: var(--amber-text);">
+          <li>• 5〜10件でも学習できます（本番は数百〜数千件推奨）</li>
+          <li>• chosen と rejected の差は明確にする（あいまいなペアは避ける）</li>
+          <li>• rejected は「完全に誤り」ではなく「やや不十分」程度の方が学習効果が出やすい</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- beta の調整 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">4</div>
+        <h2 class="text-xl font-bold">beta パラメータの実験</h2>
+      </div>
+      <div class="card">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>beta 値</th><th>挙動</th><th>リスク</th></tr></thead>
+            <tbody>
+              <tr><td>0.01〜0.05</td><td>参照モデルから大きく逸脱できる</td><td>崩壊（意味不明な出力）のリスク</td></tr>
+              <tr><td><strong>0.1（推奨）</strong></td><td>バランスの良い調整</td><td>—</td></tr>
+              <tr><td>0.3〜0.5</td><td>参照モデルに近い挙動を保つ</td><td>preference が反映されにくい</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex justify-start pt-4" style="border-top: 1px solid var(--border);">
+      <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
+    </div>
+  </main>
+</body>
+</html>

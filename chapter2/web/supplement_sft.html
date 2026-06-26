@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足: SFT と LoRA の仕組み — 第2章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: #DDD8CE; --border-strong: #C5BFB2;
+      --text: #1C1917; --text-sub: #57534E; --text-muted: #A8A29E;
+      --green: #0D4A38; --green-mid: #1A6B52; --green-bg: #EAF3EF; --green-border: #A7CBB9;
+      --amber: #7C5C00; --amber-bg: #FFF8E6; --amber-border: #E8C96A; --amber-text: #92400E;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+    .label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-mid); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; }
+    .card-green { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .card-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .section-heading { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--green); margin-bottom: 1.5rem; }
+    .section-number { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    pre { border-radius: 0.5rem; overflow-x: auto; }
+    code.hljs { border-radius: 0.5rem; font-size: 0.82rem; }
+    .key-point { border-left: 3px solid var(--green); padding-left: 1rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { background: var(--surface2); padding: 0.6rem 1rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 0.6rem 1rem; border: 1px solid var(--border); }
+    tr:nth-child(even) td { background: var(--surface2); }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-3xl mx-auto px-6 py-4">
+      <div class="flex items-center gap-2 mb-1">
+        <a href="index.html" class="label" style="text-decoration: none;">← 第2章トップ</a>
+        <span style="color: var(--text-muted);">›</span>
+        <span class="label">補足資料</span>
+      </div>
+      <h1 class="text-2xl font-bold">SFT と LoRA の仕組み</h1>
+      <p class="text-sm mt-1" style="color: var(--text-sub);">Supervised Fine-Tuning を低メモリで実現する手法</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- SFT とは -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">1</div>
+        <h2 class="text-xl font-bold">SFT とは何か</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        事前学習済み LLM は「次のトークンを予測する」という汎用タスクで学習されています。
+        これをユーザーの指示に従う形式へ変換するのが <strong>Supervised Fine-Tuning (SFT)</strong> です。
+      </p>
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-3">SFT の目的</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>フェーズ</th><th>タスク</th><th>学習シグナル</th></tr></thead>
+            <tbody>
+              <tr><td>事前学習</td><td>次トークン予測</td><td>大量のテキスト（教師なし）</td></tr>
+              <tr><td><strong>SFT</strong></td><td>指示への回答生成</td><td>（指示, 回答）ペア（教師あり）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="key-point">
+        <p class="text-sm">SFT の損失関数は事前学習と同じ <strong>クロスエントロピー損失</strong>。違いは学習データが「回答トークン」のみに絞られていること。</p>
+      </div>
+      <p class="text-sm mt-4" style="color: var(--text-sub);">SFT のプロンプトテンプレート例（Alpaca 形式）:</p>
+      <pre><code class="language-text">### 指示:
+Pythonでリストをソートする方法を教えてください。
+
+### 回答:
+Pythonでリストをソートするには sorted() 関数または .sort() メソッドを使います...
+</code></pre>
+    </section>
+
+    <!-- LoRA の原理 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">2</div>
+        <h2 class="text-xl font-bold">LoRA の原理</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        LLaMA 3 8B の全パラメータ（約80億個）を更新すると、A100 80GB でもぎりぎりのメモリを消費します。
+        <strong>LoRA (Low-Rank Adaptation)</strong> はほとんどのパラメータを凍結し、
+        わずかな「差分行列」だけを学習することで、少ないメモリでファインチューニングを実現します。
+      </p>
+      <div class="card mb-6">
+        <p class="text-sm font-bold mb-3">LoRA の数式</p>
+        <p class="text-sm mb-2">元の重み行列 $W \in \mathbb{R}^{d \times d}$ に対して、差分を低ランク分解で表現します:</p>
+        $$\Delta W = BA \quad (B \in \mathbb{R}^{d \times r},\ A \in \mathbb{R}^{r \times d},\ r \ll d)$$
+        <p class="text-sm mt-3 mb-2">推論時の出力:</p>
+        $$h = Wx + \frac{\alpha}{r} \Delta W x = Wx + \frac{\alpha}{r} BAx$$
+        <p class="text-sm mt-3" style="color: var(--text-sub);">
+          $r$ = rank（小さいほどパラメータ少、精度低）<br>
+          $\alpha$ = スケール係数（通常 $\alpha = 2r$）
+        </p>
+      </div>
+
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-3">パラメータ数の比較</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>手法</th><th>学習パラメータ</th><th>比率</th><th>メモリ（概算）</th></tr></thead>
+            <tbody>
+              <tr><td>フルファインチューニング</td><td>8,000,000,000</td><td>100%</td><td>~160GB</td></tr>
+              <tr><td>LoRA (rank=64)</td><td>~40,000,000</td><td>~0.5%</td><td>~18GB</td></tr>
+              <tr><td><strong>LoRA (rank=16)</strong></td><td>~10,000,000</td><td>~0.1%</td><td>~12GB</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card-amber">
+        <p class="text-sm font-bold mb-1" style="color: var(--amber-text);">rank の選び方</p>
+        <ul class="text-sm space-y-1" style="color: var(--amber-text);">
+          <li>• <code>r=8〜16</code>: 通常のタスク適応（推奨スタート地点）</li>
+          <li>• <code>r=32〜64</code>: 複雑なタスクや精度が重要な場合</li>
+          <li>• <code>r=128+</code>: ほぼフルファインチューニングに近い挙動</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- QLoRA -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">3</div>
+        <h2 class="text-xl font-bold">4bit 量子化 + LoRA = QLoRA</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        ベースモデルを 4bit で量子化（QLoRA）することで、さらにメモリを削減できます。
+        本ハンズオンでは <code>BitsAndBytesConfig</code> を使った NF4 量子化を採用します。
+      </p>
+      <pre><code class="language-python">from transformers import BitsAndBytesConfig
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,   # 量子化定数をさらに量子化
+    bnb_4bit_quant_type="nf4",        # Normal Float 4bit
+    bnb_4bit_compute_dtype=torch.bfloat16,
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Meta-Llama-3-8B",
+    quantization_config=bnb_config,
+    device_map="auto",
+)</code></pre>
+    </section>
+
+    <!-- 実験パラメータ -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">4</div>
+        <h2 class="text-xl font-bold">実験で試すパラメータ</h2>
+      </div>
+      <div class="card">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>パラメータ</th><th>デフォルト</th><th>試す値</th><th>期待される影響</th></tr></thead>
+            <tbody>
+              <tr><td><code>lora_rank</code></td><td>16</td><td>8, 32, 64</td><td>小さいほど軽量・低精度</td></tr>
+              <tr><td><code>lora_alpha</code></td><td>32</td><td>rank と同値、2倍</td><td>学習スケールの調整</td></tr>
+              <tr><td><code>learning_rate</code></td><td>2e-4</td><td>1e-4, 5e-4</td><td>収束速度・安定性</td></tr>
+              <tr><td><code>max_seq_length</code></td><td>512</td><td>256, 1024</td><td>短いほど速い・長文は切れる</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-green mt-4">
+        <p class="text-sm" style="color: var(--green);">
+          <strong>wandb での監視ポイント</strong><br>
+          <code>train/loss</code> が単調減少しているか確認してください。
+          途中で NaN になった場合は学習率を下げてください。
+          <code>train/grad_norm</code> が急に大きくなる場合は勾配爆発のサインです。
+        </p>
+      </div>
+    </section>
+
+    <div class="flex justify-start pt-4" style="border-top: 1px solid var(--border);">
+      <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
+    </div>
+  </main>
+</body>
+</html>

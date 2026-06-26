@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第2章 理解確認クイズ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: #DDD8CE; --border-strong: #C5BFB2;
+      --text: #1C1917; --text-sub: #57534E; --text-muted: #A8A29E;
+      --green: #0D4A38; --green-mid: #1A6B52; --green-bg: #EAF3EF; --green-border: #A7CBB9;
+      --amber: #7C5C00; --amber-bg: #FFF8E6; --amber-border: #E8C96A; --amber-text: #92400E;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+    .label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-mid); }
+    .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; }
+    .option-btn {
+      display: block; width: 100%; text-align: left;
+      padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem;
+      border: 1px solid var(--border); background: var(--surface2);
+      font-size: 0.9rem; cursor: pointer; transition: all 0.15s;
+    }
+    .option-btn:hover { border-color: var(--green-border); background: var(--green-bg); }
+    .option-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green); font-weight: 600; }
+    .option-btn.wrong   { background: #FEF2F2; border-color: #FCA5A5; color: #DC2626; }
+    .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+    .answer-box { display: none; margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; background: var(--green-bg); border: 1px solid var(--green-border); font-size: 0.875rem; }
+    .answer-box.show { display: block; }
+    .score-box { background: var(--surface); border: 2px solid var(--green); border-radius: 0.75rem; padding: 1.5rem; text-align: center; }
+    .fill-input { border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-size: 0.9rem; width: 100%; background: var(--surface); }
+    .fill-input:focus { outline: none; border-color: var(--green-border); }
+    .check-btn {
+      margin-top: 0.5rem; padding: 0.5rem 1.25rem; border-radius: 0.375rem;
+      background: var(--green); color: white; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      border: none; transition: opacity 0.15s;
+    }
+    .check-btn:hover { opacity: 0.85; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-3xl mx-auto px-6 py-4">
+      <div class="flex items-center gap-2 mb-1">
+        <a href="index.html" class="label" style="text-decoration: none;">← 第2章トップ</a>
+        <span style="color: var(--text-muted);">›</span>
+        <span class="label">理解確認クイズ</span>
+      </div>
+      <h1 class="text-2xl font-bold">第2章 理解確認クイズ</h1>
+      <p class="text-sm mt-1" style="color: var(--text-sub);">全 10 問 — 選択肢をクリックすると正解・解説が表示されます</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-6" id="quiz-main">
+
+    <!-- Q1 -->
+    <div class="question-card" id="q1">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q1 / 10 — SFT</p>
+      <p class="font-semibold mb-4">SFT（Supervised Fine-Tuning）の目的として最も適切なものはどれですか？</p>
+      <button class="option-btn" onclick="answer('q1', this, false)">A. 事前学習済みモデルのパラメータをゼロから学習し直す</button>
+      <button class="option-btn" onclick="answer('q1', this, true)">B. 指示と回答のペアデータを使って、指示に従う能力を付与する</button>
+      <button class="option-btn" onclick="answer('q1', this, false)">C. モデルのアーキテクチャを変更して新しいタスクに対応させる</button>
+      <button class="option-btn" onclick="answer('q1', this, false)">D. 量子化によってモデルを高速化する</button>
+      <div class="answer-box" id="q1-answer">
+        <strong style="color: var(--green);">正解: B</strong><br>
+        SFT は事前学習済みモデルに「指示への応答」という振る舞いを追加学習させる手法です。
+        パラメータをゼロから学習するのではなく、事前学習の成果（汎用的な言語理解）を活かしながら、
+        タスク固有のデータで微調整します。損失関数は事前学習と同じクロスエントロピー損失で、
+        回答トークン部分のみを計算対象にします。
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card" id="q2">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q2 / 10 — LoRA</p>
+      <p class="font-semibold mb-4">LoRA が学習パラメータを削減できる仕組みはどれですか？</p>
+      <button class="option-btn" onclick="answer('q2', this, false)">A. 重み行列の小さい値をゼロにしてスパースにする</button>
+      <button class="option-btn" onclick="answer('q2', this, false)">B. モデルの一部のレイヤーを完全に凍結して学習しない</button>
+      <button class="option-btn" onclick="answer('q2', this, true)">C. 重み行列の差分を低ランク行列 BA の積で近似し、B と A だけを学習する</button>
+      <button class="option-btn" onclick="answer('q2', this, false)">D. 4bit 量子化でパラメータを圧縮する</button>
+      <div class="answer-box" id="q2-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        LoRA は $\Delta W = BA$ ($B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$, $r \ll d$) という低ランク分解で差分行列を表現します。
+        元の重み $W$ は凍結し、$B$ と $A$（合計 $2dr$ 個のパラメータ）だけを学習することで、
+        フルファインチューニング比で 99% 以上のパラメータ削減を実現します。
+        量子化（D）は別の技術です。
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card" id="q3">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q3 / 10 — LoRA</p>
+      <p class="font-semibold mb-4">LoRA の <code>rank</code> を大きくした場合の影響として正しいものはどれですか？</p>
+      <button class="option-btn" onclick="answer('q3', this, false)">A. 学習パラメータが減り、メモリ使用量が下がる</button>
+      <button class="option-btn" onclick="answer('q3', this, true)">B. 学習パラメータが増え、より複雑な適応が可能になるがメモリを消費する</button>
+      <button class="option-btn" onclick="answer('q3', this, false)">C. 学習率が上がり、収束が速くなる</button>
+      <button class="option-btn" onclick="answer('q3', this, false)">D. チェックポイントのファイルサイズが小さくなる</button>
+      <div class="answer-box" id="q3-answer">
+        <strong style="color: var(--green);">正解: B</strong><br>
+        rank $r$ を大きくすると、$B \in \mathbb{R}^{d \times r}$ と $A \in \mathbb{R}^{r \times d}$ の両方のサイズが増えるため、
+        学習パラメータ数（$2dr$）が比例して増えます。
+        一方で表現力が上がり、より複雑なタスク適応に有利です。
+        rank=16 前後がバランスの良いスタート地点です。
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-card" id="q4">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q4 / 10 — DPO</p>
+      <p class="font-semibold mb-4">DPO（Direct Preference Optimization）が RLHF より実装しやすい主な理由はどれですか？</p>
+      <button class="option-btn" onclick="answer('q4', this, false)">A. GPU を使わずに CPU だけで学習できるから</button>
+      <button class="option-btn" onclick="answer('q4', this, true)">B. 報酬モデルの学習と PPO の強化学習が不要で、教師ありファインチューニングと同じ枠組みで実装できるから</button>
+      <button class="option-btn" onclick="answer('q4', this, false)">C. 参照モデルが不要で、単一モデルだけで学習できるから</button>
+      <button class="option-btn" onclick="answer('q4', this, false)">D. データが 1 件あれば学習できるから</button>
+      <div class="answer-box" id="q4-answer">
+        <strong style="color: var(--green);">正解: B</strong><br>
+        RLHF の実装には「①報酬モデルの学習、②PPO による強化学習、③参照モデルの保持」という3段階が必要です。
+        DPO はこれを数学的に等価な教師ありファインチューニングとして定式化し直すことで、
+        通常の SFT ループで実行できます。ただし参照モデルは必要です（C は誤り）。
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-card" id="q5">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q5 / 10 — DPO</p>
+      <p class="font-semibold mb-4">DPO の <code>beta</code> パラメータを大きくすると何が起こりますか？</p>
+      <button class="option-btn" onclick="answer('q5', this, false)">A. 学習が速くなる</button>
+      <button class="option-btn" onclick="answer('q5', this, false)">B. モデルが参照モデルから大きく逸脱し、崩壊リスクが上がる</button>
+      <button class="option-btn" onclick="answer('q5', this, true)">C. 参照モデルからの逸脱にペナルティが強くかかり、保守的な出力になる</button>
+      <button class="option-btn" onclick="answer('q5', this, false)">D. チャンクサイズが増える</button>
+      <div class="answer-box" id="q5-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        $\beta$ は DPO の KL 正則化係数で、参照モデル $\pi_{\text{ref}}$ からの逸脱にペナルティを与えます。
+        $\beta$ が大きいほど「参照モデルに似た出力を保て」というプレッシャーが強くなり、
+        preference による調整幅が小さくなります。一般に 0.1 前後が推奨されます。
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-card" id="q6">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q6 / 10 — RAG</p>
+      <p class="font-semibold mb-4">RAG において「チャンクサイズを小さくする」と精度はどうなりますか？</p>
+      <button class="option-btn" onclick="answer('q6', this, false)">A. 常に精度が上がる</button>
+      <button class="option-btn" onclick="answer('q6', this, false)">B. 常に精度が下がる</button>
+      <button class="option-btn" onclick="answer('q6', this, true)">C. ピンポイントな情報は取りやすくなるが、文脈が途切れて回答品質が下がる場合がある</button>
+      <button class="option-btn" onclick="answer('q6', this, false)">D. チャンクサイズは精度と無関係</button>
+      <div class="answer-box" id="q6-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        チャンクサイズが小さいと、特定キーワードを含む箇所をピンポイントで取得しやすくなります。
+        一方、説明の途中で切れてしまい、前後の文脈が失われるため、
+        LLM が正確に回答するために必要な情報が断片化するリスクがあります。
+        タスクや文書の性質に応じて 256・512・1024 token を実験して最適値を見つけることが重要です。
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question-card" id="q7">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q7 / 10 — RAG</p>
+      <p class="font-semibold mb-4">SFT ではなく RAG を選ぶべき状況はどれですか？</p>
+      <button class="option-btn" onclick="answer('q7', this, false)">A. モデルの応答スタイルを丁寧な敬語に統一したい</button>
+      <button class="option-btn" onclick="answer('q7', this, false)">B. 特定ドメインの専門用語を正しく使えるようにしたい</button>
+      <button class="option-btn" onclick="answer('q7', this, true)">C. 毎日更新される社内ドキュメントに基づいて質問に答えたい</button>
+      <button class="option-btn" onclick="answer('q7', this, false)">D. 推論速度を最大化してリアルタイムチャットに使いたい</button>
+      <div class="answer-box" id="q7-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        知識の更新頻度が高い（毎日更新）場合、SFT では更新のたびに再学習が必要で現実的ではありません。
+        RAG はベクトルDBを更新するだけで済み、追加コストなく最新の情報を参照できます。
+        応答スタイルの変更（A）は DPO、専門用語の習得（B）は SFT の方が適しています。
+        RAG は検索コストがかかるため推論速度（D）では不利です。
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question-card" id="q8">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q8 / 10 — 評価指標</p>
+      <p class="font-semibold mb-4">ROUGE スコアが低くても BERTScore が高くなるケースはどれですか？</p>
+      <button class="option-btn" onclick="answer('q8', this, false)">A. 生成文が参照文と完全に一致している</button>
+      <button class="option-btn" onclick="answer('q8', this, false)">B. 生成文が短すぎてほとんどの情報が欠けている</button>
+      <button class="option-btn" onclick="answer('q8', this, true)">C. 同じ内容を異なる単語・言い回しで表現している</button>
+      <button class="option-btn" onclick="answer('q8', this, false)">D. 生成文が完全に誤った情報を含んでいる</button>
+      <div class="answer-box" id="q8-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        ROUGE は N-gram の表層的な重複を見るため、「同じ意味を別の表現で言い換えた場合」に低スコアになりやすいです。
+        BERTScore は BERT の埋め込みを使って意味的な類似度を計算するため、
+        言い換えや同義語を使っていても正しく評価できます。
+        日本語の言い換えが多いタスクでは ROUGE より BERTScore が有効なことが多いです。
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question-card" id="q9">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q9 / 10 — 評価指標</p>
+      <p class="font-semibold mb-4">LLM-as-judge の既知のバイアスとして正しいものはどれですか？（複数可）</p>
+      <div id="q9-multi" style="display: none;">複数選択</div>
+      <button class="option-btn" onclick="answer('q9', this, true, true)">A. 自分自身と同じモデルが生成した回答を高く評価しやすい（自己バイアス）</button>
+      <button class="option-btn" onclick="answer('q9', this, true, true)">B. 長い回答を短い回答より高く評価しやすい（長さバイアス）</button>
+      <button class="option-btn" onclick="answer('q9', this, false, true)">C. 計算コストがかからず高速に評価できる</button>
+      <button class="option-btn" onclick="answer('q9', this, false, true)">D. 参照回答が必ず必要で、参照なしでは評価できない</button>
+      <div class="answer-box" id="q9-answer">
+        <strong style="color: var(--green);">正解: A と B</strong><br>
+        A（自己バイアス）と B（長さバイアス）は LLM-as-judge の代表的な問題点として研究で指摘されています。
+        C は誤りで、LLM の推論が必要なためコストがかかります。
+        D も誤りで、LLM-as-judge は参照回答なしでも絶対評価として使えます（ただし精度は参照あり評価より低い場合が多い）。
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question-card" id="q10">
+      <p class="text-xs font-bold mb-3" style="color: var(--text-muted);">Q10 / 10 — 総合</p>
+      <p class="font-semibold mb-4">「社内ドキュメントに基づいたQAシステム」を作る場合、最適な構成はどれですか？</p>
+      <button class="option-btn" onclick="answer('q10', this, false)">A. LLaMA 3 をゼロから事前学習する</button>
+      <button class="option-btn" onclick="answer('q10', this, false)">B. SFT のみで社内ドキュメント全文を学習させる</button>
+      <button class="option-btn" onclick="answer('q10', this, true)">C. SFT で回答スタイルを整え、RAG で最新ドキュメントを参照させる</button>
+      <button class="option-btn" onclick="answer('q10', this, false)">D. DPO のみで preference データから学習させる</button>
+      <div class="answer-box" id="q10-answer">
+        <strong style="color: var(--green);">正解: C</strong><br>
+        実務で最も多く採用されるのは「SFT + RAG のハイブリッド」です。
+        SFT で「丁寧な日本語で答える」「箇条書きにする」などの応答スタイルを固め、
+        RAG で最新ドキュメントの内容を参照することで、頻繁なドキュメント更新にも対応できます。
+        ゼロから事前学習（A）はコスト的に非現実的。SFT のみ（B）は更新に対応できない。
+        DPO のみ（D）はドメイン知識を与えることができません。
+      </div>
+    </div>
+
+    <!-- スコア表示 -->
+    <div class="score-box" id="score-box" style="display: none;">
+      <p class="text-2xl font-bold mb-1" style="color: var(--green);" id="score-text"></p>
+      <p class="text-sm" style="color: var(--text-sub);" id="score-comment"></p>
+    </div>
+
+    <div class="text-center pt-4" style="border-top: 1px solid var(--border);">
+      <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
+    </div>
+  </main>
+
+  <script>
+    const answers = {};
+    const correctCount = { val: 0 };
+    const totalQ = 10;
+
+    function answer(qId, btn, isCorrect, isMulti = false) {
+      if (!isMulti && answers[qId]) return;
+      if (isMulti && answers[qId] && answers[qId].done) return;
+
+      if (!isMulti) {
+        answers[qId] = true;
+        const btns = document.querySelectorAll(`#${qId} .option-btn`);
+        btns.forEach(b => { b.classList.add('disabled'); });
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+        document.getElementById(`${qId}-answer`).classList.add('show');
+        if (isCorrect) correctCount.val++;
+        checkAllDone();
+      } else {
+        if (!answers[qId]) answers[qId] = { selected: 0, correct: 0, done: false };
+        answers[qId].selected++;
+        btn.classList.add('disabled');
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) answers[qId].correct++;
+        if (answers[qId].selected >= 2) {
+          answers[qId].done = true;
+          const btns = document.querySelectorAll(`#${qId} .option-btn`);
+          btns.forEach(b => b.classList.add('disabled'));
+          document.getElementById(`${qId}-answer`).classList.add('show');
+          if (answers[qId].correct >= 2) correctCount.val++;
+          checkAllDone();
+        }
+      }
+    }
+
+    function checkAllDone() {
+      const answered = Object.keys(answers).length;
+      if (answered >= totalQ) {
+        const box = document.getElementById('score-box');
+        const txt = document.getElementById('score-text');
+        const cmt = document.getElementById('score-comment');
+        txt.textContent = `スコア: ${correctCount.val} / ${totalQ}`;
+        if (correctCount.val === totalQ) cmt.textContent = '完璧です！第3章へ進みましょう。';
+        else if (correctCount.val >= 8) cmt.textContent = '優秀です！間違えた問題の補足ページを復習しましょう。';
+        else if (correctCount.val >= 6) cmt.textContent = '基礎は押さえています。補足ページで確認しましょう。';
+        else cmt.textContent = '各補足ページをもう一度読み直してみてください。';
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  </script>
+</body>
+</html>

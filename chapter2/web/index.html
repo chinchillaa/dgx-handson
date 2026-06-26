@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第2章：AIを「強く」する</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg:           #F7F5F0;
+      --surface:      #FFFFFF;
+      --surface2:     #F0EDE6;
+      --border:       #DDD8CE;
+      --border-strong:#C5BFB2;
+      --text:         #1C1917;
+      --text-sub:     #57534E;
+      --text-muted:   #A8A29E;
+      --green:        #0D4A38;
+      --green-mid:    #1A6B52;
+      --green-bg:     #EAF3EF;
+      --green-border: #A7CBB9;
+      --amber:        #7C5C00;
+      --amber-bg:     #FFF8E6;
+      --amber-border: #E8C96A;
+      --amber-text:   #92400E;
+      --code-bg:      #18181B;
+      --code-out:     #27272A;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                   "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1 { letter-spacing: -0.02em; }
+    h2 { letter-spacing: -0.01em; line-height: 1.4; }
+    h3 { letter-spacing: -0.01em; }
+    .label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--green);
+      margin-bottom: 1.5rem;
+    }
+    .section-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--green);
+      color: white;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+    .card-green {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .card-amber {
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .topic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.15s;
+    }
+    .topic-card:hover { border-color: var(--green-border); }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+    }
+    .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .badge-amber { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border); }
+    .badge-gray  { background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); }
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      color: var(--green);
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: 1px solid var(--green-border);
+      background: var(--green-bg);
+      transition: background 0.15s;
+    }
+    .link-row:hover { background: #D4EAE1; }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .nav-btn-prev {
+      background: var(--surface2);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+    }
+    .nav-btn-next {
+      background: var(--green);
+      color: white;
+    }
+    .nav-btn:hover { opacity: 0.85; }
+    .decision-box {
+      background: var(--surface2);
+      border: 1px solid var(--border-strong);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 2;
+      color: var(--text);
+    }
+    .decision-yes { color: var(--green); font-weight: 700; }
+    .decision-no  { color: var(--amber-text); font-weight: 700; }
+    .decision-result { color: var(--green); font-weight: 700; font-size: 0.9rem; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ヘッダー -->
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-4xl mx-auto px-6 py-5">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="label">ML ハンズオンセッション</span>
+        <span style="color: var(--text-muted); font-size: 0.75rem;">›</span>
+        <span class="label">第2章</span>
+      </div>
+      <h1 class="text-3xl font-bold" style="color: var(--text);">
+        AIを「強く」する
+      </h1>
+      <p class="mt-2 text-base" style="color: var(--text-sub);">
+        SFT・DPO・RAG・評価指標を使ってモデルの能力を引き出す
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- 到達目標 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">目</div>
+        <h2 class="text-xl font-bold">この章の到達目標</h2>
+      </div>
+      <div class="card-green">
+        <ul class="space-y-2 text-sm" style="color: var(--green);">
+          <li>✓ タスクに応じて SFT・DPO・RAG を使い分けられる</li>
+          <li>✓ LoRA を使ってメモリ効率よくファインチューニングを実行できる</li>
+          <li>✓ RAG パイプラインを構築し、チャンクサイズの影響を体感できる</li>
+          <li>✓ BERTScore・ROUGE・LLM-as-judge で手法間の差を定量比較できる</li>
+          <li>✓ 学習ログを wandb で監視しながら「学習を完走させる」経験を積む</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 手法選定フレームワーク -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">0</div>
+        <h2 class="text-xl font-bold">手法選定の判断フレームワーク</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        第2章の全トピックを始める前に、「どの手法をいつ使うか」を確認しておきます。
+        実験中に迷ったらこのフレームに立ち戻ってください。
+      </p>
+      <div class="decision-box">
+        <div>Q1: タスク固有の知識が必要か？</div>
+        <div class="pl-6"><span class="decision-yes">→ YES</span> → Q2: 知識は動的（頻繁に更新）か？</div>
+        <div class="pl-12"><span class="decision-yes">→ YES</span> → <span class="decision-result">RAG</span>（ドキュメントを外部DBに置く）</div>
+        <div class="pl-12"><span class="decision-no">→ NO</span>  → <span class="decision-result">SFT が有力</span>（知識をモデルに焼き込む）</div>
+        <div class="pl-6"><span class="decision-no">→ NO</span>  → <span class="decision-result">Prompt Engineering または DPO</span>（応答スタイル調整）</div>
+      </div>
+    </section>
+
+    <!-- セクション一覧 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">§</div>
+        <h2 class="text-xl font-bold">セクション一覧</h2>
+      </div>
+      <div class="space-y-4">
+
+        <!-- Section 1: SFT -->
+        <div class="topic-card">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold" style="color: var(--green);">2-1</span>
+                <span class="font-bold text-base">SFT (Supervised Fine-Tuning) + LoRA</span>
+                <span class="badge badge-amber">GPU必須</span>
+                <span class="badge badge-gray">約90分</span>
+              </div>
+              <p class="text-sm" style="color: var(--text-sub);">
+                LLaMA 3 に LoRA アダプタを適用し、日本語指示データセットで SFT を実行します。
+                LoRA の rank・alpha を変えて学習コストと品質のトレードオフを観察します。
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a href="supplement_sft.html" class="link-row">📄 補足: SFT と LoRA の仕組み</a>
+                <span class="text-xs px-3 py-1 rounded" style="background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); display: inline-flex; align-items: center;">
+                  📓 ch2_01_sft.ipynb
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: DPO -->
+        <div class="topic-card">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold" style="color: var(--green);">2-2</span>
+                <span class="font-bold text-base">DPO (Direct Preference Optimization)</span>
+                <span class="badge badge-amber">GPU必須</span>
+                <span class="badge badge-gray">約60分</span>
+              </div>
+              <p class="text-sm" style="color: var(--text-sub);">
+                chosen/rejected ペアのデータセットを自分で作成し、DPOTrainer で学習します。
+                SFT モデルと DPO モデルの出力を並べて応答スタイルの差を確認します。
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a href="supplement_dpo.html" class="link-row">📄 補足: DPO の理論と preference data</a>
+                <span class="text-xs px-3 py-1 rounded" style="background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); display: inline-flex; align-items: center;">
+                  📓 ch2_02_dpo.ipynb
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: RAG -->
+        <div class="topic-card">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold" style="color: var(--green);">2-3</span>
+                <span class="font-bold text-base">RAG (Retrieval-Augmented Generation)</span>
+                <span class="badge badge-green">CPU可</span>
+                <span class="badge badge-gray">約60分</span>
+              </div>
+              <p class="text-sm" style="color: var(--text-sub);">
+                LangChain + ChromaDB でドキュメント検索パイプラインを構築します。
+                チャンクサイズ（256/512/1024 token）と top-k 件数を変えて検索精度を比較します。
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a href="supplement_rag.html" class="link-row">📄 補足: RAG パイプラインの構成要素</a>
+                <span class="text-xs px-3 py-1 rounded" style="background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); display: inline-flex; align-items: center;">
+                  📓 ch2_03_rag.ipynb
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Evaluation -->
+        <div class="topic-card">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold" style="color: var(--green);">2-4</span>
+                <span class="font-bold text-base">評価実験：手法を定量比較する</span>
+                <span class="badge badge-green">CPU可</span>
+                <span class="badge badge-gray">約45分</span>
+              </div>
+              <p class="text-sm" style="color: var(--text-sub);">
+                同一質問セット（10問）に対して「素のLLM」「SFT後」「RAGあり」で回答させ、
+                BERTScore・ROUGE・LLM-as-judge の3指標で採点・比較します。
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a href="supplement_evaluation.html" class="link-row">📄 補足: 評価指標の使い分け</a>
+                <span class="text-xs px-3 py-1 rounded" style="background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); display: inline-flex; align-items: center;">
+                  📓 ch2_04_evaluation.ipynb
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- クイズ -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">Q</div>
+        <h2 class="text-xl font-bold">理解確認クイズ</h2>
+      </div>
+      <div class="card-amber">
+        <p class="text-sm mb-3" style="color: var(--amber-text);">
+          各セクション終了後に自己採点してください。
+          全問正解を目指す必要はありません。迷った問題は補足ページで復習しましょう。
+        </p>
+        <a href="quiz_ch2.html" class="link-row" style="display: inline-flex; border-color: var(--amber-border); background: var(--amber-bg); color: var(--amber-text);">
+          🎯 第2章 理解確認クイズを開く
+        </a>
+      </div>
+    </section>
+
+    <!-- 演習ファイル -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">✏</div>
+        <h2 class="text-xl font-bold">演習ノートブック</h2>
+      </div>
+      <div class="card">
+        <p class="text-sm mb-4" style="color: var(--text-sub);">
+          <code># TODO:</code> コメントの箇所を自分で実装してください。
+          詰まったら <code>solutions/</code> フォルダの解答を参照できます。
+        </p>
+        <div class="grid grid-cols-1 gap-2 text-sm font-mono" style="color: var(--text-sub);">
+          <div class="flex items-center gap-2 p-2 rounded" style="background: var(--surface2); border: 1px solid var(--border);">
+            <span>📓</span><span>exercises/ex_01_sft.ipynb</span><span class="ml-auto badge badge-gray">SFT + LoRA 穴埋め</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background: var(--surface2); border: 1px solid var(--border);">
+            <span>📓</span><span>exercises/ex_02_dpo.ipynb</span><span class="ml-auto badge badge-gray">DPO 穴埋め</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background: var(--surface2); border: 1px solid var(--border);">
+            <span>📓</span><span>exercises/ex_03_rag.ipynb</span><span class="ml-auto badge badge-gray">RAG パイプライン穴埋め</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background: var(--surface2); border: 1px solid var(--border);">
+            <span>📓</span><span>exercises/ex_04_evaluation.ipynb</span><span class="ml-auto badge badge-gray">評価指標穴埋め</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GPU注意 -->
+    <section>
+      <div class="card-amber">
+        <div class="flex items-start gap-3">
+          <span class="text-xl">⚠️</span>
+          <div>
+            <p class="font-bold text-sm mb-1" style="color: var(--amber-text);">GPU 使用時の注意事項</p>
+            <ul class="text-sm space-y-1" style="color: var(--amber-text);">
+              <li>SFT・DPO の学習は <strong>A100 1枚を約30〜60分</strong> 占有します</li>
+              <li>実行前に <code>/data/shared/gpu_queue.txt</code> で順番を確認してください</li>
+              <li>必ず <code>tmux new -s sft-train</code> セッション内で実行してください（SSH切断対策）</li>
+              <li>学習スクリプトは <code>scripts/train_sft.py</code>・<code>scripts/train_dpo.py</code> を使用します</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ナビゲーション -->
+    <nav class="flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
+      <a href="../../chapter1/web/index.html" class="nav-btn nav-btn-prev">
+        ← 第1章：機械学習の仕組み
+      </a>
+      <a href="../../chapter3/web/index.html" class="nav-btn nav-btn-next">
+        第3章：エージェントを作ろう →
+      </a>
+    </nav>
+
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-6 py-6" style="border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem;">
+    ML ハンズオンセッション — 第2章
+  </footer>
+
+</body>
+</html>

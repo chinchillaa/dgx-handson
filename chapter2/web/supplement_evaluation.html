@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足: 評価指標の使い分け — 第2章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: #DDD8CE; --border-strong: #C5BFB2;
+      --text: #1C1917; --text-sub: #57534E; --text-muted: #A8A29E;
+      --green: #0D4A38; --green-mid: #1A6B52; --green-bg: #EAF3EF; --green-border: #A7CBB9;
+      --amber: #7C5C00; --amber-bg: #FFF8E6; --amber-border: #E8C96A; --amber-text: #92400E;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+    .label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-mid); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; }
+    .card-green { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .card-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .section-heading { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--green); margin-bottom: 1.5rem; }
+    .section-number { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    pre { border-radius: 0.5rem; overflow-x: auto; }
+    code.hljs { border-radius: 0.5rem; font-size: 0.82rem; }
+    .key-point { border-left: 3px solid var(--green); padding-left: 1rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { background: var(--surface2); padding: 0.6rem 1rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 0.6rem 1rem; border: 1px solid var(--border); }
+    tr:nth-child(even) td { background: var(--surface2); }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-3xl mx-auto px-6 py-4">
+      <div class="flex items-center gap-2 mb-1">
+        <a href="index.html" class="label" style="text-decoration: none;">← 第2章トップ</a>
+        <span style="color: var(--text-muted);">›</span>
+        <span class="label">補足資料</span>
+      </div>
+      <h1 class="text-2xl font-bold">評価指標の使い分け</h1>
+      <p class="text-sm mt-1" style="color: var(--text-sub);">BERTScore・ROUGE・LLM-as-judge の特性と使い所</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- 指標の概観 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">1</div>
+        <h2 class="text-xl font-bold">3つの評価指標の概観</h2>
+      </div>
+      <div class="card mb-4">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>指標</th><th>計算方法</th><th>参照回答</th><th>特徴</th></tr></thead>
+            <tbody>
+              <tr><td><strong>ROUGE</strong></td><td>N-gram の重複率</td><td>必要</td><td>計算が速い・意味を見ない</td></tr>
+              <tr><td><strong>BERTScore</strong></td><td>BERT 埋め込みのコサイン類似度</td><td>必要</td><td>意味的な類似を評価</td></tr>
+              <tr><td><strong>LLM-as-judge</strong></td><td>LLM による採点</td><td>不要も可</td><td>人間評価に最も近い</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="key-point">
+        <p class="text-sm">
+          3つを組み合わせて使うのが原則です。ROUGE だけでは「同じ意味を別の表現で答えた」ケースが低く評価されます。
+          LLM-as-judge だけでは API コストがかかり、バイアスが入ります。
+        </p>
+      </div>
+    </section>
+
+    <!-- ROUGE -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">2</div>
+        <h2 class="text-xl font-bold">ROUGE</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        主に翻訳・要約の評価で使われる N-gram ベースの指標です。
+        生成文と参照文の間で共通する N-gram の割合を測ります。
+      </p>
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-2">ROUGE-L（最長共通部分列）の定義</p>
+        $$\text{ROUGE-L} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+        <p class="text-sm mt-3" style="color: var(--text-sub);">Precision: 生成文中に参照文と共通する LCS の割合 / Recall: 参照文中に生成文と共通する LCS の割合</p>
+      </div>
+      <pre><code class="language-python">from rouge_score import rouge_scorer
+
+scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=False)
+
+reference = "機械学習は大量のデータからパターンを学習するAIの手法です"
+hypothesis = "機械学習はデータからパターンを見つけ出すAI技術です"
+
+scores = scorer.score(reference, hypothesis)
+print(f"ROUGE-1: {scores['rouge1'].fmeasure:.3f}")
+print(f"ROUGE-2: {scores['rouge2'].fmeasure:.3f}")
+print(f"ROUGE-L: {scores['rougeL'].fmeasure:.3f}")</code></pre>
+    </section>
+
+    <!-- BERTScore -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">3</div>
+        <h2 class="text-xl font-bold">BERTScore</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        BERT の埋め込み表現を使って、トークンレベルの意味的な類似度を計算します。
+        「同じ意味を異なる単語で表現した場合」に ROUGE より高いスコアを与えます。
+      </p>
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-2">BERTScore の計算方法（概略）</p>
+        <ol class="text-sm space-y-1 list-decimal list-inside" style="color: var(--text-sub);">
+          <li>生成文・参照文の各トークンを BERT でベクトル化</li>
+          <li>各トークンペアのコサイン類似度を計算</li>
+          <li>Recall: 参照文の各トークンが生成文の最も近いトークンとどれだけ似ているか</li>
+          <li>Precision/Recall の F1 を最終スコアとする</li>
+        </ol>
+      </div>
+      <pre><code class="language-python">from bert_score import score
+
+references  = ["機械学習は大量のデータからパターンを学習するAIの手法です"]
+hypotheses  = ["機械学習はデータからパターンを見つけ出すAI技術です"]
+
+P, R, F1 = score(hypotheses, references, lang="ja", verbose=True)
+print(f"BERTScore F1: {F1.mean().item():.3f}")</code></pre>
+    </section>
+
+    <!-- LLM-as-judge -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">4</div>
+        <h2 class="text-xl font-bold">LLM-as-judge</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        LLM 自体に採点させる手法です。人間の評価者に最も近い結果が得られますが、
+        採点の再現性と LLM バイアスに注意が必要です。
+      </p>
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-3">採点プロンプトのテンプレート</p>
+        <pre><code class="language-text">あなたは公平な評価者です。以下の質問に対する回答を1〜5点で採点してください。
+
+【質問】
+{question}
+
+【参照回答】
+{reference}
+
+【評価対象の回答】
+{generated}
+
+採点基準:
+5: 参照回答と同等以上の正確さと詳しさ
+4: ほぼ正確だが一部不足
+3: 概ね正しいが重要な情報が欠けている
+2: 部分的に正しいが誤りを含む
+1: 明らかに誤りまたは無関係
+
+スコア（1〜5の整数のみ）:</code></pre>
+      </div>
+      <div class="card-amber">
+        <p class="text-sm font-bold mb-1" style="color: var(--amber-text);">LLM-as-judge の注意点</p>
+        <ul class="text-sm space-y-1" style="color: var(--amber-text);">
+          <li>• 自分自身の出力を高く評価する「自己バイアス」が知られている</li>
+          <li>• 長い回答を短い回答より好む傾向がある</li>
+          <li>• 複数回実行して平均を取ることで安定性が上がる</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 使い分け -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">5</div>
+        <h2 class="text-xl font-bold">実験での使い分け指針</h2>
+      </div>
+      <div class="card">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>目的</th><th>推奨指標</th><th>理由</th></tr></thead>
+            <tbody>
+              <tr><td>大量データの一次スクリーニング</td><td>ROUGE</td><td>高速・参照文があれば低コスト</td></tr>
+              <tr><td>言い換えを含む意味的な評価</td><td>BERTScore</td><td>同義表現を適切に評価</td></tr>
+              <tr><td>最終的な品質判断</td><td>LLM-as-judge</td><td>人間評価との相関が高い</td></tr>
+              <tr><td>手法間の総合比較</td><td>3指標の平均</td><td>単一指標のバイアスを打ち消す</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex justify-start pt-4" style="border-top: 1px solid var(--border);">
+      <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
+    </div>
+  </main>
+</body>
+</html>

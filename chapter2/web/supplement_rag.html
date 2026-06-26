@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補足: RAG パイプラインの構成要素 — 第2章</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: #DDD8CE; --border-strong: #C5BFB2;
+      --text: #1C1917; --text-sub: #57534E; --text-muted: #A8A29E;
+      --green: #0D4A38; --green-mid: #1A6B52; --green-bg: #EAF3EF; --green-border: #A7CBB9;
+      --amber: #7C5C00; --amber-bg: #FFF8E6; --amber-border: #E8C96A; --amber-text: #92400E;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Meiryo",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+    .label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-mid); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; }
+    .card-green { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .card-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 0.75rem; padding: 1.25rem; }
+    .section-heading { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--green); margin-bottom: 1.5rem; }
+    .section-number { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    pre { border-radius: 0.5rem; overflow-x: auto; }
+    code.hljs { border-radius: 0.5rem; font-size: 0.82rem; }
+    .key-point { border-left: 3px solid var(--green); padding-left: 1rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { background: var(--surface2); padding: 0.6rem 1rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 0.6rem 1rem; border: 1px solid var(--border); }
+    tr:nth-child(even) td { background: var(--surface2); }
+    .flow-step { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px dashed var(--border); }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num { display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 0.1rem; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border);">
+    <div class="max-w-3xl mx-auto px-6 py-4">
+      <div class="flex items-center gap-2 mb-1">
+        <a href="index.html" class="label" style="text-decoration: none;">← 第2章トップ</a>
+        <span style="color: var(--text-muted);">›</span>
+        <span class="label">補足資料</span>
+      </div>
+      <h1 class="text-2xl font-bold">RAG パイプラインの構成要素</h1>
+      <p class="text-sm mt-1" style="color: var(--text-sub);">知識を外部DBに持たせて LLM の回答を強化する仕組み</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- RAG とは -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">1</div>
+        <h2 class="text-xl font-bold">RAG とは何か</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        <strong>Retrieval-Augmented Generation (RAG)</strong> は、質問に答える前に関連ドキュメントを検索して
+        コンテキストとして LLM に渡す手法です。
+        SFT でモデルに知識を「焼き込む」のではなく、知識を外部データベースに置いておきます。
+      </p>
+      <div class="card mb-4">
+        <p class="text-sm font-bold mb-3">RAG の処理フロー</p>
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div>
+            <p class="font-semibold text-sm">ドキュメントの分割（チャンキング）</p>
+            <p class="text-sm" style="color: var(--text-sub);">長い文書をテキストチャンクに分割する。チャンクサイズが検索精度に影響。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div>
+            <p class="font-semibold text-sm">エンベッディング（ベクトル化）</p>
+            <p class="text-sm" style="color: var(--text-sub);">各チャンクを埋め込みモデルで高次元ベクトルに変換し、ベクトルDBに格納。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div>
+            <p class="font-semibold text-sm">類似検索（Retrieval）</p>
+            <p class="text-sm" style="color: var(--text-sub);">ユーザーの質問もベクトル化し、コサイン類似度で上位 k 件のチャンクを取得。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div>
+            <p class="font-semibold text-sm">コンテキスト付き生成（Generation）</p>
+            <p class="text-sm" style="color: var(--text-sub);">取得したチャンクを「参考文書」としてプロンプトに埋め込み、LLM に回答させる。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- チャンクサイズの影響 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">2</div>
+        <h2 class="text-xl font-bold">チャンクサイズの影響</h2>
+      </div>
+      <p class="text-sm mb-4" style="color: var(--text-sub);">
+        チャンクサイズは RAG の精度に直結する最重要パラメータです。ハンズオンでは 3 通りを比較します。
+      </p>
+      <div class="card mb-4">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>チャンクサイズ</th><th>メリット</th><th>デメリット</th><th>向いているケース</th></tr></thead>
+            <tbody>
+              <tr><td>256 token</td><td>ピンポイントで関連箇所を取れる</td><td>文脈が途切れやすい</td><td>FAQ・短い定義文</td></tr>
+              <tr><td><strong>512 token</strong></td><td>精度とコンテキスト量のバランス</td><td>—</td><td>一般的な技術文書</td></tr>
+              <tr><td>1024 token</td><td>段落全体の文脈を保てる</td><td>ノイズが増えやすい</td><td>論文・長い説明文</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="key-point">
+        <p class="text-sm">チャンクに <strong>オーバーラップ</strong>（overlap=50〜100 token）を設定すると、
+        チャンク境界で情報が切れる問題を緩和できます。</p>
+      </div>
+    </section>
+
+    <!-- LangChain + ChromaDB の実装 -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">3</div>
+        <h2 class="text-xl font-bold">LangChain + ChromaDB の実装パターン</h2>
+      </div>
+      <pre><code class="language-python">from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import TextLoader
+
+# 1. ドキュメント読み込み
+loader = TextLoader("./docs/sample.txt", encoding="utf-8")
+documents = loader.load()
+
+# 2. チャンキング
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,       # チャンクサイズ (token 数の近似)
+    chunk_overlap=50,     # 前後チャンクとの重複量
+    length_function=len,
+)
+chunks = splitter.split_documents(documents)
+print(f"チャンク数: {len(chunks)}")
+
+# 3. エンベッディング + ベクトルDB作成
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+)
+vectorstore = Chroma.from_documents(chunks, embeddings)
+
+# 4. 類似検索（top-k=3）
+query = "機械学習における過学習とは何ですか？"
+results = vectorstore.similarity_search(query, k=3)
+for i, doc in enumerate(results):
+    print(f"--- 検索結果 {i+1} ---")
+    print(doc.page_content[:200])
+</code></pre>
+    </section>
+
+    <!-- SFT vs RAG の使い分け -->
+    <section>
+      <div class="section-heading">
+        <div class="section-number">4</div>
+        <h2 class="text-xl font-bold">SFT vs RAG の使い分け</h2>
+      </div>
+      <div class="card">
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>観点</th><th>SFT</th><th>RAG</th></tr></thead>
+            <tbody>
+              <tr><td>知識の更新頻度</td><td>低い（再学習が必要）</td><td>高い（DBを更新するだけ）</td></tr>
+              <tr><td>推論コスト</td><td>低い（モデルに内包）</td><td>高い（検索 + 生成）</td></tr>
+              <tr><td>幻覚（hallucination）</td><td>抑制しにくい</td><td>参照元を明示できる</td></tr>
+              <tr><td>応答スタイルの変更</td><td>得意</td><td>苦手</td></tr>
+              <tr><td>ドメイン知識の深さ</td><td>中程度（データ量に依存）</td><td>ドキュメントの質に依存</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-green mt-4">
+        <p class="text-sm" style="color: var(--green);">
+          <strong>実務での組み合わせ</strong><br>
+          SFT で応答形式・スタイルを固め、RAG で最新の知識を補完するという
+          <strong>SFT + RAG のハイブリッド</strong>が実務では最もよく使われるパターンです。
+        </p>
+      </div>
+    </section>
+
+    <div class="flex justify-start pt-4" style="border-top: 1px solid var(--border);">
+      <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
+    </div>
+  </main>
+</body>
+</html>
