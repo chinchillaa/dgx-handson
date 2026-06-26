@@ -21,3 +21,7 @@ outputs/
 # OS
 .DS_Store
 Thumbs.db
+
+# データセット（大容量バイナリ）
+data/
+chapter1/solutions/data/
