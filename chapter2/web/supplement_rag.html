@@ -63,7 +63,8 @@
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         <strong>Retrieval-Augmented Generation (RAG)</strong> は、質問に答える前に関連ドキュメントを検索して
         コンテキストとして LLM に渡す手法です。
-        SFT でモデルに知識を「焼き込む」のではなく、知識を外部データベースに置いておきます。
+        コンテキストとは、LLM に一緒に読ませる参考情報のことです。試験でいうと、暗記だけで答えるのではなく、持ち込み資料の該当ページを開いてから答えるイメージです。
+        SFT でモデルに知識を「焼き込む」のではなく、知識を外部データベースに置いておき、必要に応じて検索します。
       </p>
       <div class="card mb-4">
         <p class="text-sm font-bold mb-3">RAG の処理フロー</p>
@@ -71,21 +72,21 @@
           <div class="flow-num">1</div>
           <div>
             <p class="font-semibold text-sm">ドキュメントの分割（チャンキング）</p>
-            <p class="text-sm" style="color: var(--text-sub);">長い文書をテキストチャンクに分割する。チャンクサイズが検索精度に影響。</p>
+            <p class="text-sm" style="color: var(--text-sub);">長い文書をテキストチャンクに分割します。<br>ここでチャンクとは「検索しやすい短いかたまり」です。<br>たとえば10ページの資料を、段落ごとのメモカードに分けるイメージです。<br>このチャンクサイズは検索精度に影響します。</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">2</div>
           <div>
             <p class="font-semibold text-sm">エンベッディング（ベクトル化）</p>
-            <p class="text-sm" style="color: var(--text-sub);">各チャンクを埋め込みモデルで高次元ベクトルに変換し、ベクトルDBに格納。</p>
+            <p class="text-sm" style="color: var(--text-sub);">各チャンクを埋め込みモデルで高次元ベクトルに変換し、ベクトルDBに格納します。<br>ベクトル化とは、文章の意味を数値のリストで表すことです。たとえば「犬」と「子犬」は近い数値、「犬」と「契約書」は遠い数値になります。</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">3</div>
           <div>
             <p class="font-semibold text-sm">類似検索（Retrieval）</p>
-            <p class="text-sm" style="color: var(--text-sub);">ユーザーの質問もベクトル化し、コサイン類似度で上位 k 件のチャンクを取得。</p>
+            <p class="text-sm" style="color: var(--text-sub);">ユーザーの質問をベクトル化し、コサイン類似度で上位 k 件のチャンクを取得します。<br>パラメータとして使用するtop-k の k は「似ている資料を何件持ってくるか」を表します。<br>k=3 なら、最も近いメモカードを3枚取り出すイメージです。</p>
           </div>
         </div>
         <div class="flow-step">
@@ -105,23 +106,24 @@
         <h2 class="text-xl font-bold">チャンクサイズの影響</h2>
       </div>
       <p class="text-sm mb-4" style="color: var(--text-sub);">
-        チャンクサイズは RAG の精度に直結する最重要パラメータです。ハンズオンでは 3 通りを比較します。
+        チャンクサイズは RAG の精度に直結する最重要パラメータです。短すぎると情報が途中で切れ、長すぎると関係ない説明まで混ざります。ハンズオンでは 3 通りを比較します。
+        token は文字数と完全には一致しないため、以下の情報量はあくまで目安です。
       </p>
       <div class="card mb-4">
         <div class="overflow-x-auto">
           <table>
-            <thead><tr><th>チャンクサイズ</th><th>メリット</th><th>デメリット</th><th>向いているケース</th></tr></thead>
+            <thead><tr><th>チャンクサイズ</th><th>情報量の目安</th><th>メリット</th><th>デメリット</th><th>向いているケース</th></tr></thead>
             <tbody>
-              <tr><td>256 token</td><td>ピンポイントで関連箇所を取れる</td><td>文脈が途切れやすい</td><td>FAQ・短い定義文</td></tr>
-              <tr><td><strong>512 token</strong></td><td>精度とコンテキスト量のバランス</td><td>—</td><td>一般的な技術文書</td></tr>
-              <tr><td>1024 token</td><td>段落全体の文脈を保てる</td><td>ノイズが増えやすい</td><td>論文・長い説明文</td></tr>
+              <tr><td>256 token</td><td>X(Twitter)の短い投稿数個分、FAQ 1〜2項目程度</td><td>ピンポイントで関連箇所を取れる</td><td>文脈が途切れやすい</td><td>FAQ・短い定義文</td></tr>
+              <tr><td><strong>512 token</strong></td><td>短いブログ節や、技術説明の小見出し1つ程度</td><td>精度とコンテキスト量のバランス</td><td>—</td><td>一般的な技術文書</td></tr>
+              <tr><td>1024 token</td><td>長めの節や、ドキュメント1ページ弱程度</td><td>段落全体の文脈を保てる</td><td>ノイズが増えやすい</td><td>論文・長い説明文</td></tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="key-point">
         <p class="text-sm">チャンクに <strong>オーバーラップ</strong>（overlap=50〜100 token）を設定すると、
-        チャンク境界で情報が切れる問題を緩和できます。</p>
+        チャンク境界で情報が切れる問題を緩和できます。オーバーラップとは、隣り合うチャンクに同じ文を少し重ねて入れることです。ページをコピーするときに、前後の数行も一緒に写して文脈を残すイメージです。</p>
       </div>
     </section>
 
@@ -190,6 +192,7 @@ for i, doc in enumerate(results):
           <strong>実務での組み合わせ</strong><br>
           SFT で応答形式・スタイルを固め、RAG で最新の知識を補完するという
           <strong>SFT + RAG のハイブリッド</strong>が実務では最もよく使われるパターンです。
+          たとえば「必ず結論から箇条書きで答える」部分は SFT、「最新の社内規程を参照する」部分は RAG に任せます。
         </p>
       </div>
     </section>

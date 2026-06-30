@@ -206,14 +206,15 @@
       </div>
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         第2章の全トピックを始める前に、「どの手法をいつ使うか」を確認しておきます。
+        ここで扱う手法は、ざっくり言うと「モデルに答え方を教える」「好ましい答えを選ばせる」「資料を検索してから答えさせる」の3種類です。
         実験中に迷ったらこのフレームに立ち戻ってください。
       </p>
       <div class="decision-box">
         <div>Q1: タスク固有の知識が必要か？</div>
         <div class="pl-6"><span class="decision-yes">→ YES</span> → Q2: 知識は動的（頻繁に更新）か？</div>
-        <div class="pl-12"><span class="decision-yes">→ YES</span> → <span class="decision-result">RAG</span>（ドキュメントを外部DBに置く）</div>
-        <div class="pl-12"><span class="decision-no">→ NO</span>  → <span class="decision-result">SFT が有力</span>（知識をモデルに焼き込む）</div>
-        <div class="pl-6"><span class="decision-no">→ NO</span>  → <span class="decision-result">Prompt Engineering または DPO</span>（応答スタイル調整）</div>
+        <div class="pl-12"><span class="decision-yes">→ YES</span> → <span class="decision-result">RAG</span>（資料を外部DBに置き、必要な部分を検索してから回答する）</div>
+        <div class="pl-12"><span class="decision-no">→ NO</span>  → <span class="decision-result">SFT が有力</span>（例題と模範解答で、モデルの中に知識や答え方を学習させる）</div>
+        <div class="pl-6"><span class="decision-no">→ NO</span>  → <span class="decision-result">Prompt Engineering または DPO</span>（プロンプトや好みの例で応答スタイルを調整する）</div>
       </div>
     </section>
 
@@ -236,8 +237,9 @@
                 <span class="badge badge-gray">約90分</span>
               </div>
               <p class="text-sm" style="color: var(--text-sub);">
+                SFT は「質問と模範回答の例」を使って、モデルに期待する答え方を教える手法です。
                 LLaMA 3 に LoRA アダプタを適用し、日本語指示データセットで SFT を実行します。
-                LoRA の rank・alpha を変えて学習コストと品質のトレードオフを観察します。
+                LoRA の rank・alpha を変えて、軽さと品質のバランスを観察します。
               </p>
               <div class="mt-3 flex flex-wrap gap-2">
                 <a href="supplement_sft.html" class="link-row">📄 補足: SFT と LoRA の仕組み</a>
@@ -260,6 +262,7 @@
                 <span class="badge badge-gray">約60分</span>
               </div>
               <p class="text-sm" style="color: var(--text-sub);">
+                DPO は「こちらの回答の方がよい」という比較データから、モデルの好ましい振る舞いを学習させる手法です。
                 chosen/rejected ペアのデータセットを自分で作成し、DPOTrainer で学習します。
                 SFT モデルと DPO モデルの出力を並べて応答スタイルの差を確認します。
               </p>
@@ -284,6 +287,7 @@
                 <span class="badge badge-gray">約60分</span>
               </div>
               <p class="text-sm" style="color: var(--text-sub);">
+                RAG は、モデルに資料を丸暗記させるのではなく、回答前に関連資料を探して読ませる仕組みです。
                 LangChain + ChromaDB でドキュメント検索パイプラインを構築します。
                 チャンクサイズ（256/512/1024 token）と top-k 件数を変えて検索精度を比較します。
               </p>
@@ -310,6 +314,7 @@
               <p class="text-sm" style="color: var(--text-sub);">
                 同一質問セット（10問）に対して「素のLLM」「SFT後」「RAGあり」で回答させ、
                 BERTScore・ROUGE・LLM-as-judge の3指標で採点・比較します。
+                文字の一致、意味の近さ、LLMによる総合判断という違う観点を見比べます。
               </p>
               <div class="mt-3 flex flex-wrap gap-2">
                 <a href="supplement_evaluation.html" class="link-row">📄 補足: 評価指標の使い分け</a>

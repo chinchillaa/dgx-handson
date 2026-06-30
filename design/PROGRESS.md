@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-04-16（infra 動作確認・バグ修正・Llama アクセス申請中）
+> 最終更新：2026-06-30（第2章 Web 資料作成・初学者向け説明改善）
 
 ---
 
@@ -25,7 +25,7 @@ DGX（A100 x8）上で実施する ML ハンズオンセッション用コンテ
 | 章 | テーマ | 状態 |
 |---|---|---|
 | 第1章 | 機械学習(AI)の仕組み | **完成** |
-| 第2章 | AI を「強く」する（SFT・DPO・RAG） | 未着手 |
+| 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成・説明改善済み** |
 | 第3章 | AI エージェントを作ろう | 未着手 |
 
 ---
@@ -60,7 +60,14 @@ dgx-handson/
 │       ├── sol_01_linear_regression.ipynb        ✅ HO-1 解答
 │       ├── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
 │       └── sol_03_llm_inference.ipynb            ✅ HO-3 解答
-├── chapter2/  （空ディレクトリ + .gitkeep のみ）
+├── chapter2/
+│   └── web/
+│       ├── index.html                            ✅ 第2章トップ・手法選定フレームワーク
+│       ├── supplement_sft.html                   ✅ SFT・LoRA・QLoRA 補足（4×4行列の数値例つき）
+│       ├── supplement_dpo.html                   ✅ DPO 補足（参照モデル・損失関数図解・動的デモつき）
+│       ├── supplement_rag.html                   ✅ RAG 補足（チャンクサイズ情報量目安つき）
+│       ├── supplement_evaluation.html            ✅ 評価指標補足（ROUGE・BERTScore・LLM-as-judge）
+│       └── quiz_ch2.html                         ✅ 第2章 理解確認クイズ
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 └── infra/
     ├── setup.sh                                      ✅ 環境構築（uv + venv + パッケージ + Jupyter カーネル）
@@ -103,13 +110,34 @@ bash infra/predownload.sh          # Llama ダウンロード（約 2.5 GB）
 
 ---
 
+## chapter2 Web 資料更新ログ（2026-06-30）
+
+第2章の Web 資料を作成し、初学者が専門用語でつまずきにくいよう説明を補強済み。
+
+| ファイル | 更新内容 |
+|---|---|
+| `chapter2/web/index.html` | SFT・DPO・RAG・評価指標の役割と手法選定フレームワークを整理 |
+| `chapter2/web/supplement_sft.html` | SFT/LoRA/QLoRA の説明を補強。低ランク行列・rank・alpha・量子化を具体例つきで説明。LoRA は 4×4 重み行列の数値例で、`W` → `ΔW` → `W'` の更新まで記載 |
+| `chapter2/web/supplement_dpo.html` | DPO/RLHF/preference data の説明を補強。参照モデルの役割、DPO 損失関数の図解、chosen/rejected 確率バーと beta スライダーの簡易デモを追加 |
+| `chapter2/web/supplement_rag.html` | RAG の処理フロー、チャンク・ベクトル化・top-k・オーバーラップを例つきで説明。チャンクサイズ表に情報量の目安を追加 |
+| `chapter2/web/supplement_evaluation.html` | ROUGE・BERTScore・LLM-as-judge の違いを、文字一致・意味類似・LLM評価の観点で整理 |
+| `chapter2/web/quiz_ch2.html` | 解説文に用語補足を追加し、誤答時に復習しやすい内容へ更新 |
+
+### 注意点
+
+- `supplement_dpo.html` は理解補助のため、ページ内 JavaScript による簡易インタラクティブデモを含む。
+- `DESIGN.md` の「動的エフェクト禁止」は印刷・PDF化を想定した原則だが、今回はユーザー指示により、学習理解を優先して限定的な動的図解を追加した。
+- chapter2 のノートブック、演習、解答ファイルは未作成。
+
+---
+
 ## 残タスク
 
 ### chapter2・chapter3
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | 未着手 |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答は未作成 |
 | 第3章（AI エージェント） | 未着手 |
 
 ---
