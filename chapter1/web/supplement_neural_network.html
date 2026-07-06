@@ -161,6 +161,11 @@
       a { color: inherit; text-decoration: none; }
     }
   </style>
+  <!-- 共通テーマ（フォント + デザインシステム）※ページ内 <style> より後に読み込む -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/web-theme.css">
 </head>
 <body>
 
@@ -224,8 +229,9 @@
           <!-- 説明 -->
           <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
             <p style="margin-bottom:0.75rem;">
-              XOR は「2つの入力が異なるとき 1、同じとき 0」を返す演算です。
-              4点を散布図に描くと、<strong style="color:var(--text);">1本の直線で ○ と × を分けることは不可能</strong> です。
+              XOR は「2つの入力が異なるとき 1、同じとき 0」を返す演算です。<br>
+              4点を散布図に描くと、<strong style="color:var(--text);">1本の直線で ○ と × を分けることは不可能</strong> です。<br>
+              (つまり$y = a_1 * x_1 + a_2 * x_2 + b$ では表現できない関数ということ)
             </p>
             <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
               <thead>
@@ -270,8 +276,9 @@
       <div class="note-amber">
         <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜ線形変換では解けないのか？</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          線形変換をいくつ重ねても、結果は常に「1回の線形変換」と数学的に等価です。
-          つまり、どれだけ層を増やしても <strong>曲線的な境界を表現できません</strong>。
+          線形変換をいくつ重ねても、結果は常に「1回の線形変換」と数学的に等価です。<br>
+          (線形変換の合成もまた線形変換になるため)<br>
+          つまり、どれだけ層を増やしても <strong>直線的な境界しか表現できません</strong>。
           この問題を解決するのが <strong>活性化関数（非線形変換）</strong> の導入です。
         </p>
       </div>
@@ -289,7 +296,7 @@
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
         ニューラルネットワーク（NN）は「関数を複雑にするための部品」を積み重ねた構造です。
-        <strong style="color:var(--text);">線形変換 → 活性化関数 → 線形変換 → …</strong>
+        <strong style="color:var(--text);">線形変換 → 活性化関数(SECTION 2で説明) → 線形変換 → …</strong>
         というブロックを繰り返すことで、任意の複雑な入出力関係を近似できます。
       </p>
 
@@ -418,7 +425,7 @@
           </div>
           <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
             負の値をすべて 0 に、正の値はそのまま通す。
-            <strong style="color:var(--text);">現代の NN で最も広く使われる</strong> 活性化関数。
+            <strong style="color:var(--text);">現代の NN でも広く使われる</strong> 活性化関数。<br>(元祖Transformerでも使われている)
           </p>
           <!-- SVG ReLU グラフ -->
           <svg viewBox="0 0 160 100" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
@@ -596,7 +603,7 @@ print(f"出力の形状:  {output.shape}")</code></pre>
         <p style="font-size:0.82rem; color:#5C4200; line-height:1.75;">
           2012年以降の深層学習ブームの背景の一つは「自動微分フレームワークの普及」です。
           研究者がモデルの構造設計に集中できるようになり、
-          100層を超えるネットワークの学習が現実的になりました。
+          深層ネットワークの学習が現実的になりました。
         </p>
       </div>
 

@@ -179,6 +179,11 @@
       body { background: white; }
     }
   </style>
+  <!-- 共通テーマ（フォント + デザインシステム）※ページ内 <style> より後に読み込む -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/web-theme.css">
 </head>
 <body>
 
@@ -470,9 +475,9 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
       <div class="card">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">概念図：損失の「地形」</p>
         <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.75; margin-bottom:1rem;">
-          $w$ と $b$ の値を変えると損失 $L$ が変わります。これを描くと
-          <strong style="color:var(--text);">お椀型の曲面</strong> になります。
-          底（最小値）が「最もデータに合ったパラメータ」の位置です。
+          $w$ と $b$ の値を変えると損失 $L$ の値も変わります。(この時、$L$は$w$,$b$の関数と言う)<br>これを描くと
+          <strong style="color:var(--text);">お椀型の曲面</strong> になったとします。(曲線ではなく<strong style="color:var(--text);">曲面</strong>)<br>
+          このときのお椀の底（最小値）が「最もデータに合ったパラメータ」の位置と言えます。
         </p>
         <svg viewBox="0 0 440 200" style="width:100%; max-width:440px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
           <!-- 背景グリッド -->

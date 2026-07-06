@@ -1,0 +1,287 @@
+/* ============================================================
+   DGX ML ハンズオン 共通テーマ
+   各ページの <style> の後に読み込むこと（同一詳細度なら後勝ちで
+   このファイルが優先される）。ページ固有のレイアウトは上書きせず、
+   配色変数・タイポグラフィ・質感・インタラクションのみ統一する。
+   ============================================================ */
+
+/* ── パレット（全ページ共通の変数を一元管理） ── */
+:root {
+  --bg:           #F6F3EC;
+  --surface:      #FFFFFF;
+  --surface2:     #EFEBE1;
+  --border:       #E0DACE;
+  --border-strong:#C7C0B1;
+  --text:         #201C18;
+  --text-sub:     #57534E;
+  --text-muted:   #A39C92;
+  --green:        #0D4A38;
+  --green-mid:    #1A6B52;
+  --green-bg:     #EAF3EF;
+  --green-border: #A7CBB9;
+  --amber:        #7C5C00;
+  --amber-bg:     #FFF8E6;
+  --amber-border: #E8C96A;
+  --amber-text:   #92400E;
+  --red:          #991B1B;
+  --red-bg:       #FEF2F2;
+  --red-border:   #FCA5A5;
+  --code-bg:      #16181A;
+  --code-out:     #24262A;
+
+  --font-body:    "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont,
+                  "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+  --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-mono:    "IBM Plex Mono", "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+
+  --shadow-sm:    0 1px 2px rgba(32, 28, 24, 0.05);
+  --shadow-card:  0 1px 2px rgba(32, 28, 24, 0.04), 0 6px 20px -12px rgba(32, 28, 24, 0.10);
+  --shadow-hover: 0 2px 4px rgba(32, 28, 24, 0.05), 0 12px 28px -12px rgba(13, 74, 56, 0.18);
+}
+
+/* ── ベース ── */
+html { scroll-behavior: smooth; }
+@media (min-width: 1100px) {
+  html { font-size: 17px; }  /* 大画面では全体をわずかに拡大して可読性を上げる */
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  /* 紙のような粒子テクスチャ + 上部にごく薄い緑のウォッシュ */
+  background-image:
+    radial-gradient(1100px 420px at 50% -120px, rgba(13, 74, 56, 0.045), transparent 65%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.09 0 0 0 0.028 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  text-rendering: optimizeLegibility;
+}
+
+/* 最上部のブランドアクセントライン */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green) 0%, #2E8B6B 45%, #C9A227 100%);
+  z-index: 60;
+  pointer-events: none;
+}
+
+::selection { background: #CBE3D7; color: var(--green); }
+
+body :focus-visible {
+  outline: 2px solid var(--green-mid);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* スクロールバー（WebKit系） */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── タイポグラフィ ── */
+body h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
+body h2, body h3 {
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
+body p { text-wrap: pretty; }
+
+/* ヒーロー（summary-block / result-block）の見出しは明朝で格調を出す */
+.summary-block h2, .result-block h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+/* 等幅フォントの統一 */
+body :is(code, pre, kbd, samp),
+.output-block, .terminal-inline, .metric-value, .fill-input,
+.decision-box, .var-table td:first-child {
+  font-family: var(--font-mono);
+}
+
+/* ── ヘッダー / フッター ── */
+body > header {
+  box-shadow: 0 10px 30px -26px rgba(32, 28, 24, 0.5);
+  position: relative;
+}
+body > header .label { font-weight: 700; }
+body > footer { letter-spacing: 0.06em; }
+
+/* ── カード類：角丸・陰影・ホバーを統一 ── */
+.card, .card-math, .topic-card, .q-card, .question-card, .chart-panel,
+.card-green, .card-amber {
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+.card-lecture, .card-handson, .card-quiz {
+  border-radius: 0 12px 12px 0;
+  box-shadow: var(--shadow-card);
+}
+.topic-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.topic-card:hover {
+  border-color: var(--green-border);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ヒーローブロックは深緑のグラデーションで奥行きを出す */
+.summary-block, .result-block {
+  background: linear-gradient(140deg, #11573F 0%, #0D4A38 45%, #093226 100%);
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset,
+              0 18px 40px -22px rgba(13, 74, 56, 0.55);
+}
+
+/* ── セクション見出し ── */
+.section-heading { border-bottom-color: var(--border); }
+.section-heading::before { border-radius: 2px; }
+.section-number {
+  border-radius: 10px;
+  font-family: var(--font-display);
+  box-shadow: var(--shadow-sm);
+}
+/* 大きな透かし番号（補足ページ）は明朝で装飾的に */
+.section-rule .num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  opacity: 0.16;
+}
+
+/* ── 注釈ボックス ── */
+.note-green, .note-amber, .note-red, .note-green-inline {
+  border-radius: 0 10px 10px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── コードブロック ── */
+.code-label {
+  background: var(--code-bg);
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid #33363B;
+}
+pre.hljs-wrap {
+  border-radius: 0 0 10px 10px;
+  box-shadow: var(--shadow-card);
+}
+pre.hljs-wrap code.hljs { background: var(--code-bg); }
+pre.hljs-wrap code { font-size: 0.8rem; line-height: 1.7; }
+.output-block { border-radius: 0 0 10px 10px; }
+.terminal-inline { border-radius: 8px; }
+
+/* KaTeX の数式が横にはみ出す場合はブロック内スクロール */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35em 0.1em;
+}
+
+/* ── リンクチップ / ボタン ── */
+.link-chip, .link-row, .file-chip, .file-chip-gray, .time-chip {
+  border-radius: 999px;
+  transition: background 0.18s ease, border-color 0.18s ease,
+              box-shadow 0.18s ease, transform 0.18s ease;
+}
+.link-chip:hover, .link-row:hover {
+  background: #DCEDE5;
+  border-color: var(--green-mid);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.nav-btn, .btn, .btn-check, .btn-section, .btn-primary, .btn-stop {
+  transition: background 0.18s ease, border-color 0.18s ease,
+              box-shadow 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+}
+.nav-btn { border-radius: 999px; }
+.nav-btn:hover, .btn-check:hover:not(:disabled) {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+  opacity: 1;
+}
+.btn-check, .btn-section, .btn { border-radius: 8px; }
+
+/* ── バッジ ── */
+.badge { font-feature-settings: "palt" 1; }
+
+/* ── テーブル ── */
+.data-table tbody tr { transition: background 0.15s ease; }
+.data-table tbody tr:hover { background: rgba(13, 74, 56, 0.035); }
+
+/* ── クイズ UI ── */
+.choice-label, .option-btn {
+  border-radius: 9px;
+  transition: background 0.16s ease, border-color 0.16s ease,
+              box-shadow 0.16s ease, transform 0.16s ease;
+}
+.choice-label:hover, .option-btn:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateX(2px);
+}
+.q-card, .question-card { transition: border-color 0.2s ease, background 0.3s ease; }
+.feedback, .answer-box { border-radius: 9px; }
+.fill-input { transition: border-color 0.16s ease, color 0.16s ease; }
+.score-box { border-radius: 14px; box-shadow: var(--shadow-card); }
+.score-bar-fill {
+  background: linear-gradient(90deg, var(--green-mid), #2E8B6B);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── デモページ（スライダー / メトリクス） ── */
+input[type="range"]::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border: 2.5px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--green-border), var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2.5px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--green-border);
+  cursor: pointer;
+}
+.metric-card { border-radius: 10px; }
+.progress-fill {
+  background: linear-gradient(90deg, var(--green), #2E8B6B);
+  transition: width 0.2s ease;
+}
+
+/* ── 手法選定フローチャート（ch2） ── */
+.decision-box {
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  font-size: 0.82rem;
+}
+
+/* ── モーション配慮 ── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ── 印刷 ── */
+@media print {
+  body { background: #FFFFFF !important; background-image: none !important; }
+  body::before { display: none; }
+  .card, .card-math, .topic-card, .q-card, .question-card,
+  .card-lecture, .card-handson, .card-quiz, .summary-block {
+    box-shadow: none;
+  }
+}
