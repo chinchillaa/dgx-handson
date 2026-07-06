@@ -64,7 +64,9 @@
       </div>
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         事前学習済み LLM は「次のトークンを予測する」という汎用タスクで学習されています。
+        ただし、そのままでは「質問されたら、どのくらい丁寧に、どの形式で答えるか」までは十分に決まっていません。
         これをユーザーの指示に従う形式へ変換するのが <strong>Supervised Fine-Tuning (SFT)</strong> です。
+        人で例えると、高学歴の新人にチーム内固有の知識だったり、業務手順に関するOJTをするようなものです。
       </p>
       <div class="card mb-4">
         <p class="text-sm font-bold mb-3">SFT の目的</p>
@@ -79,7 +81,7 @@
         </div>
       </div>
       <div class="key-point">
-        <p class="text-sm">SFT の損失関数は事前学習と同じ <strong>クロスエントロピー損失</strong>。違いは学習データが「回答トークン」のみに絞られていること。</p>
+        <p class="text-sm">SFT の損失関数は事前学習と同じ <strong>クロスエントロピー損失</strong>です。これは「次に予測する単語（トークン）と、正解トークンとのズレ」を測る点数です。SFT では「回答部分をうまく出せたか」を見てモデルを調整します。</p>
       </div>
       <p class="text-sm mt-4" style="color: var(--text-sub);">SFT のプロンプトテンプレート例（Alpaca 形式）:</p>
       <pre><code class="language-text">### 指示:
@@ -100,16 +102,74 @@ Pythonでリストをソートするには sorted() 関数または .sort() メ�
         LLaMA 3 8B の全パラメータ（約80億個）を更新すると、A100 80GB でもぎりぎりのメモリを消費します。
         <strong>LoRA (Low-Rank Adaptation)</strong> はほとんどのパラメータを凍結し、
         わずかな「差分行列」だけを学習することで、少ないメモリでファインチューニングを実現します。
+        パラメータを丸ごと書き換えるのではなく、全体の0.1~1%のみを更新する方法です。
       </p>
       <div class="card mb-6">
         <p class="text-sm font-bold mb-3">LoRA の数式</p>
-        <p class="text-sm mb-2">元の重み行列 $W \in \mathbb{R}^{d \times d}$ に対して、差分を低ランク分解で表現します:</p>
+        <p class="text-sm mb-2">元の重み行列 $W \in \mathbb{R}^{d \times d}$ に対して、差分を低ランク分解で表現します。低ランク行列とは「大きな表を、少ない列数の2つの小さな表の組み合わせで近似する」考え方です。たとえば 1000×1000 の表を直接100万個の値で直す代わりに、1000×16 と 16×1000 の2つの表で差分を表します:</p>
         $$\Delta W = BA \quad (B \in \mathbb{R}^{d \times r},\ A \in \mathbb{R}^{r \times d},\ r \ll d)$$
+        <div class="card-green mt-4 mb-4">
+          <p class="text-sm font-bold mb-2" style="color: var(--green);">4×4 の重み行列で見る LoRA</p>
+          <p class="text-sm mb-2" style="color: var(--green);">
+            簡単のため、元の重み行列 $W$ が 4×4 だとします。フルファインチューニングでは、16 個すべての値を直接更新します。
+            一方、LoRA で rank=1 にすると、学習するのは $B$（4×1）と $A$（1×4）の合計 8 個だけです。
+            ここでは説明を単純にするため、スケール係数 $\alpha/r$ は 1 とします。
+          </p>
+          <p class="text-sm mb-2" style="color: var(--green);">まず、元の重み行列 $W$ が次の値だったとします。</p>
+          $$
+          W =
+          \begin{bmatrix}
+          1.0 & 0.5 & -0.5 & 0.0 \\
+          0.0 & 1.0 & 0.5 & -0.5 \\
+          -0.5 & 0.0 & 1.0 & 0.5 \\
+          0.5 & -0.5 & 0.0 & 1.0
+          \end{bmatrix}
+          $$
+          <p class="text-sm mb-2" style="color: var(--green);">LoRA の学習で、たとえば次の $B$ と $A$ が得られたとします。</p>
+          $$
+          B =
+          \begin{bmatrix}
+          0.1 \\
+          0.0 \\
+          -0.2 \\
+          0.3
+          \end{bmatrix},\quad
+          A =
+          \begin{bmatrix}
+          1.0 & -1.0 & 0.5 & 0.0
+          \end{bmatrix}
+          $$
+          <p class="text-sm mb-2" style="color: var(--green);">この2つを掛けると、4×4 の差分行列 $\Delta W = BA$ ができます。</p>
+          $$
+          \Delta W = BA =
+          \begin{bmatrix}
+          0.1 & -0.1 & 0.05 & 0.0 \\
+          0.0 & 0.0 & 0.0 & 0.0 \\
+          -0.2 & 0.2 & -0.1 & 0.0 \\
+          0.3 & -0.3 & 0.15 & 0.0
+          \end{bmatrix}
+          $$
+          <p class="text-sm mb-2" style="color: var(--green);">LoRA 適用後は、元の $W$ にこの差分を足して使います。</p>
+          $$
+          W' = W + \Delta W =
+          \begin{bmatrix}
+          1.1 & 0.4 & -0.45 & 0.0 \\
+          0.0 & 1.0 & 0.5 & -0.5 \\
+          -0.7 & 0.2 & 0.9 & 0.5 \\
+          0.8 & -0.8 & 0.15 & 1.0
+          \end{bmatrix}
+          $$
+          <p class="text-sm" style="color: var(--green);">
+            この例では、$W$ の16個を直接学習したのではなく、$B$ と $A$ の8個だけを学習して、結果として16個分の差分を作っています。
+            2行目のように $B$ の値が 0 の行は差分も 0 になり、元の重みが変わりません。
+            実際の LoRA では、この差分に $\alpha/r$ を掛けてから $W$ に足します。
+          </p>
+        </div>
         <p class="text-sm mt-3 mb-2">推論時の出力:</p>
         $$h = Wx + \frac{\alpha}{r} \Delta W x = Wx + \frac{\alpha}{r} BAx$$
         <p class="text-sm mt-3" style="color: var(--text-sub);">
-          $r$ = rank（小さいほどパラメータ少、精度低）<br>
-          $\alpha$ = スケール係数（通常 $\alpha = 2r$）
+          $r$ = rank（差分を表すための「中間の幅」。小さいほど軽いが、表現できる変更も少ない）<br>
+          $\alpha$ = スケール係数（LoRA の差分をどのくらい強く反映するか。通常 $\alpha = 2r$ から試す）
         </p>
       </div>
 
@@ -145,7 +205,8 @@ Pythonでリストをソートするには sorted() 関数または .sort() メ�
       </div>
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         ベースモデルを 4bit で量子化（QLoRA）することで、さらにメモリを削減できます。
-        本ハンズオンでは <code>BitsAndBytesConfig</code> を使った NF4 量子化を採用します。
+        量子化とは、細かい数値を少ない桁で近似して保存することです。たとえば「3.14159」を「3.1」として扱えば少し粗くなりますが、保存量は小さくなります。
+        本ハンズオンでは <code>BitsAndBytesConfig</code> を使った NF4 量子化を採用します。NF4 は、LLM の重みによく合うように設計された 4bit 表現です。
       </p>
       <pre><code class="language-python">from transformers import BitsAndBytesConfig
 
@@ -174,8 +235,8 @@ model = AutoModelForCausalLM.from_pretrained(
           <table>
             <thead><tr><th>パラメータ</th><th>デフォルト</th><th>試す値</th><th>期待される影響</th></tr></thead>
             <tbody>
-              <tr><td><code>lora_rank</code></td><td>16</td><td>8, 32, 64</td><td>小さいほど軽量・低精度</td></tr>
-              <tr><td><code>lora_alpha</code></td><td>32</td><td>rank と同値、2倍</td><td>学習スケールの調整</td></tr>
+              <tr><td><code>lora_rank</code></td><td>16</td><td>8, 32, 64</td><td>小さいほど軽量。大きいほど複雑な変更を表せる</td></tr>
+              <tr><td><code>lora_alpha</code></td><td>32</td><td>rank と同値、2倍</td><td>LoRA の差分をどれだけ強く足すか</td></tr>
               <tr><td><code>learning_rate</code></td><td>2e-4</td><td>1e-4, 5e-4</td><td>収束速度・安定性</td></tr>
               <tr><td><code>max_seq_length</code></td><td>512</td><td>256, 1024</td><td>短いほど速い・長文は切れる</td></tr>
             </tbody>

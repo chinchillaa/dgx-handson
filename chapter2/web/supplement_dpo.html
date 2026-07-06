@@ -37,6 +37,28 @@
     .pair-box { border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.82rem; }
     .chosen-box { background: var(--green-bg); border: 1px solid var(--green-border); }
     .rejected-box { background: #FEF2F2; border: 1px solid #FCA5A5; }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .demo-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; }
+    .prob-row { display: grid; grid-template-columns: 5.5rem 1fr 3.5rem; gap: 0.75rem; align-items: center; margin-top: 0.65rem; }
+    .prob-label { font-size: 0.8rem; font-weight: 700; }
+    .prob-track { height: 0.65rem; background: var(--surface); border: 1px solid var(--border); border-radius: 9999px; overflow: hidden; }
+    .prob-fill { display: block; width: 0%; height: 100%; border-radius: 9999px; transition: width 0.15s ease; }
+    .prob-fill.chosen { background: var(--green-mid); }
+    .prob-fill.rejected { background: #DC2626; }
+    .prob-value { font-family: 'Courier New', monospace; font-size: 0.82rem; text-align: right; color: var(--text-sub); }
+    .formula-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .flow-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.9rem; }
+    .flow-card-num { display: inline-flex; align-items: center; justify-content: center; width: 1.45rem; height: 1.45rem; border-radius: 50%; background: var(--green); color: white; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.45rem; }
+    .mini-formula { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 0.4rem; padding: 0.45rem 0.6rem; margin-top: 0.45rem; font-family: 'Courier New', monospace; font-size: 0.78rem; color: var(--text); overflow-x: auto; }
+    .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .role-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.85rem; }
+    .role-card strong { color: var(--green); }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .compare-box { border-radius: 0.5rem; padding: 0.85rem; border: 1px solid var(--border); background: var(--surface2); }
+    .compare-box.good { border-color: var(--green-border); background: var(--green-bg); }
+    .compare-box.bad { border-color: #FCA5A5; background: #FEF2F2; }
+    input[type="range"] { width: 100%; accent-color: var(--green); }
+    @media (max-width: 640px) { .demo-grid, .formula-flow, .role-grid, .compare-grid { grid-template-columns: 1fr; } .prob-row { grid-template-columns: 4.5rem 1fr 3rem; } }
   </style>
   <!-- 共通テーマ（フォント + デザインシステム）※ページ内 <style> より後に読み込む -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,8 +90,23 @@
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         人間のフィードバックを学習に反映する方法として <strong>RLHF</strong> が広く知られていますが、
         報酬モデルの学習と PPO という強化学習が必要で、実装が複雑です。
+        報酬モデルとは「この回答は何点か」を予測する別モデル、PPO はその点数が高くなるようにモデルを更新する強化学習アルゴリズムです。
         <strong>DPO</strong> はこれを大幅に簡略化した手法です。
+        たとえば「回答Aより回答Bの方が親切」という比較例を見せて、モデルがBのような回答を出しやすくなるよう直接調整します。
       </p>
+      <div class="card-green mb-4">
+        <p class="text-sm font-bold mb-2" style="color: var(--green);">参照モデルとは</p>
+        <p class="text-sm" style="color: var(--green);">
+          参照モデルは学習対象のモデルが元の自然な言語出力能力を失ったり、極端な応答を生成したりすることを防ぐために、基準として比較・固定されるベースラインモデルのことです。<br>
+          多くの場合、DPO を始める前の SFT 済みモデルをコピーして固定します。<br>
+          学習中のモデルが評価基準通りの回答(chosen)を出しやすくなったかと、評価基準通りでない回答(rejected)を出しにくくなったかを、この固定モデルと比べて判断します。
+        </p>
+        <p class="text-sm mt-2" style="color: var(--green);">
+          たとえば、学習中モデルが chosen を強く好むようになっても、同時に元の自然な日本語や基本知識まで崩れてしまうと困ります。
+          そこで参照モデルは「元のモデルから離れすぎていないか」を測るものさしとして働きます。
+        </p>
+      </div>
+
       <div class="card mb-4">
         <div class="overflow-x-auto">
           <table>
@@ -95,20 +132,146 @@
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         DPO の損失関数は以下の形をとります。
         chosen（好ましい）回答の確率を上げ、rejected（好ましくない）回答の確率を下げます。
+        数式は長く見えますが、読むべきポイントは「同じ質問に対して、良い回答を悪い回答より出しやすくする」ことです。
       </p>
       <div class="card mb-4">
         $$\mathcal{L}_{\text{DPO}}(\pi_\theta) = -\mathbb{E}_{(x, y_w, y_l)} \left[\log \sigma \left( \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} - \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} \right) \right]$$
         <div class="mt-4 text-sm space-y-1" style="color: var(--text-sub);">
-          <p>$\pi_\theta$：学習中のモデル、$\pi_{\text{ref}}$：参照モデル（SFT 済み）</p>
+          <p>$\pi_\theta$：学習中モデルが持つ確率分布。$\pi_\theta(y|x)$ は「入力 $x$ に対して回答 $y$ を出す確率」を表す</p>
+          <p>$\pi_{\text{ref}}$：参照モデルが持つ確率分布。通常は SFT 済みモデルを固定して使う</p>
           <p>$y_w$：chosen（好ましい回答）、$y_l$：rejected（好ましくない回答）</p>
-          <p>$\beta$：KL ペナルティ係数（参照モデルからの逸脱を制御）</p>
+          <p>$\beta$：KL ペナルティ係数（参照モデルからの逸脱を制御）。大きいほど「元のモデルから変わりすぎないで」というブレーキが強くなります。</p>
         </div>
       </div>
       <div class="card-green">
         <p class="text-sm" style="color: var(--green);">
           <strong>直感的な理解</strong><br>
           参照モデルと比べて「chosen の確率の上昇幅」が「rejected の確率の上昇幅」を上回ればロスが下がります。
+          たとえば同じ質問に対して、丁寧で具体例のある回答を chosen、短く不正確な回答を rejected とすると、DPO は前者を選びやすくします。
           $\beta$ が大きいほど参照モデルへの保守性が強くなります（過剰適応を防ぐ）。
+        </p>
+      </div>
+
+      <div class="card mt-4">
+        <p class="text-sm font-bold mb-3">数式を左から読む</p>
+
+        <div class="formula-flow mb-4">
+          <div class="flow-card">
+            <span class="flow-card-num">1</span>
+            <p class="text-sm font-bold mb-1">参照モデルとの比率を見る</p>
+            <p class="text-sm" style="color: var(--text-sub);">学習中モデルが、参照モデルより chosen / rejected をどれだけ出しやすいかを比べます。</p>
+            <code class="mini-formula">πθ(y|x) / πref(y|x)</code>
+          </div>
+          <div class="flow-card">
+            <span class="flow-card-num">2</span>
+            <p class="text-sm font-bold mb-1">chosen と rejected を比べる</p>
+            <p class="text-sm" style="color: var(--text-sub);">chosen 側の伸びから rejected 側の伸びを引きます。chosen の方が伸びていれば良い方向です。</p>
+            <code class="mini-formula">log chosen比率 - log rejected比率</code>
+          </div>
+          <div class="flow-card">
+            <span class="flow-card-num">3</span>
+            <p class="text-sm font-bold mb-1">損失に変換する</p>
+            <p class="text-sm" style="color: var(--text-sub);">差が大きいほど「良い学習」とみなし、損失が小さくなる形へ変換します。</p>
+            <code class="mini-formula">-log σ(差)</code>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto mb-4">
+          <table>
+            <thead><tr><th>記号</th><th>読み方</th></tr></thead>
+            <tbody>
+              <tr><td><code>πθ(y|x)</code></td><td>学習中モデルの確率分布。入力 <code>x</code> に対して回答 <code>y</code> を出す確率</td></tr>
+              <tr><td><code>πref(y|x)</code></td><td>参照モデルの確率分布。通常は SFT 済みモデルを固定して使う</td></tr>
+              <tr><td><code>yw / yl</code></td><td><code>yw</code> は chosen、<code>yl</code> は rejected</td></tr>
+              <tr><td><code>E</code></td><td>1件だけでなく、データセット全体で平均するという意味</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="compare-grid mb-4">
+          <div class="compare-box good">
+            <p class="text-sm font-bold mb-1" style="color: var(--green);">chosen の例</p>
+            <p class="text-sm" style="color: var(--green);">参照モデル 40% → 学習中モデル 60%</p>
+            <code class="mini-formula">0.60 / 0.40 = 1.5</code>
+            <p class="text-sm mt-2" style="color: var(--green);">この例では1より大きいので、chosenを出しやすくなったと言えます。</p>
+          </div>
+          <div class="compare-box bad">
+            <p class="text-sm font-bold mb-1" style="color: #DC2626;">rejected の例</p>
+            <p class="text-sm" style="color: #991B1B;">参照モデル 35% → 学習中モデル 20%</p>
+            <code class="mini-formula">0.20 / 0.35 ≒ 0.57</code>
+            <p class="text-sm mt-2" style="color: #991B1B;">この例では1より小さいので、rejectedを出しにくくなったと言えます。</p>
+          </div>
+        </div>
+各記号の補足
+        <div class="role-grid">
+          <div class="role-card text-sm" style="color: var(--text-sub);">
+            <strong>log</strong><br>
+            確率の比率を足し引きしやすくします。回答全体の確率は非常に小さいため、ログ確率で扱う方が安定します。
+          </div>
+          <div class="role-card text-sm" style="color: var(--text-sub);">
+            <strong>σ（sigmoid）</strong><br>
+            chosen と rejected の差を 0〜1 のスコアに変換します。chosen が優勢なほど 1 に近づきます。
+          </div>
+          <!-- <div class="role-card text-sm" style="color: var(--text-sub);">
+            <strong>-log</strong><br>
+            sigmoid の値が 1 に近いほど損失を小さくします。つまり chosen を選びやすいほど学習が進んだと見なします。
+          </div> -->
+          <div class="role-card text-sm" style="color: var(--text-sub);">
+            <strong>β</strong><br>
+            参照モデルから離れすぎないためのブレーキです。小さいと好みを強く反映し、大きいと保守的になります。
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <p class="text-sm font-bold mb-2">数値で見る DPO の動き</p>
+        <p class="text-sm mb-4" style="color: var(--text-sub);">
+          次の例では、質問「Python の <code>sort()</code> と <code>sorted()</code> の違いは？」に対して、
+          具体例つきの回答を chosen、短すぎる回答を rejected とします。
+          参照モデルは chosen を 40%、rejected を 35% の確率で出す状態から始まります。
+          DPO 後は chosen をより出しやすく、rejected を出しにくくします。
+        </p>
+
+        <div class="demo-grid mb-4">
+          <div class="demo-panel">
+            <p class="text-xs font-bold mb-2" style="color: var(--text-muted);">参照モデル（学習前）</p>
+            <div class="prob-row">
+              <span class="prob-label" style="color: var(--green);">chosen</span>
+              <span class="prob-track"><span class="prob-fill chosen" style="width: 40%;"></span></span>
+              <span class="prob-value">40%</span>
+            </div>
+            <div class="prob-row">
+              <span class="prob-label" style="color: #DC2626;">rejected</span>
+              <span class="prob-track"><span class="prob-fill rejected" style="width: 35%;"></span></span>
+              <span class="prob-value">35%</span>
+            </div>
+          </div>
+          <div class="demo-panel">
+            <p class="text-xs font-bold mb-2" style="color: var(--text-muted);">DPO 後（簡易イメージ）</p>
+            <div class="prob-row">
+              <span class="prob-label" style="color: var(--green);">chosen</span>
+              <span class="prob-track"><span class="prob-fill chosen" id="dpo-chosen-bar"></span></span>
+              <span class="prob-value" id="dpo-chosen-val"></span>
+            </div>
+            <div class="prob-row">
+              <span class="prob-label" style="color: #DC2626;">rejected</span>
+              <span class="prob-track"><span class="prob-fill rejected" id="dpo-rejected-bar"></span></span>
+              <span class="prob-value" id="dpo-rejected-val"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-panel">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <span class="text-sm font-semibold" style="color: var(--text-sub);">beta（参照モデルから離れすぎないためのブレーキ）</span>
+            <code id="dpo-beta-val" style="font-size:0.8rem; color:var(--green); background:var(--green-bg); border:1px solid var(--green-border); border-radius:4px; padding:1px 7px;">0.10</code>
+          </div>
+          <input type="range" id="dpo-beta-slider" min="0.05" max="0.50" value="0.10" step="0.05">
+          <p class="text-sm mt-3" style="color: var(--text-sub);" id="dpo-demo-note"></p>
+        </div>
+
+        <p class="text-xs mt-3" style="color: var(--text-muted);">
+          この図は直感理解のための簡略化です。実際のDPOでは、回答全体のトークン確率と参照モデルとの差を使って損失を計算します。
         </p>
       </div>
     </section>
@@ -121,7 +284,9 @@
       </div>
       <p class="text-sm mb-4" style="color: var(--text-sub);">
         DPO に必要なデータは <strong>（prompt, chosen, rejected）の3つ組</strong> です。
+        prompt は質問、chosen は選んでほしい回答、rejected は避けたい回答です。
         質より量よりも、<strong>chosen と rejected の差が明確</strong> であることが重要です。
+        たとえば「具体例がある」「制約を説明している」「誤解を招かない」など、良い理由がはっきり分かるペアにします。
       </p>
       <div class="space-y-4">
         <div>
@@ -169,9 +334,9 @@
           <table>
             <thead><tr><th>beta 値</th><th>挙動</th><th>リスク</th></tr></thead>
             <tbody>
-              <tr><td>0.01〜0.05</td><td>参照モデルから大きく逸脱できる</td><td>崩壊（意味不明な出力）のリスク</td></tr>
+              <tr><td>0.01〜0.05</td><td>参照モデルから大きく逸脱できる</td><td>崩壊（同じ語の反復や意味不明な出力）のリスク</td></tr>
               <tr><td><strong>0.1（推奨）</strong></td><td>バランスの良い調整</td><td>—</td></tr>
-              <tr><td>0.3〜0.5</td><td>参照モデルに近い挙動を保つ</td><td>preference が反映されにくい</td></tr>
+              <tr><td>0.3〜0.5</td><td>参照モデルに近い挙動を保つ</td><td>preference（好みの比較例）が反映されにくい</td></tr>
             </tbody>
           </table>
         </div>
@@ -182,5 +347,35 @@
       <a href="index.html" style="color: var(--green); font-size: 0.9rem; text-decoration: none;">← 第2章トップに戻る</a>
     </div>
   </main>
+
+  <script>
+    function updateDpoDemo() {
+      const slider = document.getElementById('dpo-beta-slider');
+      if (!slider) return;
+      const beta = parseFloat(slider.value);
+      const refChosen = 0.40;
+      const refRejected = 0.35;
+      // beta が小さいほど好みを強く反映し、大きいほど参照モデルに近く保つ簡易モデル。
+      const shift = Math.max(0.04, 0.20 - beta * 0.28);
+      const chosen = Math.min(0.75, refChosen + shift);
+      const rejected = Math.max(0.10, refRejected - shift * 0.85);
+      const chosenPct = Math.round(chosen * 100);
+      const rejectedPct = Math.round(rejected * 100);
+      document.getElementById('dpo-beta-val').textContent = beta.toFixed(2);
+      document.getElementById('dpo-chosen-bar').style.width = `${chosenPct}%`;
+      document.getElementById('dpo-rejected-bar').style.width = `${rejectedPct}%`;
+      document.getElementById('dpo-chosen-val').textContent = `${chosenPct}%`;
+      document.getElementById('dpo-rejected-val').textContent = `${rejectedPct}%`;
+      const note = beta <= 0.10
+        ? 'beta が小さいため、chosen を強く増やし rejected を大きく下げます。ただし変えすぎると出力が崩れるリスクがあります。'
+        : beta >= 0.30
+          ? 'beta が大きいため、参照モデルに近いまま保ちます。安定しますが、preference の反映は弱くなります。'
+          : 'chosen を増やし rejected を下げつつ、参照モデルから離れすぎない中間的な調整です。';
+      document.getElementById('dpo-demo-note').textContent = note;
+    }
+    const dpoBetaSlider = document.getElementById('dpo-beta-slider');
+    if (dpoBetaSlider) dpoBetaSlider.addEventListener('input', updateDpoDemo);
+    updateDpoDemo();
+  </script>
 </body>
 </html>
