@@ -184,24 +184,23 @@
 
   <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
 
-    <!-- ━━━ LLM の本質（章共通のコアメッセージ） ━━━ -->
+    <!-- ━━━ このセクションの核心 ━━━ -->
     <div class="summary-block">
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">読み始める前に</p>
       <h2 style="font-size:1.2rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:1rem;">
-        LLM がしているのは、<br>
-        <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を統計的に予測すること</span>——それだけです。
+        推論パラメータは、<br><span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">モデルを一切変えません</span>。
       </h2>
       <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
-        膨大なテキストを読んで「この文脈の次に来やすい単語は何か」を学び、
-        予測して、選んで、また予測する。これを 1 トークンずつ繰り返しているだけです。<br><br>
-        <strong>そしてこの本質は、モデルがどれだけ新しく複雑になっても変わりません。</strong>
-        パラメータが数千億個になっても、思考の過程を書き出す推論モデルでも、
-        画像や音声を扱うマルチモーダルモデルでも、中核にあるのは同じ<strong>次トークン予測</strong>です。
-        変わったのは予測の精度と、扱えるトークンの種類だけです。<br><br>
-        人間のように考えているように見えるのは、
-        <em>この単純な仕組みを途方もない量のデータで鍛え上げた結果</em>であって、
-        どこかで別の何かが起きているわけではありません。
-        このページで扱う <strong>temperature も top_p も、予測された確率分布から「どう選ぶか」を決めているだけ</strong>で、モデル自体は何も変わりません。
+        学習済みの重みには指一本触れません。
+        変えているのは、モデルが出した確率分布から
+        <strong>「どのトークンを選ぶか」という最後の一手だけ</strong>です。<br><br>
+        それだけで、同じモデルが<strong>堅実にも、大胆にも</strong>なります。
+        コード生成では余計なことを言わせず、アイデア出しでは思い切った表現を引き出す。
+        学習を回す必要も、追加のコストもありません。
+        <em>最も安く、最も速く、最も手軽に出力を制御できる手段</em>がこれです。<br><br>
+        逆に言えば、ここを理解しないまま使うと
+        「LLM は毎回答えが変わって使えない」という誤った結論にたどり着きます。
+        このページでは、その一手が何をしているのかを見ていきます。
       </p>
     </div>
 
