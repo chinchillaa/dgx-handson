@@ -248,8 +248,8 @@
           <h1 class="text-2xl font-bold" style="color:var(--text);">理解確認クイズ</h1>
         </div>
         <div style="font-size:0.75rem; color:var(--text-muted); text-align:right; line-height:1.8;">
-          <p>全 <strong style="color:var(--text);">17 問</strong></p>
-          <p>選択式 7 ／ 穴埋め 6 ／ 記述式 4</p>
+          <p>全 <strong style="color:var(--text);">18 問</strong></p>
+          <p>選択式 7 ／ 穴埋め 6 ／ 記述式 5</p>
         </div>
       </div>
     </div>
@@ -524,6 +524,18 @@
         <div class="feedback" id="fb-q17"></div>
       </div>
 
+      <!-- Q18 -->
+      <div class="q-card" id="card-q18">
+        <p class="q-num">Q18</p>
+        <p class="q-text">
+          Self-Attention では Q・K・V をすべて<strong>同じ入力 $X$</strong> から作る。
+          それなら $X$ をそのまま Q と K に使えばよさそうだが、実際には
+          $W^Q, W^K$ という行列を掛けてから内積を取る。<strong>なぜか</strong>説明してください。
+        </p>
+        <textarea class="desc-textarea" id="desc-q18" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q18"></div>
+      </div>
+
       <div style="margin-top:0.5rem;">
         <button class="btn-section" onclick="gradeSection3()">模範解答を表示する</button>
       </div>
@@ -578,6 +590,7 @@
       q15: '通常の教師あり学習では人間が付けたラベル（正解）が必要ですが、LLM の事前学習では<strong>テキスト自体から教師信号を自動生成</strong>します。具体的には「これまでのトークン列を入力として、次のトークンを予測する」タスクを設定し、実際の次トークンが正解ラベルとして機能します。そのため人手でのラベル付けが不要で、インターネット上の大量テキストをそのまま学習データとして利用できます。',
       q16: 'temperature が高いほど確率分布が平坦になり、低確率のトークンが選ばれやすくなります。<strong>コード生成では構文の正確性が求められる</strong>ため、temperature=1.5 のような高い値では文法エラーや意味不明なコードが生成されやすくなります。コード生成には temperature=0.1〜0.3 程度の低い値が推奨されます。',
       q17: 'LLM の出力は「文章」ではなく<strong>語彙サイズぶんの確率分布</strong>です。生成のたびに、その確率分布に従って次のトークンを1つ<strong>ランダムに引いている（サンプリング）</strong>ため、同じ入力でも引かれるトークンが変わり、結果として違う文章になります。モデルの重みが変わっているわけでも、モデルが気まぐれなわけでもありません。<br>毎回同じ答えを返させたい場合は、<code>do_sample=False</code>（Greedy デコーディング＝常に確率1位を選ぶ）にします。サンプリングを使いたいが再現性も欲しい場合は、<code>torch.manual_seed()</code> で乱数シードを固定するか、<code>temperature</code> を 0 に近づけて分布を極端に尖らせます。',
+      q18: '<strong>内積は類似度</strong>なので、$X$ をそのまま Q と K に使うと、<strong>自分と自分の内積が必ず最大</strong>になってしまいます。その結果、どのトークンも「自分自身」に最も注目することになり、「自分に注目してください」という何の役にも立たない機構になってしまいます（実際、ハンズオン③ Part 2-2 では「食べた」が目的語の「サカナ」0.22 より自分自身 0.35 を見てしまいます）。<br>そこで $W^Q$ と $W^K$ で<strong>別々の方向にねじってから内積を取ります</strong>。角度を変えてからぶつけるので、自分自身との内積が最大とは限らなくなり、「動詞は目的語を探す」といった意味のある関係を学習できるようになります。$W^Q$ は「何を探しに行くか」、$W^K$ は「どの側面を看板として掲げるか」、$W^V$ は「注目された結果、何を渡すか」を決めています。',
     };
 
     // ── スコア管理 ──────────────────────────────────────────────
@@ -618,7 +631,7 @@
           q3: { ok: '正解です。線形変換をいくつ重ねても1回の線形変換と等価なため、非線形性の導入が不可欠です。', ng: '補足資料: ニューラルネットワーク Section 0 の「なぜ線形変換では解けないのか」を確認しましょう。' },
           q4: { ok: '正解です。全トークン間の関連度を一度に（並列に）計算できる点が最大の優位性です。', ng: '補足資料: Transformer Section 2 を確認しましょう。RNN の逐次処理との違いが重要です。' },
           q5: { ok: '正解です。Chinchilla 研究によりパラメータ : トークン ≈ 1 : 20 が最適と示されました。', ng: '補足資料: 事前学習 Section 3 の Chinchilla 法則を確認しましょう。' },
-          q6: { ok: '正解です。「Q と K の相性が良いほど強く注目し、注目した相手の V を受け取る」——これが Self-Attention のすべてです。', ng: 'Q は検索窓に打ち込む言葉、K は本の背表紙、V は本の中身に例えられます。補足資料: Transformer Section 2、およびハンズオン③ Part 2 を確認しましょう。' },
+          q6: { ok: '正解です。Attention は Python の dict とほぼ同じで、違いは「キーの完全一致」ではなく「似ている度合いに応じて全部の値を混ぜて返す」点だけです。', ng: 'Attention は「あいまい検索できる辞書」です。Q は辞書に打ち込む検索語、K は辞書のキー、V は辞書の値にあたります。補足資料: Transformer Section 2、およびハンズオン③ Part 2 を確認しましょう。' },
           q7: { ok: '正解です。未来が見えてしまうと「答えを見ながら答えを当てる練習」になり、学習が成立しません。', ng: '因果マスクは計算量削減のためではありません。補足資料: Transformer Section 2 の「因果マスク」、およびハンズオン③ Part 3 を確認しましょう。' },
         };
 
@@ -673,7 +686,7 @@
 
     // ── セクション3：模範解答表示 ─────────────────────────────────
     function gradeSection3() {
-      ['q14','q15','q16','q17'].forEach(qid => {
+      ['q14','q15','q16','q17','q18'].forEach(qid => {
         const fb = document.getElementById(`fb-${qid}`);
         fb.className = 'feedback ref';
         fb.innerHTML = '<strong>模範解答:</strong> ' + REFERENCES[qid];
