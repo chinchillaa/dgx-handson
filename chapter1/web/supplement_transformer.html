@@ -979,10 +979,15 @@
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
           <strong>本編 Part 4</strong> では、本物の Llama の 1 層を
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> して、
+          Part 2 で自分が書いた $W^Q, W^K, W^V$ が
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">q_proj</code> /
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> /
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code> といった
-          <em>名前まで同じ部品</em>が並んでいることを確認します。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">k_proj</code> /
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">v_proj</code> として
+          <em>名前まで同じ形</em>で入っていることを確認します。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> や
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code>、
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">mlp</code> は、
+          本編では「まだ作っていない部品」として眺めるだけです。
           さらに<strong>付録 C</strong> では、上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
           PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
           <strong>正味 50 行ほど</strong>で自分で組み立てます。
@@ -1096,7 +1101,7 @@
       <p style="font-size:0.83rem; line-height:1.8; margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.18);">
         ここまでの内容は、すべて <a href="index.html">ハンズオン③</a>
         （<code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_llm_inference.ipynb</code>）の
-        Part 1〜5 で実際にコードとして書き、本物の Llama と照合します（約 30 分）。
+        Part 1〜5 で実際に手を動かして確かめます（約 30 分）。
         Multi-Head の実装・Transformer ブロックの組み立て・Attention Sink の実測は、
         同じフォルダの <code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code>（付録）へ。
         <strong>読んで分かった気になる前に、手を動かしてください。</strong>
