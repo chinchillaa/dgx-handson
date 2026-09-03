@@ -198,6 +198,7 @@
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
         <li>自然言語をベクトルに変換することで、数学的な操作が可能になる仕組みを掴む</li>
         <li>自己注意機構（Self-Attention）が「文脈」を数値で表す仕組みを掴む</li>
+        <li>因果マスクが「LLM は左から右にしか書けない」という性質を生むことを掴む</li>
         <li>Transformer の全体構造と LLM への接続を掴む</li>
       </ol>
       <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
@@ -537,6 +538,13 @@
           「食べた」は「寿司（0.45）」と「昨日（0.28）」に強く注目し、「は（0.10）」にはあまり注目しません。
           この重みで Value を加重平均することで、<em>「何を・いつ食べたか」という文脈が埋め込まれた</em>新しいベクトルが得られます。
         </p>
+        <div class="note-green" style="margin-top:1rem;">
+          <p style="font-size:0.8rem; color:#1C4A35; line-height:1.75;">
+            <strong>ハンズオン③ Part 2</strong> では、この図をコードで再現します。
+            「ネコ・が・サカナ・食べた」という4トークンのミニチュアを作り、
+            $W^Q, W^K$ を手で設計して「食べた → サカナ に 0.99 注目する」注目度を実際に計算します。
+          </p>
+        </div>
       </div>
 
       <!-- 数式 -->
@@ -573,9 +581,112 @@
       <div class="note-green">
         <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Multi-Head Attention</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          実際には Self-Attention を複数の「ヘッド」で並列に実行します（例: 8ヘッド）。
+          実際には Self-Attention を複数の「ヘッド」で並列に実行します。
           各ヘッドは異なる $W^Q, W^K, W^V$ を持ち、<strong>異なる「注目パターン」を同時に学習</strong>できます。
           一方のヘッドが「構文的な依存」を、別のヘッドが「意味的な類似性」を捉えるといった役割分担が生まれます。
+        </p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.6rem;">
+          ハンズオン③で使う <strong>Llama-3.2-1B</strong> は 1 層あたり <strong>32 ヘッド</strong>、
+          それが <strong>16 層</strong>なので、モデル全体で <strong>512 枚</strong>の注目度マップが動いています。
+          実装上はヘッドごとに別の行列を持つのではなく、
+          $d_{model} = 2048$ を 32 分割して 1 ヘッドあたり 64 次元を担当させます（計算量を増やさないため）。
+        </p>
+      </div>
+
+      <!-- 因果マスク -->
+      <h3 style="font-size:0.95rem; font-weight:700; color:var(--text); margin:2rem 0 0.75rem;">因果マスク（Causal Mask）——未来を見せない</h3>
+      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        ここまでの Self-Attention には、LLM として使うには致命的な問題があります——
+        <strong style="color:var(--text);">各トークンが未来のトークンまで見られてしまう</strong>ことです。
+        LLM の学習は「次のトークンを当てる」練習なので、これでは答えを見ながら答える練習になってしまいます。
+      </p>
+
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">因果マスク：自分より後ろは見えない</p>
+        <svg viewBox="0 0 420 190" style="width:100%; max-width:420px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <!-- 列ラベル -->
+          <g font-size="9" text-anchor="middle" fill="var(--text-muted)">
+            <text x="150" y="24">ネコ</text>
+            <text x="200" y="24">が</text>
+            <text x="250" y="24">サカナ</text>
+            <text x="300" y="24">食べた</text>
+          </g>
+          <text x="225" y="10" font-size="8" text-anchor="middle" fill="var(--text-muted)">見られる側</text>
+          <!-- 行ラベル -->
+          <g font-size="9" text-anchor="end" fill="var(--text-muted)">
+            <text x="120" y="48">ネコ</text>
+            <text x="120" y="83">が</text>
+            <text x="120" y="118">サカナ</text>
+            <text x="120" y="153">食べた</text>
+          </g>
+          <text x="40" y="105" font-size="8" fill="var(--text-muted)">見る側</text>
+          <!-- セル 4x4 -->
+          <g>
+            <!-- row0 -->
+            <rect x="128" y="32" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="178" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <rect x="228" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <rect x="278" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <!-- row1 -->
+            <rect x="128" y="67" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="178" y="67" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="228" y="67" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <rect x="278" y="67" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <!-- row2 -->
+            <rect x="128" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="178" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="228" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="278" y="102" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
+            <!-- row3 -->
+            <rect x="128" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="178" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="228" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+            <rect x="278" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+          </g>
+          <!-- ○× -->
+          <g font-size="11" text-anchor="middle" font-weight="700">
+            <text x="150" y="52" fill="#FFFFFF">○</text>
+            <text x="200" y="52" fill="var(--red)">×</text><text x="250" y="52" fill="var(--red)">×</text><text x="300" y="52" fill="var(--red)">×</text>
+            <text x="150" y="87" fill="#FFFFFF">○</text><text x="200" y="87" fill="#FFFFFF">○</text>
+            <text x="250" y="87" fill="var(--red)">×</text><text x="300" y="87" fill="var(--red)">×</text>
+            <text x="150" y="122" fill="#FFFFFF">○</text><text x="200" y="122" fill="#FFFFFF">○</text><text x="250" y="122" fill="#FFFFFF">○</text>
+            <text x="300" y="122" fill="var(--red)">×</text>
+            <text x="150" y="157" fill="#FFFFFF">○</text><text x="200" y="157" fill="#FFFFFF">○</text><text x="250" y="157" fill="#FFFFFF">○</text><text x="300" y="157" fill="#FFFFFF">○</text>
+          </g>
+          <text x="225" y="183" font-size="8.5" text-anchor="middle" fill="var(--text-muted)">下三角だけが残る＝過去（と自分）しか見られない</text>
+        </svg>
+      </div>
+
+      <div class="card-math" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">実装は「softmax の前に $-\infty$ を入れる」だけ</p>
+        <div style="text-align:center; margin-bottom:1rem;">
+          $$\text{scores}_{ij} = \begin{cases} \dfrac{q_i \cdot k_j}{\sqrt{d_k}} & (j \le i) \\[6pt] -\infty & (j > i) \end{cases}$$
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
+          $e^{-\infty} = 0$ なので、softmax を通した後の注目度がちょうど 0 になります。
+          PyTorch では <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">scores.masked_fill(~mask, float('-inf'))</code> の 1 行で書けます。
+        </p>
+      </div>
+
+      <div class="note-amber" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">これが「LLM は左から右にしか書けない」ことの正体</p>
+        <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
+          生成時に 1 トークンずつしか進めないのも、文頭のトークンが文脈をほとんど持てないのも、
+          すべてこの三角形の構造から来ています。
+          <strong>ハンズオン③ Part 3</strong> でこのマスクを実装し、注目度マップが三角形になる様子を確認します。
+        </p>
+      </div>
+
+      <!-- Attention Sink -->
+      <div class="note-red">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--red); margin-bottom:0.3rem;">注意：Attention Sink（注目の吸い込み口）</p>
+        <p style="font-size:0.83rem; color:#7A1F1F; line-height:1.75;">
+          実際のモデルの注目度マップを見ると、<strong>文頭トークンだけが異常に明るい</strong>ことに気づきます。
+          softmax は必ず合計を 1 にするため、「特に見るべき相手がいない」ヘッドも、
+          どこかに注目を割り振らざるを得ません。その捨て場所として文頭トークンが使われるのです。
+          これを <strong>Attention Sink</strong> と呼びます。バグではありません。
+          Llama-3.2-1B では最終トークンから見た注目のうち平均 <strong>約 72%</strong> が文頭に吸い込まれています
+          （ハンズオン③ Part 5 で実測します）。注目度マップを読むときは、文頭への注目は「無視」と解釈してください。
         </p>
       </div>
     </section>
@@ -600,24 +711,24 @@
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1.25rem;">Transformer ブロックの内部</p>
         <svg viewBox="0 0 340 380" style="width:100%; max-width:340px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
           <!-- 入力 -->
-          <text x="170" y="18" font-size="10" fill="var(--text-muted)" text-anchor="middle">入力（埋め込み＋位置エンコーディング）</text>
+          <text x="170" y="18" font-size="10" fill="var(--text-muted)" text-anchor="middle">入力（埋め込み＋位置情報）</text>
           <line x1="170" y1="22" x2="170" y2="42" stroke="var(--border-strong)" stroke-width="1.5"/>
           <polygon points="170,42 166,36 174,36" fill="var(--border-strong)"/>
 
           <!-- 位置エンコーディング説明 -->
           <rect x="10" y="26" width="110" height="24" rx="4" fill="var(--amber-bg)" stroke="var(--amber-border)" stroke-width="1"/>
-          <text x="65" y="41" font-size="8.5" fill="var(--amber)" text-anchor="middle" font-weight="600">位置エンコーディング加算済み</text>
+          <text x="65" y="41" font-size="8.5" fill="var(--amber)" text-anchor="middle" font-weight="600">位置情報を付与済み</text>
 
           <!-- Multi-Head Attention ブロック -->
           <rect x="50" y="46" width="240" height="60" rx="8" fill="var(--green-bg)" stroke="var(--green-border)" stroke-width="1.5"/>
           <text x="170" y="72" font-size="11" fill="var(--green)" text-anchor="middle" font-weight="700">Multi-Head Self-Attention</text>
-          <text x="170" y="88" font-size="9" fill="var(--green-mid)" text-anchor="middle">全トークン間の関連度を並列計算</text>
+          <text x="170" y="88" font-size="9" fill="var(--green-mid)" text-anchor="middle">入力を正規化してから適用（Pre-Norm）</text>
 
           <!-- 残差接続 + LayerNorm -->
           <line x1="170" y1="106" x2="170" y2="126" stroke="var(--border-strong)" stroke-width="1.5"/>
           <polygon points="170,126 166,120 174,120" fill="var(--border-strong)"/>
           <rect x="85" y="126" width="170" height="30" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
-          <text x="170" y="146" font-size="10" fill="var(--text-sub)" text-anchor="middle">Add &amp; Layer Norm（残差接続）</text>
+          <text x="170" y="146" font-size="10" fill="var(--text-sub)" text-anchor="middle">残差接続： x + Attention(x)</text>
 
           <!-- 残差の矢印 -->
           <path d="M50,70 Q20,70 20,141 Q20,156 82,156" fill="none" stroke="var(--green-border)" stroke-width="1.5" stroke-dasharray="4,2"/>
@@ -629,13 +740,13 @@
           <polygon points="170,176 166,170 174,170" fill="var(--border-strong)"/>
           <rect x="50" y="176" width="240" height="60" rx="8" fill="var(--surface2)" stroke="var(--border-strong)" stroke-width="1.5"/>
           <text x="170" y="202" font-size="11" fill="var(--text)" text-anchor="middle" font-weight="700">Feed-Forward Network</text>
-          <text x="170" y="218" font-size="9" fill="var(--text-sub)" text-anchor="middle">Linear → ReLU/GeLU → Linear</text>
+          <text x="170" y="218" font-size="9" fill="var(--text-sub)" text-anchor="middle">正規化してから Linear → SiLU → Linear</text>
 
           <!-- 残差接続 + LayerNorm 2 -->
           <line x1="170" y1="236" x2="170" y2="256" stroke="var(--border-strong)" stroke-width="1.5"/>
           <polygon points="170,256 166,250 174,250" fill="var(--border-strong)"/>
           <rect x="85" y="256" width="170" height="30" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
-          <text x="170" y="276" font-size="10" fill="var(--text-sub)" text-anchor="middle">Add &amp; Layer Norm（残差接続）</text>
+          <text x="170" y="276" font-size="10" fill="var(--text-sub)" text-anchor="middle">残差接続： x + FFN(x)</text>
 
           <!-- 残差の矢印 2 -->
           <path d="M290,190 Q310,190 310,271 Q310,286 258,286" fill="none" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4,2"/>
@@ -652,6 +763,18 @@
           <polygon points="170,354 166,348 174,348" fill="var(--border-strong)"/>
           <text x="170" y="368" font-size="10" fill="var(--text-muted)" text-anchor="middle">出力（文脈を反映したベクトル列）</text>
         </svg>
+        <div class="note-amber" style="margin-top:1rem;">
+          <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">正規化の位置：Post-Norm と Pre-Norm</p>
+          <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
+            2017 年の原論文は「サブレイヤーを通してから正規化する」<strong>Post-Norm</strong>
+            （$\text{Norm}(x + \text{Attention}(x))$）でしたが、
+            層を深く積むと学習が不安定になることが分かり、現在の LLM はほぼすべて
+            <strong>Pre-Norm</strong>（$x + \text{Attention}(\text{Norm}(x))$）——
+            <em>正規化してからサブレイヤーに入れ、その結果を元の $x$ に足す</em>——を採用しています。
+            上の図と、ハンズオン③ Part 4 で実装するコードはこの Pre-Norm 方式です。
+            残差の通り道に正規化が挟まらないため、勾配がまっすぐ下層まで届きます。
+          </p>
+        </div>
       </div>
 
       <!-- 各コンポーネントの説明 -->
@@ -664,26 +787,51 @@
           </p>
         </div>
         <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">位置エンコーディング</p>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">位置エンコーディング / RoPE</p>
           <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            Self-Attention は順序を考慮しないため、トークンの位置情報を埋め込みに加算して注入します。
-            「1番目の単語」「2番目の単語」という位置関係を表現します。
+            Self-Attention は順序を考慮しない（「猫が魚を食べた」と「魚が猫を食べた」を区別できない）ため、
+            位置情報を別途与える必要があります。
+            原論文では sin/cos を埋め込みに<em>加算</em>しましたが、
+            <strong style="color:var(--text);">Llama では RoPE（回転位置埋め込み）</strong>を使い、
+            Attention の計算の中で Q・K を位置に応じて「回転」させることで位置を表現します。
           </p>
         </div>
         <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Layer Normalization</p>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Layer Normalization / RMSNorm</p>
           <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            各層の出力を正規化し、学習を安定させます。
+            各層の入出力のスケールを揃え、学習を安定させます。
             バッチ正規化と異なり、各トークンの特徴次元方向で正規化するため、可変長の入力でも動作します。
+            <strong style="color:var(--text);">Llama では RMSNorm</strong>——平均を引く処理を省いた簡略版——が使われ、
+            計算が軽いぶん高速です。
           </p>
         </div>
         <div class="card">
           <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Feed-Forward Network（FFN）</p>
           <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            2層の線形変換（中間次元は通常 $4 \times d_{model}$）を各トークンに独立して適用します。
+            2層の線形変換（中間次元は通常 $4 \times d_{model}$。Llama-3.2-1B なら $2048 \to 8192 \to 2048$）を
+            各トークンに<em>独立して</em>適用します。
             Attention が「どのトークンに注目するか」を決める一方、FFN が「何を記憶・変換するか」を担います。
+            活性化関数は ReLU/GeLU が一般的ですが、<strong style="color:var(--text);">Llama は SwiGLU</strong>（SiLU + ゲート機構）を使い、
+            線形層が 3 枚になります。
+            なお <strong style="color:var(--text);">パラメータの大半を占めるのは Attention ではなく FFN</strong> です
+            （ハンズオン③ Part 4 で内訳を実測します）。
           </p>
         </div>
+      </div>
+
+      <div class="note-green">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4：このブロックを自分で組む</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
+          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
+          <strong>正味 50 行ほど</strong>で実装します。
+          そのうえで本物の Llama の 1 層を <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> し、
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">q_proj</code> /
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> /
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code> といった
+          <em>名前まで同じ部品</em>が並んでいることを確認します。
+          自作したものと本物の違いは、規模と「学習済みかどうか」だけです。
+        </p>
       </div>
     </section>
 
@@ -784,9 +932,16 @@
       <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>言語→ベクトル変換</strong>によって、テキストが NN の標準演算パイプラインに乗る</span></li>
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Self-Attention</strong> が全トークン間の関連度を一度に計算し、文脈を表現に反映させる</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + LayerNorm</strong> の組み合わせ</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成する</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>因果マスク</strong>が未来のトークンへの注目を 0 にする——LLM が左から右にしか書けない理由</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + 正規化</strong> の組み合わせ。形が変わらないので何段でも積める</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">05</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成する</span></li>
       </ul>
+      <p style="font-size:0.83rem; line-height:1.8; margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.18);">
+        ここまでの内容は、すべて <a href="index.html">ハンズオン③</a>
+        （<code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_llm_inference.ipynb</code>）の
+        Part 1〜5 で実際にコードとして書き、本物の Llama と照合します。
+        <strong>読んで分かった気になる前に、手を動かしてください。</strong>
+      </p>
     </div>
 
     <!-- ━━━ ナビゲーション ━━━ -->

@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-06-30（第2章 Web 資料作成・初学者向け説明改善）
+> 最終更新：2026-09-03（HO-3 を Transformer/Attention 実装ハンズオンへ全面改訂）
 
 ---
 
@@ -51,15 +51,15 @@ dgx-handson/
 │   ├── notebooks/
 │   │   ├── ch1_01_linear_regression.ipynb        ✅ NumPy勾配降下・学習率実験（解説用）
 │   │   ├── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
-│   │   └── ch1_03_llm_inference.ipynb            ✅ HuggingFace LLM推論パラメータ探索（解説用）
+│   │   └── ch1_03_llm_inference.ipynb            ✅ Transformer/Attention 実装〜LLM推論（解説用・84セル）
 │   ├── exercises/
 │   │   ├── ex_01_linear_regression.ipynb         ✅ 穴埋め: predict/mse_loss/dw/db/更新式
 │   │   ├── ex_02_mnist_nn.ipynb                  ✅ 穴埋め: fc1/fc2定義・forward・5ステップループ・evaluate
-│   │   └── ex_03_llm_inference.ipynb             ✅ 穴埋め: generate_text/TTR/Jaccard計算
+│   │   └── ex_03_llm_inference.ipynb             ✅ 穴埋め9問: Attention/因果マスク/残差/貪欲法/サンプリング（assert 自己チェック付き）
 │   └── solutions/
 │       ├── sol_01_linear_regression.ipynb        ✅ HO-1 解答
 │       ├── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
-│       └── sol_03_llm_inference.ipynb            ✅ HO-3 解答
+│       └── sol_03_llm_inference.ipynb            ✅ HO-3 解答（実行検証済み・自己チェック9件通過）
 ├── chapter2/
 │   └── web/
 │       ├── index.html                            ✅ 第2章トップ・手法選定フレームワーク
@@ -89,7 +89,7 @@ dgx-handson/
 | `sol_01_linear_regression.ipynb` — 完全実行 | ✅ エラーなし・グラフ出力確認 |
 | `sol_02_mnist_nn.ipynb` — 完全実行 | ✅ エラーなし・学習曲線出力確認 |
 | `sol_03_llm_inference.ipynb` — インポート・ロジック関数 | ✅ TTR / Jaccard 正常動作 |
-| `sol_03` — Llama モデルロード以降 | ⏳ Meta アクセス申請中（承認待ち） |
+| `sol_03` — Llama モデルロード以降 | ✅ 2026-09-03 に DGX 上で完全実行を確認 |
 
 ### 修正済みバグ
 
@@ -262,6 +262,80 @@ supplement ページ:
 ├─ まとめ（summary-block / ディープグリーン背景）
 └─ ナビゲーション（← 前ページ / 次ページ →）
 ```
+
+---
+
+## HO-3 改訂ログ（2026-09-03）
+
+ハンズオン③を「推論パラメータ探索のみ（約30分）」から
+**「Transformer と Attention をゼロから作り、LLM を動かすまで（約75〜90分）」** に全面改訂した。
+
+### 改訂の意図
+
+DESIGN.md 第1章の設計方針「抽象度を段階的に上げる：線形回帰 → NN → Transformer → LLM」のうち、
+**Transformer / Attention の段だけがハンズオン不在**で、座学（`supplement_transformer.html`）のみだった。
+「動くコードが先、説明は後」という基本方針に沿わせるため、この段を実装ハンズオン化した。
+
+### `ch1_03_llm_inference.ipynb` の構成（84セル）
+
+| Part | 内容 | 到達点 |
+|---|---|---|
+| 0 | セットアップ・モデルロード | — |
+| 1 | トークン化 → 埋め込み → コサイン類似度 | 意味がベクトルの距離として表れることを確認 |
+| 2 | Self-Attention をゼロから実装 | 4トークン×4次元のミニチュアで Q/K/V を手で設計し、注目度を可視化 |
+| 3 | 因果マスク・Multi-Head を実装 | LLM が左から右にしか書けない理由を構造として理解 |
+| 4 | Transformer ブロックを `nn.Module` で構築 | 本物の `LlamaDecoderLayer` と部品を照合。パラメータ内訳を可視化 |
+| 5 | 実 Llama の Attention を可視化 | 第3層ヘッド31 が "it → cat" に 0.50 注目していることを発見 |
+| 6 | 次トークン予測・貪欲法生成・KV キャッシュ | `generate()` を使わず生成。KV キャッシュで 2.4 倍高速化を実測 |
+| 7 | temperature / top_p を確率分布上で可視化 → 生成実験 | 旧 Step3〜5（TTR・Jaccard・repetition_penalty）を統合 |
+
+### 教材設計上の要点
+
+- **Part 2 のミニチュア世界**：各次元に「名詞性・動詞性・生き物性・食べ物性」という
+  人間が読める意味を割り当て、$W_Q, W_K$ を手で設計することで
+  「食べた → サカナ に 0.99 注目」という**意味の読める注目度**を作った。
+  そのうえで Part 2-5 でランダム重みと比較し、「学習とは何を獲得することか」に接続している。
+- **Part 5 の Attention Sink**：多くのヘッド（82%）が文頭トークンに注目を捨てる現象を
+  コラムとして明示した。これを説明しないと、実 Attention マップを見た参加者が混乱する。
+- **Part 2 → Part 5 の伏線回収**が全体の軸。「自分で作る → 本物と照合する → 使いこなす」の順。
+
+### Web 資料の追随修正（`chapter1/web/`）
+
+ノートブック改訂に合わせ、第1章 Web 資料の不整合を解消した。
+
+| ファイル | 修正内容 |
+|---|---|
+| `supplement_transformer.html` | **因果マスクの節を新設**（4×4 の ○× 図・$-\infty$ マスクの式・実装1行）。**Attention Sink のコラム**を追加（実測 72%）。Multi-Head を Llama-3.2-1B の実数（32ヘッド×16層＝512枚、GQA）に更新。位置エンコーディング→**RoPE**、LayerNorm→**RMSNorm**、FFN→**SwiGLU/SiLU** を追記。ブロック図を **Post-Norm → Pre-Norm** に修正（ノートブック実装と一致させるため）。各節に HO-3 の Part 番号への導線を追加 |
+| `supplement_inference_params.html` | コード例の `torch_dtype` を **`dtype`** に修正（transformers 5.x）。**`use_cache`（KV キャッシュ）のカードを追加**。Greedy の説明に「HO-3 Part 6〜7 で generate() を使わず実装する」導線を追加 |
+| `supplement_pretraining.html` | 規模感の比較表に **HO-3 で使う Llama-3.2-1B の行**を追加。Causal Masking と「1文から複数サンプル」に HO-3 Part 3 / Part 6 への導線を追加 |
+| `quiz_ch1.html` | **13問 → 17問**。選択式に Q6（Q・K・V の役割）・Q7（因果マスクの理由）、穴埋めに Q13（`-inf` マスク）、記述式に Q17（なぜ毎回違う答えが返るか）を追加。設問 ID・表示番号・採点ロジック・スコア分母（客観 10 → 13）をすべて繰り下げ済み |
+| `index.html` | HO-3 の題目・説明・所要時間（30→75分）を更新。到達目標に「Self-Attention と Transformer ブロックを自分で実装できる」を追加。1-3 / 1-5 の講義カードに HO-3 の Part 番号を明記。所要時間サマリを実習 135 分・合計約 4 時間に更新 |
+
+> **注**：`supplement_transformer.html` の Attention 例図（「私 は 昨日 食べた 寿司」）は
+> ノートブックのミニチュア（「ネコ が サカナ 食べた」）と異なるが、これは意図的にそのまま残している。
+> 図は一般的な例示であり矛盾はなく、代わりに図の直下に
+> 「HO-3 Part 2 でこの図をコードで再現する」旨のブリッジを置いた。
+
+### `ex_03` / `sol_03`
+
+課題9問＋チャレンジ2問。各課題末尾に `assert` による**自己チェック**を入れ、
+`✅ OK` が出れば正解と分かるようにした。特に課題4（残差接続）は
+「全パラメータを 0 にしたとき出力が入力と一致するか」で残差の有無を判定している。
+
+### 動作検証（DGX / GB10・torch 2.13・transformers 5.16）
+
+| 対象 | 結果 |
+|---|---|
+| `ch1_03_llm_inference.ipynb` 全84セル実行 | ✅ エラー0件・約34秒 |
+| `sol_03_llm_inference.ipynb` 全セル実行 | ✅ エラー0件・自己チェック9件すべて通過 |
+
+### 既知の注意点
+
+- モデルロードに `attn_implementation='eager'` が**必須**（Part 5 で `output_attentions=True` を使うため）。
+  SDPA / FlashAttention では Attention 重みが返らない。
+- transformers 5.x では `torch_dtype` が deprecated。`dtype` を使うこと。
+- `AutoTokenizer.from_pretrained(..., clean_up_tokenization_spaces=False)` を指定しないと
+  BPE トークナイザの警告が出る。
 
 ---
 
