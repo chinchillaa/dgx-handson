@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-09-03（HO-3 を Transformer/Attention 実装ハンズオンへ全面改訂）
+> 最終更新：2026-09-03（HO-3 を30分のコア版＋付録に分割）
 
 ---
 
@@ -51,7 +51,8 @@ dgx-handson/
 │   ├── notebooks/
 │   │   ├── ch1_01_linear_regression.ipynb        ✅ NumPy勾配降下・学習率実験（解説用）
 │   │   ├── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
-│   │   └── ch1_03_llm_inference.ipynb            ✅ Transformer/Attention 実装〜LLM推論（解説用・84セル）
+│   │   ├── ch1_03_llm_inference.ipynb            ✅ Attention 実装〜LLM推論（解説用・47セル・約30分）
+│   │   └── ch1_03_appendix_deep_dive.ipynb       ✅ HO-3 付録 深掘り編（42セル・約45分・任意）
 │   ├── exercises/
 │   │   ├── ex_01_linear_regression.ipynb         ✅ 穴埋め: predict/mse_loss/dw/db/更新式
 │   │   ├── ex_02_mnist_nn.ipynb                  ✅ 穴埋め: fc1/fc2定義・forward・5ステップループ・evaluate
@@ -351,6 +352,57 @@ AIcia Solid Project「ディープラーニングの世界」vol.24（Attention�
 > 実行結果に合わせて「意味を持つトークンは」と限定して記述している。
 
 ch1_03 は 84 → **88 セル**、quiz は 17 → **18 問**（記述式 Q18 を追加、番号繰り下げ不要）。
+
+### 30分版への圧縮と付録への分割（2026-09-03）
+
+「内容は良いが量が多すぎる」というレビューを受け、本編を **88 → 47 セル（約30分）** に絞り、
+外した内容を **`ch1_03_appendix_deep_dive.ipynb`（42セル・約45分）** に退避した。
+
+#### 本編（30分・47セル）に残したもの
+
+| Part | 内容 |
+|---|---|
+| 0 | セットアップ・モデルロード |
+| 1 | トークン化 → 埋め込み → コサイン類似度（埋め込み行列の説明は類似度セルに畳み込み） |
+| 2 | Self-Attention をゼロから（W なしの失敗 → ねじる → 実装 → 比較図 → 出力ベクトル） |
+| 3 | 因果マスク（Multi-Head は付録へ） |
+| 4 | **本物の Llama の1層を print して部品を照合するだけ**（自作クラスは付録へ） |
+| 5 | 実 Llama の Attention 可視化（it→cat の1枚のみ） |
+| 6 | 次トークン予測 → 貪欲法生成 |
+| 7 | temperature / top_p の分布可視化 → generate() で2温度比較 |
+
+#### 付録（任意・42セル）に退避したもの
+
+| 付録 | 内容 | 元 Part |
+|---|---|---|
+| A | √d_k の実験、学習前のランダム重み、日英トークン効率 | 2-5・2-6・1-1 |
+| B | Multi-Head Attention を作る | 3-2 |
+| C | Transformer ブロックを nn.Module で組み立て＋パラメータ内訳 | 4 |
+| D | 層ごとの Attention の違い、Attention Sink の実測 | 5 |
+| E | 全位置ぶんの予測、KV キャッシュ、サンプリングの自作実装 | 6-1・6-3・7-3 |
+| F | TTR・Top-p 実験・Jaccard・repetition_penalty | 7-5〜7-8 |
+
+**付録は独立して動く。** 冒頭の「準備」セル1つで、本編で定義した関数・変数
+（`scaled_dot_product_attention` / `causal_self_attention` / `plot_attention` /
+ミニチュア世界 `X` / 実モデルの注目度 `A` / `generate_text` など）をまとめて再現する。
+関数定義は本編ノートブックから機械的に抽出しているため、本編と付録で実装がズレない。
+
+#### 実行時間の実測（DGX / GB10）
+
+| ノートブック | セル数 | 全セル実行 | エラー |
+|---|---|---|---|
+| `ch1_03_llm_inference.ipynb` | 47（code 21） | **13 秒** | 0 |
+| `ch1_03_appendix_deep_dive.ipynb` | 42（code 19） | 32 秒 | 0 |
+
+（本編は生成を伴う重い実験を付録へ移したため、実行時間が 34 秒 → 13 秒に短縮）
+
+#### 追随修正
+
+- `index.html`：HO-3 を「実習 30分」に戻し、付録を「発展（任意・約45分）」として別枠で記載。
+  所要時間サマリを実習 90 分・合計約 3.5 時間に修正。到達目標4 から「Transformer ブロック」を外した
+- Web 補足資料の「ハンズオン③ Part N」参照を、本編／付録のどちらを指すかに合わせて全件修正
+  （Attention Sink → 付録 D、KV キャッシュ → 付録 E-2、ブロック組み立て → 付録 C など）
+- `ex_03` / `sol_03` の課題4・課題7 に、対応する解説が付録にある旨の注記を追加
 
 ### `ex_03` / `sol_03`
 

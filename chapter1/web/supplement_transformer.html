@@ -722,6 +722,8 @@
           それが <strong>16 層</strong>なので、モデル全体で <strong>512 枚</strong>の注目度マップが動いています。
           実装上はヘッドごとに別の行列を持つのではなく、
           $d_{model} = 2048$ を 32 分割して 1 ヘッドあたり 64 次元を担当させます（計算量を増やさないため）。
+          ヘッドを 2 つ手で作って違いを見る実験と、$d_{model}$ を分割する実装は、
+          ハンズオン③の付録 B にあります。
         </p>
       </div>
 
@@ -818,7 +820,7 @@
           どこかに注目を割り振らざるを得ません。その捨て場所として文頭トークンが使われるのです。
           これを <strong>Attention Sink</strong> と呼びます。バグではありません。
           Llama-3.2-1B では最終トークンから見た注目のうち平均 <strong>約 72%</strong> が文頭に吸い込まれています
-          （ハンズオン③ Part 5 で実測します）。注目度マップを読むときは、文頭への注目は「無視」と解釈してください。
+          （ハンズオン③の付録 <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code> 付録 D で実測します）。注目度マップを読むときは、文頭への注目は「無視」と解釈してください。
         </p>
       </div>
     </section>
@@ -903,7 +905,7 @@
             層を深く積むと学習が不安定になることが分かり、現在の LLM はほぼすべて
             <strong>Pre-Norm</strong>（$x + \text{Attention}(\text{Norm}(x))$）——
             <em>正規化してからサブレイヤーに入れ、その結果を元の $x$ に足す</em>——を採用しています。
-            上の図と、ハンズオン③ Part 4 で実装するコードはこの Pre-Norm 方式です。
+            上の図と、ハンズオン③の付録 C で組み立てるコードはこの Pre-Norm 方式です。
             残差の通り道に正規化が挟まらないため、勾配がまっすぐ下層まで届きます。
           </p>
         </div>
@@ -946,22 +948,23 @@
             活性化関数は ReLU/GeLU が一般的ですが、<strong style="color:var(--text);">Llama は SwiGLU</strong>（SiLU + ゲート機構）を使い、
             線形層が 3 枚になります。
             なお <strong style="color:var(--text);">パラメータの大半を占めるのは Attention ではなく FFN</strong> です
-            （ハンズオン③ Part 4 で内訳を実測します）。
+            （ハンズオン③の付録 C-1 で内訳を実測します）。
           </p>
         </div>
       </div>
 
       <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4：このブロックを自分で組む</p>
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4／付録 C：本物と照合し、自分で組む</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
-          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
-          <strong>正味 50 行ほど</strong>で実装します。
-          そのうえで本物の Llama の 1 層を <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> し、
+          <strong>本編 Part 4</strong> では、本物の Llama の 1 層を
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> して、
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">q_proj</code> /
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> /
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code> といった
           <em>名前まで同じ部品</em>が並んでいることを確認します。
+          さらに<strong>付録 C</strong> では、上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
+          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
+          <strong>正味 50 行ほど</strong>で自分で組み立てます。
           自作したものと本物の違いは、規模と「学習済みかどうか」だけです。
         </p>
       </div>
@@ -1072,7 +1075,9 @@
       <p style="font-size:0.83rem; line-height:1.8; margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.18);">
         ここまでの内容は、すべて <a href="index.html">ハンズオン③</a>
         （<code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_llm_inference.ipynb</code>）の
-        Part 1〜5 で実際にコードとして書き、本物の Llama と照合します。
+        Part 1〜5 で実際にコードとして書き、本物の Llama と照合します（約 30 分）。
+        Multi-Head の実装・Transformer ブロックの組み立て・Attention Sink の実測は、
+        同じフォルダの <code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code>（付録）へ。
         <strong>読んで分かった気になる前に、手を動かしてください。</strong>
       </p>
     </div>

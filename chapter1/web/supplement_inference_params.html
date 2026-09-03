@@ -246,12 +246,12 @@
           サンプリングを使うと<strong>毎回異なる出力が生成</strong>され、創造的なタスクに向きます。
         </p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75; margin-top:0.5rem;">
-          <strong>ハンズオン③ Part 6〜7</strong> では、この流れを
+          <strong>ハンズオン③ Part 6</strong> では、この流れを
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">model.generate()</code> を使わずに
-          自分で書きます。Greedy ループを 10 行ほどで実装したうえで、
-          そこに Temperature と Top-p を組み込み、
+          自分で書きます。Greedy ループは 10 行ほどで実装できます。
+          そこに Temperature と Top-p を組み込んだサンプリングの自作実装は、付録 E-3 にあります。
           「LLM の出力が毎回変わるのはモデルが気まぐれだからではなく、確率分布からサイコロを振っているから」
-          であることを手を動かして確認します。
+          であることを手を動かして確認できます。
         </p>
       </div>
     </section>
@@ -586,7 +586,7 @@
             過去の K・V を保存して使い回すのが <strong style="color:var(--text);">KV キャッシュ</strong>です。
             <code style="font-size:0.78rem; background:var(--surface2); padding:1px 4px; border-radius:3px;">True</code>（デフォルト）のままで構いませんが、
             <em>LLM 推論のメモリ使用量の大部分はこのキャッシュが占める</em>という点は実運用で重要です。
-            プロンプトが長いほど効果が大きく、ハンズオン③ Part 6 では
+            プロンプトが長いほど効果が大きく、ハンズオン③の付録 E-2 では
             481 トークンのプロンプトで <strong style="color:var(--text);">約 2.4 倍</strong>の高速化を実測します。
           </p>
         </div>
@@ -705,7 +705,7 @@ print(tokenizer.decode(outputs_factual[0],  skip_special_tokens=True))</code></p
           </tbody>
         </table>
         <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
-          ※ 最適値はモデルによって異なります。ハンズオン③ Part 7 で実際に値を振って出力の変化を観察します。
+          ※ 最適値はモデルによって異なります。ハンズオン③ Part 7 で出力の変化を観察し、付録 F で TTR・Jaccard 類似度による定量評価まで行います。
         </p>
       </div>
 
@@ -726,7 +726,7 @@ print(tokenizer.decode(outputs_factual[0],  skip_special_tokens=True))</code></p
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>Temperature</strong> は logit を割ることで分布形状を変える——低いと確実、高いと多様</span></li>
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Top-p</strong>（Nucleus）は累積確率で候補を動的に絞る——分布の形に適応するため汎用性が高い</span></li>
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>パラメータはタスクの性質に合わせてセットで調整する——単独で最大化・最小化するものではない</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>ハンズオン③ Part 6〜7 では <strong>generate() を使わずに</strong>サンプリングを実装し、パラメータが確率分布に何をしているのかを可視化する</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>ハンズオン③ Part 6〜7 では <strong>generate() を使わずに</strong>文章を生成し、パラメータが確率分布に何をしているのかを可視化する</span></li>
       </ul>
     </div>
 
