@@ -323,6 +323,10 @@
           </table>
           <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
             8トークンの文から7個の学習サンプルが自動生成される。
+            <strong style="color:var(--text-sub);">ハンズオン③ Part 6</strong> では、実際に
+            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">logits</code> の形が
+            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">(1, トークン数, 語彙数)</code> になっていること——
+            つまりモデルが<em>全位置ぶんの「次は何か」を同時に出している</em>ことを目で確認します。
             1兆トークンのデータセットなら、約1兆個の学習サンプルが得られる。
           </p>
         </div>
@@ -365,6 +369,13 @@
           Decoder-only モデルでは Self-Attention の計算時に<strong>「未来のトークンを参照しない」</strong>よう
           上三角行列でマスクします。これにより 1 回の順伝播で全ポジションの損失を同時に計算でき、
           学習効率が大幅に向上します。
+        </p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.5rem;">
+          もしマスクを外すと、モデルは「次のトークン」をそのまま覗き見できてしまい、
+          <em>答えを見ながら答えを当てる練習</em>になって学習が成立しません。
+          仕組みと実装は
+          <a href="supplement_transformer.html" style="color:var(--green); text-decoration:underline; text-underline-offset:2px;">補足資料：Transformer</a> の
+          Section 2、および <strong>ハンズオン③ Part 3</strong> を参照してください。
         </p>
       </div>
     </section>
@@ -567,6 +578,12 @@
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">300 万</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">1（数分）</td>
             </tr>
+            <tr style="border-bottom:1px solid var(--border); background:var(--green-bg);">
+              <td style="padding:0.4rem 0.75rem; color:var(--green); font-weight:600;">HO-3（Llama-3.2-1B）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">12 億</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">9 兆</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">〜 1,000（数日）</td>
+            </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">LLaMA 3 8B</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">80 億</td>
@@ -589,6 +606,9 @@
         </table>
         <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
           ※ GPU 数・学習期間はすべて公開情報からの概算です。
+          ハンズオン③で動かす Llama-3.2-1B も、<strong style="color:var(--text-sub);">推論は手元の GPU で数秒</strong>ですが、
+          その事前学習には数千 GPU 日規模の計算が投じられています。
+          私たちが第2章以降で行うのは、この成果物を<em>出発点として活用する</em>ことです。
         </p>
       </div>
     </section>

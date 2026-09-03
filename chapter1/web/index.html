@@ -332,6 +332,10 @@
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">3</span>
             <span style="font-size:0.875rem; color:var(--text-sub);">「線形回帰 → NN → Transformer → LLM」という <strong style="color:var(--text);">拡張の流れ</strong> を説明できる</span>
           </li>
+          <li style="display:flex; align-items:flex-start; gap:0.75rem;">
+            <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">4</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">Self-Attention と Transformer ブロックを <strong style="color:var(--text);">自分で実装できる</strong>（Q・K・V／因果マスク／残差接続）</span>
+          </li>
         </ol>
       </div>
     </section>
@@ -497,7 +501,9 @@
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
             NN の構造的な限界（語順・長距離依存）を示し、Attention 機構がどう解決するかを説明。
-            Self-Attention の直感「どのトークンに注目するか」を図解で理解する。
+            Self-Attention の直感「どのトークンに注目するか」と、因果マスクが生む
+            「左から右にしか書けない」という性質を図解で理解する。
+            <strong style="color:var(--text);">この内容はハンズオン③ Part 2〜5 でそのまま実装します。</strong>
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_transformer.html" class="link-chip">📄 補足資料：Transformer / Attention</a>
@@ -534,6 +540,7 @@
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
             temperature / top_p / max_new_tokens が出力に与える影響を理論と実験で理解する。
             「同じ関数でも引数次第で出力が変わる」という視点を強調する。
+            <strong style="color:var(--text);">ハンズオン③ Part 6〜7 で、サンプリングを generate() を使わずに実装します。</strong>
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_inference_params.html" class="link-chip">📄 補足資料：推論パラメータ</a>
@@ -545,13 +552,16 @@
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.625rem;">
             <div style="display:flex; align-items:center; gap:0.625rem;">
               <span class="badge badge-handson">HO-3</span>
-              <h3 style="font-size:0.925rem; font-weight:700; color:var(--text);">ハンズオン③：HuggingFace で LLM の推論パラメータを探索</h3>
+              <h3 style="font-size:0.925rem; font-weight:700; color:var(--text);">ハンズオン③：Transformer と Attention を作り、LLM を動かす</h3>
             </div>
-            <span class="time-chip">実習 30分</span>
+            <span class="time-chip">実習 75分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            日本語 LLM（ELYZA 等）を使い、temperature / top_p / max_new_tokens を変えながら
-            出力の変化を観察する。「パラメータと出力の関係」を経験的に把握する。
+            セクション 1-3 〜 1-5 を貫く総合ハンズオン。トークン化と埋め込みから始め、
+            Self-Attention・因果マスク・Transformer ブロックを自分の手で実装する。
+            そのうえで本物の Llama-3.2-1B の Attention を覗き、自作したものと同じ仕組みが
+            動いていることを確認する。最後に <code>generate()</code> を使わず文章を生成し、
+            temperature / top_p が確率分布に何をしているのかを可視化する。
           </p>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <span class="file-chip">📓 notebooks/ch1_03_llm_inference.ipynb</span>
@@ -600,7 +610,7 @@
             <tr>
               <td style="padding:0.65rem 1rem;">実習</td>
               <td style="padding:0.65rem 1rem;">ハンズオン① ② ③</td>
-              <td style="padding:0.65rem 1rem; text-align:right;">約 90 分</td>
+              <td style="padding:0.65rem 1rem; text-align:right;">約 135 分</td>
             </tr>
             <tr>
               <td style="padding:0.65rem 1rem;">確認</td>
@@ -610,7 +620,7 @@
             <tr style="background:var(--green-bg); border-bottom:none; font-weight:700;">
               <td style="padding:0.65rem 1rem; color:var(--green);">合計</td>
               <td style="padding:0.65rem 1rem;"></td>
-              <td style="padding:0.65rem 1rem; text-align:right; color:var(--green);">約 3.5 時間</td>
+              <td style="padding:0.65rem 1rem; text-align:right; color:var(--green);">約 4 時間</td>
             </tr>
           </tbody>
         </table>

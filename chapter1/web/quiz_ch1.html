@@ -248,8 +248,8 @@
           <h1 class="text-2xl font-bold" style="color:var(--text);">理解確認クイズ</h1>
         </div>
         <div style="font-size:0.75rem; color:var(--text-muted); text-align:right; line-height:1.8;">
-          <p>全 <strong style="color:var(--text);">13 問</strong></p>
-          <p>選択式 5 ／ 穴埋め 5 ／ 記述式 3</p>
+          <p>全 <strong style="color:var(--text);">17 問</strong></p>
+          <p>選択式 7 ／ 穴埋め 6 ／ 記述式 4</p>
         </div>
       </div>
     </div>
@@ -341,6 +341,32 @@
         <div class="feedback" id="fb-q5"></div>
       </div>
 
+      <!-- Q6 -->
+      <div class="q-card" id="card-q6">
+        <p class="q-num">Q6</p>
+        <p class="q-text">Self-Attention における Query・Key・Value の役割の説明として最も適切なものはどれか。</p>
+        <div class="choice-list" id="choices-q6">
+          <label class="choice-label"><input type="radio" name="q6" value="a"> <span>Q は入力文、K は出力文、V は語彙表を表す</span></label>
+          <label class="choice-label"><input type="radio" name="q6" value="b"> <span>Q は「自分が何を探しているか」、K は「自分が何者だと名乗るか」、V は「実際に渡す情報」を表す</span></label>
+          <label class="choice-label"><input type="radio" name="q6" value="c"> <span>Q・K・V は常に同一のベクトルであり、3つに分ける意味は計算の高速化だけである</span></label>
+          <label class="choice-label"><input type="radio" name="q6" value="d"> <span>Q と K は学習時のみ、V は推論時のみ使われる</span></label>
+        </div>
+        <div class="feedback" id="fb-q6"></div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card" id="card-q7">
+        <p class="q-num">Q7</p>
+        <p class="q-text">Decoder-only の LLM が因果マスク（Causal Mask）を使う最も本質的な理由はどれか。</p>
+        <div class="choice-list" id="choices-q7">
+          <label class="choice-label"><input type="radio" name="q7" value="a"> <span>計算量を半分に削減し、メモリを節約するため</span></label>
+          <label class="choice-label"><input type="radio" name="q7" value="b"> <span>学習時に「次に来るトークン」を先に見られてしまうと、次トークン予測の練習が成立しないため</span></label>
+          <label class="choice-label"><input type="radio" name="q7" value="c"> <span>語彙サイズが大きすぎて softmax が計算できなくなるため</span></label>
+          <label class="choice-label"><input type="radio" name="q7" value="d"> <span>日本語のように語順が自由な言語に対応するため</span></label>
+        </div>
+        <div class="feedback" id="fb-q7"></div>
+      </div>
+
       <div style="margin-top:0.5rem;">
         <button class="btn-section" onclick="gradeSection1()">セクション1を採点する</button>
         <span id="score-s1" style="margin-left:1rem; font-size:0.82rem; color:var(--text-muted);"></span>
@@ -358,39 +384,15 @@
       </div>
       <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.5rem;">空欄に当てはまる語句・式・コードを入力してください。</p>
 
-      <!-- Q6 -->
-      <div class="q-card" id="card-q6">
-        <p class="q-num">Q6</p>
-        <p class="q-text">
-          NumPy で線形回帰の予測関数を実装するとき、<br>
-          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">def predict(x, w, b):</code><br>
-          の本体は <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">return</code>
-          <input class="fill-input" id="fill-q6" placeholder="　　式　　" style="width:9rem;">
-          の 1 行で書ける。
-        </p>
-        <div class="feedback" id="fb-q6"></div>
-      </div>
-
-      <!-- Q7 -->
-      <div class="q-card" id="card-q7">
-        <p class="q-num">Q7</p>
-        <p class="q-text">
-          MSE の勾配降下法において、重み $w$ の更新式は<br>
-          $w \leftarrow w -$
-          <input class="fill-input" id="fill-q7" placeholder="　　　" style="width:6rem;">
-          $\cdot \dfrac{\partial L}{\partial w}$
-          である。空欄に入る記号を答えよ。
-        </p>
-        <div class="feedback" id="fb-q7"></div>
-      </div>
-
       <!-- Q8 -->
       <div class="q-card" id="card-q8">
         <p class="q-num">Q8</p>
         <p class="q-text">
-          PyTorch の学習ループで、前のステップの勾配を消去するために呼び出すメソッドは<br>
-          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">optimizer.</code><input class="fill-input" id="fill-q8" placeholder="メソッド名" style="width:8rem;"><code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">()</code>
-          である。
+          NumPy で線形回帰の予測関数を実装するとき、<br>
+          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">def predict(x, w, b):</code><br>
+          の本体は <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">return</code>
+          <input class="fill-input" id="fill-q8" placeholder="　　式　　" style="width:9rem;">
+          の 1 行で書ける。
         </p>
         <div class="feedback" id="fb-q8"></div>
       </div>
@@ -399,10 +401,11 @@
       <div class="q-card" id="card-q9">
         <p class="q-num">Q9</p>
         <p class="q-text">
-          Self-Attention の計算式 $\text{Attention}(Q, K, V) = \text{softmax}\!\left(\dfrac{QK^\top}{\sqrt{d_k}}\right)V$ において、
-          $\sqrt{d_k}$ で割る目的は
-          <input class="fill-input" id="fill-q9" placeholder="　　　　　" style="width:12rem;">
-          のためである。
+          MSE の勾配降下法において、重み $w$ の更新式は<br>
+          $w \leftarrow w -$
+          <input class="fill-input" id="fill-q9" placeholder="　　　" style="width:6rem;">
+          $\cdot \dfrac{\partial L}{\partial w}$
+          である。空欄に入る記号を答えよ。
         </p>
         <div class="feedback" id="fb-q9"></div>
       </div>
@@ -411,15 +414,50 @@
       <div class="q-card" id="card-q10">
         <p class="q-num">Q10</p>
         <p class="q-text">
-          LLM 推論で <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">temperature</code> を低くすると、
-          確率分布は
-          <input class="fill-input" id="fill-q10" placeholder="　　" style="width:5rem;">
-          くなり、
-          出力の確実性が
-          <input class="fill-input" id="fill-q10b" placeholder="　　" style="width:5rem;">
-          がる。
+          PyTorch の学習ループで、前のステップの勾配を消去するために呼び出すメソッドは<br>
+          <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">optimizer.</code><input class="fill-input" id="fill-q10" placeholder="メソッド名" style="width:8rem;"><code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">()</code>
+          である。
         </p>
         <div class="feedback" id="fb-q10"></div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="q-card" id="card-q11">
+        <p class="q-num">Q11</p>
+        <p class="q-text">
+          Self-Attention の計算式 $\text{Attention}(Q, K, V) = \text{softmax}\!\left(\dfrac{QK^\top}{\sqrt{d_k}}\right)V$ において、
+          $\sqrt{d_k}$ で割る目的は
+          <input class="fill-input" id="fill-q11" placeholder="　　　　　" style="width:12rem;">
+          のためである。
+        </p>
+        <div class="feedback" id="fb-q11"></div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="q-card" id="card-q12">
+        <p class="q-num">Q12</p>
+        <p class="q-text">
+          LLM 推論で <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">temperature</code> を低くすると、
+          確率分布は
+          <input class="fill-input" id="fill-q12" placeholder="　　" style="width:5rem;">
+          くなり、
+          出力の確実性が
+          <input class="fill-input" id="fill-q12b" placeholder="　　" style="width:5rem;">
+          がる。
+        </p>
+        <div class="feedback" id="fb-q12"></div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="q-card" id="card-q13">
+        <p class="q-num">Q13</p>
+        <p class="q-text">
+          因果マスクは、softmax に通す<strong>前</strong>のスコアのうち「未来の位置」を
+          <input class="fill-input" id="fill-q13" placeholder="　　　" style="width:8rem;">
+          に置き換えることで実装する。<br>
+          <span style="font-size:0.78rem; color:var(--text-muted);">（PyTorch のコードで書く値をそのまま答えてください）</span>
+        </p>
+        <div class="feedback" id="fb-q13"></div>
       </div>
 
       <div style="margin-top:0.5rem;">
@@ -441,37 +479,49 @@
         自分の言葉で説明してください。「採点する」で模範解答が表示されます（自己採点）。
       </p>
 
-      <!-- Q11 -->
-      <div class="q-card" id="card-q11">
-        <p class="q-num">Q11</p>
+      <!-- Q14 -->
+      <div class="q-card" id="card-q14">
+        <p class="q-num">Q14</p>
         <p class="q-text">
           線形変換だけを何層重ねても「1回の線形変換」と等価になってしまうのはなぜか。
           また、これを解決するために何を導入するか。
         </p>
-        <textarea class="desc-textarea" id="desc-q11" placeholder="ここに回答を入力してください…"></textarea>
-        <div class="feedback" id="fb-q11"></div>
+        <textarea class="desc-textarea" id="desc-q14" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q14"></div>
       </div>
 
-      <!-- Q12 -->
-      <div class="q-card" id="card-q12">
-        <p class="q-num">Q12</p>
+      <!-- Q15 -->
+      <div class="q-card" id="card-q15">
+        <p class="q-num">Q15</p>
         <p class="q-text">
           LLM の事前学習が「自己教師あり学習」と呼ばれる理由を、
           「教師信号」という言葉を使って説明してください。
         </p>
-        <textarea class="desc-textarea" id="desc-q12" placeholder="ここに回答を入力してください…"></textarea>
-        <div class="feedback" id="fb-q12"></div>
+        <textarea class="desc-textarea" id="desc-q15" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q15"></div>
       </div>
 
-      <!-- Q13 -->
-      <div class="q-card" id="card-q13">
-        <p class="q-num">Q13</p>
+      <!-- Q16 -->
+      <div class="q-card" id="card-q16">
+        <p class="q-num">Q16</p>
         <p class="q-text">
           コード生成タスクで <code style="background:var(--surface2); padding:1px 6px; border-radius:3px; font-size:0.85rem;">temperature=1.5</code> に設定した場合に起こりうる問題と、
           その理由を説明してください。
         </p>
-        <textarea class="desc-textarea" id="desc-q13" placeholder="ここに回答を入力してください…"></textarea>
-        <div class="feedback" id="fb-q13"></div>
+        <textarea class="desc-textarea" id="desc-q16" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q16"></div>
+      </div>
+
+      <!-- Q17 -->
+      <div class="q-card" id="card-q17">
+        <p class="q-num">Q17</p>
+        <p class="q-text">
+          同じ質問を LLM に 2 回投げると、違う答えが返ってくることがある。
+          その理由を<strong>「確率分布」</strong>という言葉を使って説明してください。
+          あわせて、毎回まったく同じ答えを返させたい場合にどう設定すればよいかも述べてください。
+        </p>
+        <textarea class="desc-textarea" id="desc-q17" placeholder="ここに回答を入力してください…"></textarea>
+        <div class="feedback" id="fb-q17"></div>
       </div>
 
       <div style="margin-top:0.5rem;">
@@ -502,25 +552,32 @@
       q3: 'c',
       q4: 'b',
       q5: 'b',
+      q6: 'b',
+      q7: 'b',
     };
 
     const FILL_ANSWERS = {
-      q6:  { correct: ['w * x + b', 'w*x+b'],            hint: '線形モデルの式: $\\hat{y} = wx + b$' },
-      q7:  { correct: ['α', 'alpha', 'α（アルファ）', 'α（学習率）'],
+      q8:  { correct: ['w * x + b', 'w*x+b'],            hint: '線形モデルの式: $\\hat{y} = wx + b$' },
+      q9:  { correct: ['α', 'alpha', 'α（アルファ）', 'α（学習率）'],
              hint: '更新式: $w \\leftarrow w - \\alpha \\frac{\\partial L}{\\partial w}$' },
-      q8:  { correct: ['zero_grad'],
+      q10:  { correct: ['zero_grad'],
              hint: '<code>optimizer.zero_grad()</code> で勾配をリセットします' },
-      q9:  { correct: ['勾配安定化', 'スケーリング', '勾配の安定化', 'スコアが大きくなりすぎるのを防ぐ', '勾配消失を防ぐ', 'スコアのスケーリング'],
+      q11:  { correct: ['勾配安定化', 'スケーリング', '勾配の安定化', 'スコアが大きくなりすぎるのを防ぐ', '勾配消失を防ぐ', 'スコアのスケーリング'],
              hint: '次元数が大きいと内積値が大きくなり、softmax の勾配が消えやすくなります' },
-      q10: { correct_a: ['シャープ', '鋭', '急峻'],
+      q12: { correct_a: ['シャープ', '鋭', '急峻'],
              correct_b: ['上', '高'],
              hint: '低い temperature → 分布がシャープ → 高い確率のトークンに集中 → 確実性が上がる' },
+      q13: { correct: ['-inf', '-∞', '−inf', '−∞', '-infinity', 'マイナス無限大', '負の無限大',
+                       "float('-inf')", '-float("inf")', "-float('inf')"],
+             hint: '$e^{-\\infty} = 0$ なので、softmax 後の注目度がちょうど 0 になります。'
+                   + 'PyTorch では <code>scores.masked_fill(~mask, float(\'-inf\'))</code> と書きます' },
     };
 
     const REFERENCES = {
-      q11: '線形変換 $y = Wx + b$ を何回重ねても、行列の積は1つの行列にまとめられるため、結果は常に1回の線形変換と等価です。これを解決するために<strong>活性化関数（ReLU・Sigmoid など）</strong>を各層の出力に適用します。活性化関数は非線形変換であるため、層を重ねるごとに表現能力が真の意味で拡張されます。',
-      q12: '通常の教師あり学習では人間が付けたラベル（正解）が必要ですが、LLM の事前学習では<strong>テキスト自体から教師信号を自動生成</strong>します。具体的には「これまでのトークン列を入力として、次のトークンを予測する」タスクを設定し、実際の次トークンが正解ラベルとして機能します。そのため人手でのラベル付けが不要で、インターネット上の大量テキストをそのまま学習データとして利用できます。',
-      q13: 'temperature が高いほど確率分布が平坦になり、低確率のトークンが選ばれやすくなります。<strong>コード生成では構文の正確性が求められる</strong>ため、temperature=1.5 のような高い値では文法エラーや意味不明なコードが生成されやすくなります。コード生成には temperature=0.1〜0.3 程度の低い値が推奨されます。',
+      q14: '線形変換 $y = Wx + b$ を何回重ねても、行列の積は1つの行列にまとめられるため、結果は常に1回の線形変換と等価です。これを解決するために<strong>活性化関数（ReLU・Sigmoid など）</strong>を各層の出力に適用します。活性化関数は非線形変換であるため、層を重ねるごとに表現能力が真の意味で拡張されます。',
+      q15: '通常の教師あり学習では人間が付けたラベル（正解）が必要ですが、LLM の事前学習では<strong>テキスト自体から教師信号を自動生成</strong>します。具体的には「これまでのトークン列を入力として、次のトークンを予測する」タスクを設定し、実際の次トークンが正解ラベルとして機能します。そのため人手でのラベル付けが不要で、インターネット上の大量テキストをそのまま学習データとして利用できます。',
+      q16: 'temperature が高いほど確率分布が平坦になり、低確率のトークンが選ばれやすくなります。<strong>コード生成では構文の正確性が求められる</strong>ため、temperature=1.5 のような高い値では文法エラーや意味不明なコードが生成されやすくなります。コード生成には temperature=0.1〜0.3 程度の低い値が推奨されます。',
+      q17: 'LLM の出力は「文章」ではなく<strong>語彙サイズぶんの確率分布</strong>です。生成のたびに、その確率分布に従って次のトークンを1つ<strong>ランダムに引いている（サンプリング）</strong>ため、同じ入力でも引かれるトークンが変わり、結果として違う文章になります。モデルの重みが変わっているわけでも、モデルが気まぐれなわけでもありません。<br>毎回同じ答えを返させたい場合は、<code>do_sample=False</code>（Greedy デコーディング＝常に確率1位を選ぶ）にします。サンプリングを使いたいが再現性も欲しい場合は、<code>torch.manual_seed()</code> で乱数シードを固定するか、<code>temperature</code> を 0 に近づけて分布を極端に尖らせます。',
     };
 
     // ── スコア管理 ──────────────────────────────────────────────
@@ -529,7 +586,7 @@
     // ── セクション1採点 ──────────────────────────────────────────
     function gradeSection1() {
       let correct = 0;
-      ['q1','q2','q3','q4','q5'].forEach(qid => {
+      ['q1','q2','q3','q4','q5','q6','q7'].forEach(qid => {
         const selected = document.querySelector(`input[name="${qid}"]:checked`);
         const card = document.getElementById(`card-${qid}`);
         const fb   = document.getElementById(`fb-${qid}`);
@@ -561,6 +618,8 @@
           q3: { ok: '正解です。線形変換をいくつ重ねても1回の線形変換と等価なため、非線形性の導入が不可欠です。', ng: '補足資料: ニューラルネットワーク Section 0 の「なぜ線形変換では解けないのか」を確認しましょう。' },
           q4: { ok: '正解です。全トークン間の関連度を一度に（並列に）計算できる点が最大の優位性です。', ng: '補足資料: Transformer Section 2 を確認しましょう。RNN の逐次処理との違いが重要です。' },
           q5: { ok: '正解です。Chinchilla 研究によりパラメータ : トークン ≈ 1 : 20 が最適と示されました。', ng: '補足資料: 事前学習 Section 3 の Chinchilla 法則を確認しましょう。' },
+          q6: { ok: '正解です。「Q と K の相性が良いほど強く注目し、注目した相手の V を受け取る」——これが Self-Attention のすべてです。', ng: 'Q は検索窓に打ち込む言葉、K は本の背表紙、V は本の中身に例えられます。補足資料: Transformer Section 2、およびハンズオン③ Part 2 を確認しましょう。' },
+          q7: { ok: '正解です。未来が見えてしまうと「答えを見ながら答えを当てる練習」になり、学習が成立しません。', ng: '因果マスクは計算量削減のためではありません。補足資料: Transformer Section 2 の「因果マスク」、およびハンズオン③ Part 3 を確認しましょう。' },
         };
 
         fb.className = `feedback ${isOk ? 'ok' : 'ng'}`;
@@ -569,7 +628,7 @@
       });
 
       scores.s1 = correct;
-      document.getElementById('score-s1').textContent = `${correct} / 5 問正解`;
+      document.getElementById('score-s1').textContent = `${correct} / 7 問正解`;
       updateResult();
     }
 
@@ -577,8 +636,8 @@
     function gradeSection2() {
       let correct = 0;
 
-      // Q6〜Q9（単一入力）
-      ['q6','q7','q8','q9'].forEach(qid => {
+      // Q8〜Q11・Q13（単一入力）
+      ['q8','q9','q10','q11','q13'].forEach(qid => {
         const input = document.getElementById(`fill-${qid}`);
         const val   = input.value.trim().replace(/\s/g, '');
         const ans   = FILL_ANSWERS[qid];
@@ -593,28 +652,28 @@
         fb.style.display = 'block';
       });
 
-      // Q10（2つの入力）
-      const val10a = document.getElementById('fill-q10').value.trim();
-      const val10b = document.getElementById('fill-q10b').value.trim();
-      const ok10a  = FILL_ANSWERS.q10.correct_a.some(a => val10a.includes(a));
-      const ok10b  = FILL_ANSWERS.q10.correct_b.some(a => val10b.includes(a));
-      const ok10   = ok10a && ok10b;
-      if (ok10) correct++;
-      document.getElementById('fill-q10').className  = 'fill-input ' + (ok10a ? 'correct-input' : 'incorrect-input');
-      document.getElementById('fill-q10b').className = 'fill-input ' + (ok10b ? 'correct-input' : 'incorrect-input');
-      const fb10 = document.getElementById('fb-q10');
-      fb10.className = `feedback ${ok10 ? 'ok' : 'ng'}`;
-      fb10.innerHTML = ok10 ? '正解です。' : `不正解です。ヒント: ${FILL_ANSWERS.q10.hint}`;
-      fb10.style.display = 'block';
+      // Q12（2つの入力）
+      const val12a = document.getElementById('fill-q12').value.trim();
+      const val12b = document.getElementById('fill-q12b').value.trim();
+      const ok12a  = FILL_ANSWERS.q12.correct_a.some(a => val12a.includes(a));
+      const ok12b  = FILL_ANSWERS.q12.correct_b.some(a => val12b.includes(a));
+      const ok12   = ok12a && ok12b;
+      if (ok12) correct++;
+      document.getElementById('fill-q12').className  = 'fill-input ' + (ok12a ? 'correct-input' : 'incorrect-input');
+      document.getElementById('fill-q12b').className = 'fill-input ' + (ok12b ? 'correct-input' : 'incorrect-input');
+      const fb12 = document.getElementById('fb-q12');
+      fb12.className = `feedback ${ok12 ? 'ok' : 'ng'}`;
+      fb12.innerHTML = ok12 ? '正解です。' : `不正解です。ヒント: ${FILL_ANSWERS.q12.hint}`;
+      fb12.style.display = 'block';
 
       scores.s2 = correct;
-      document.getElementById('score-s2').textContent = `${correct} / 5 問正解`;
+      document.getElementById('score-s2').textContent = `${correct} / 6 問正解`;
       updateResult();
     }
 
     // ── セクション3：模範解答表示 ─────────────────────────────────
     function gradeSection3() {
-      ['q11','q12','q13'].forEach(qid => {
+      ['q14','q15','q16','q17'].forEach(qid => {
         const fb = document.getElementById(`fb-${qid}`);
         fb.className = 'feedback ref';
         fb.innerHTML = '<strong>模範解答:</strong> ' + REFERENCES[qid];
@@ -629,7 +688,7 @@
       if (scores.s1 === null || scores.s2 === null || !scores.s3) return;
 
       const total   = (scores.s1 || 0) + (scores.s2 || 0);
-      const pct     = Math.round(total / 10 * 100);
+      const pct     = Math.round(total / 13 * 100);
       const block   = document.getElementById('result-block');
       const textEl  = document.getElementById('result-text');
       const barEl   = document.getElementById('result-bar');
@@ -638,7 +697,7 @@
       block.style.display = 'block';
       block.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      textEl.textContent = `客観問題スコア: ${total} / 10 問（${pct}%）`;
+      textEl.textContent = `客観問題スコア: ${total} / 13 問（${pct}%）`;
       barEl.style.width  = `${pct}%`;
 
       if (pct >= 90) {
