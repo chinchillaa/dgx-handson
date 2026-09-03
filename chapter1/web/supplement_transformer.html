@@ -192,12 +192,34 @@
 
   <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
 
+    <!-- ━━━ LLM の本質（章共通のコアメッセージ） ━━━ -->
+    <div class="summary-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">読み始める前に</p>
+      <h2 style="font-size:1.2rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:1rem;">
+        LLM がしているのは、<br>
+        <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を統計的に予測すること</span>——それだけです。
+      </h2>
+      <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
+        膨大なテキストを読んで「この文脈の次に来やすい単語は何か」を学び、
+        予測して、選んで、また予測する。これを 1 トークンずつ繰り返しているだけです。<br><br>
+        <strong>そしてこの本質は、モデルがどれだけ新しく複雑になっても変わりません。</strong>
+        パラメータが数千億個になっても、思考の過程を書き出す推論モデルでも、
+        画像や音声を扱うマルチモーダルモデルでも、中核にあるのは同じ<strong>次トークン予測</strong>です。
+        変わったのは予測の精度と、扱えるトークンの種類だけです。<br><br>
+        人間のように考えているように見えるのは、
+        <em>この単純な仕組みを途方もない量のデータで鍛え上げた結果</em>であって、
+        どこかで別の何かが起きているわけではありません。
+        このページで扱う <strong>Attention も Transformer も、この予測を上手くやるための仕組み</strong>にすぎません。
+      </p>
+    </div>
+
     <!-- ━━━ 目標ボックス ━━━ -->
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
         <li>自然言語をベクトルに変換することで、数学的な操作が可能になる仕組みを掴む</li>
-        <li>自己注意機構（Self-Attention）が「文脈」を数値で表す仕組みを掴む</li>
+        <li>自己注意機構（Self-Attention）が「あいまい検索できる辞書」であることを掴む</li>
+        <li>なぜ $W^Q, W^K, W^V$ という射影行列が必要なのかを掴む</li>
         <li>因果マスクが「LLM は左から右にしか書けない」という性質を生むことを掴む</li>
         <li>Transformer の全体構造と LLM への接続を掴む</li>
       </ol>
@@ -395,6 +417,18 @@
 
       <!-- RNN の問題点 -->
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+        <div class="note-red" style="grid-column:1 / -1;">
+          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題⓪ 固定次元ボトルネック（Attention 誕生の直接の動機）</p>
+          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
+            当時主流だった <strong>Encoder-Decoder モデル</strong>は、入力文全体の意味を
+            <strong>固定次元のベクトル 1 本</strong>に押し込んでから翻訳を始めます。
+            文が 5 単語でも 50 単語でも、通す管の太さが同じなのです。
+            当然、詰め込める情報量には上限があります。<br>
+            実際、原論文の実験では 30 単語までの文で学習したモデルに長文を入れると、
+            <strong>30 語を超えた瞬間に精度が急落</strong>しました。
+            この「管を太くするのではなく、<em>必要なときに元の文を見に行けばいい</em>」という発想が Attention です。
+          </p>
+        </div>
         <div class="note-red">
           <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題① 長距離依存の忘れ</p>
           <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
@@ -416,6 +450,23 @@
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
           Transformer は RNN を使わず、<strong>「注意機構（Attention）」だけで文脈を捉えます。</strong>
           全トークン間の関係を一度に計算するため、①長距離依存を直接扱え、②並列計算が可能になります。
+        </p>
+      </div>
+
+      <div class="note-amber" style="margin-top:1.25rem;">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">コラム：Attention の原点は「翻訳の単語対応」だった</p>
+        <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
+          Attention が最初に提案されたのは 2014 年、Transformer より 3 年前の
+          機械翻訳の論文です（Bahdanau, Cho, Bengio）。着想は素朴でした——
+          <strong>翻訳には単語同士の対応があるのだから、それを明示的にモデルに持たせよう</strong>。<br>
+          「あなたはアイリスですか」→ "Are you Iris?" なら、<code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">you</code>←「あなた」、
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">Iris</code>←「アイリス」、
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">?</code>←「か」。
+          出力する単語ごとに、入力のどこを見るべきかを重みで表したわけです。<br>
+          面白いことに、<strong>この原論文に "attention" という単語は一度も出てきません</strong>。
+          論文中では「soft align（やわらかい対応づけ）」「soft search」と呼ばれています。
+          この呼び名のほうが、実は仕組みを正確に表しています。<br>
+          <span style="font-size:0.78rem;">Bahdanau et al., <em>Neural machine translation by jointly learning to align and translate</em> (arXiv:1409.0473)</span>
         </p>
       </div>
     </section>
@@ -455,17 +506,17 @@
               <tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">Q</td>
                 <td style="padding:0.4rem 0.75rem; color:var(--text);">Query（質問）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">「私はどの単語と関連しているか？」という問いかけ</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">自分は<strong style="color:var(--text);">何を探しているか</strong>（辞書に打ち込む検索語）</td>
               </tr>
               <tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">K</td>
                 <td style="padding:0.4rem 0.75rem; color:var(--text);">Key（検索キー）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">「私はこんな内容を持っている」という名札</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">自分は<strong style="color:var(--text);">何者だと名乗るか</strong>（辞書のキー）</td>
               </tr>
               <tr>
                 <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">V</td>
                 <td style="padding:0.4rem 0.75rem; color:var(--text);">Value（値）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">関連度に応じて取り出される実際の内容</td>
+                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">注目された結果、<strong style="color:var(--text);">実際に渡す情報</strong>（辞書の値）</td>
               </tr>
             </tbody>
           </table>
@@ -475,6 +526,40 @@
             <em>文脈を反映した新しい表現ベクトル</em>が得られます。
           </p>
         </div>
+      </div>
+
+      <!-- 辞書の比喩 -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Attention は「あいまい検索できる辞書」である</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.85; margin-bottom:1rem;">
+          Key と Value という名前でピンと来た人もいるはずです。
+          これは <strong style="color:var(--text);">Python の辞書（<code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">dict</code>）そのもの</strong>です。
+          ただし 1 箇所だけ違います。
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.875rem 1rem;">
+            <p style="font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:0.5rem;">普通の辞書</p>
+            <p style="font-family:'SF Mono',Menlo,monospace; font-size:0.76rem; color:var(--text); line-height:1.7; margin-bottom:0.5rem;">d = {k1: v1, k2: v2, k3: v3}<br>d[q]</p>
+            <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.65;">
+              q と<strong>完全に一致する</strong>キーを探し、その値<strong>だけ</strong>を返す。
+              一致しなければエラー。
+            </p>
+          </div>
+          <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.875rem 1rem;">
+            <p style="font-size:0.72rem; font-weight:700; color:var(--green-mid); margin-bottom:0.5rem;">Attention</p>
+            <p style="font-family:'SF Mono',Menlo,monospace; font-size:0.76rem; color:var(--green); line-height:1.7; margin-bottom:0.5rem;">attention(q, K, V)</p>
+            <p style="font-size:0.78rem; color:#1C4A35; line-height:1.65;">
+              q に<strong>似ている</strong>キーほど強い重みをつけ、
+              <strong>全部の値を重み付きで混ぜて</strong>返す。
+            </p>
+          </div>
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8;">
+          $q$ が $k_2$ にそっくりなら、返ってくるのはほぼ $v_2$。
+          $k_1$ と $k_2$ の両方に似ていれば、$v_1$ と $v_2$ が半分ずつ混ざって返ってきます。<br>
+          <strong style="color:var(--text);">「完全一致の辞書」を「あいまい検索できる辞書」に緩めたもの</strong>——それが Attention です。
+          原論文が Attention を「soft search」と呼んだのは、まさにこの意味です。
+        </p>
       </div>
 
       <!-- 計算ステップの可視化 -->
@@ -564,7 +649,7 @@
           </tr>
           <tr>
             <td>$\sqrt{d_k}$</td>
-            <td>次元数の平方根でスコアをスケーリング（勾配安定化のため）</td>
+            <td>次元数の平方根でスコアをスケーリング。<strong>次元が増えるとベクトルは長くなる</strong>ため、割らないと「次元が高いだけでスコアが大きい」ことになり、softmax が 1 箇所に全振りして学習が進まなくなる</td>
           </tr>
           <tr>
             <td>softmax</td>
@@ -577,12 +662,80 @@
         </table>
       </div>
 
+      <div class="note-green" style="margin-bottom:1.5rem;">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">この式で一番大事なのは「内積 ＝ 類似度」</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          ここが腑に落ちれば、あとは全部おまけです。
+          2 つのベクトルが<strong>同じ向き</strong>なら内積は大きい正の値、<strong>直交</strong>していればほぼ 0、
+          <strong>逆向き</strong>なら負の値になります。
+          Part 1 で単語埋め込みのコサイン類似度を計算したのと、やっていることは同じです。<br>
+          つまり $QK^\top$ は<strong>「どのクエリが、どのキーに似ているか」を全ペア分並べた表</strong>にほかなりません。
+        </p>
+      </div>
+
+      <!-- なぜ W を掛けるのか -->
+      <h3 style="font-size:0.95rem; font-weight:700; color:var(--text); margin:2rem 0 0.75rem;">なぜ $W^Q, W^K, W^V$ を掛けるのか——「ねじってから、ぶつける」</h3>
+      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        Self-Attention では、Q も K も V も<strong style="color:var(--text);">同じ入力 $X$</strong> から作ります。
+        だったら、わざわざ変換せず $X$ をそのまま Q と K にすればいいのでは——と思いませんか。
+        やってみると、はっきり失敗します。
+      </p>
+
+      <div class="note-red" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.83rem; font-weight:700; color:var(--red); margin-bottom:0.3rem;">$Q = K = X$ のままだとどうなるか</p>
+        <p style="font-size:0.83rem; color:#7A1F1F; line-height:1.75;">
+          内積は類似度です。ということは——<strong>自分と自分の内積が一番大きい</strong>に決まっています。<br>
+          結果、どのトークンも「自分自身」に最も注目します。
+          <em>「自分に注目してください」という、何の役にも立たない機構</em>のできあがりです。<br>
+          ハンズオン③ Part 2-2 で実際に計算すると、「食べた」は目的語の「サカナ」（0.22）よりも
+          <strong>自分自身（0.35）を見てしまいます</strong>。これでは文脈が一切捉えられません。
+        </p>
+      </div>
+
+      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
+        だから <strong style="color:var(--text);">$W^Q$ と $W^K$ で別々の方向に「ねじって」から内積を取ります。</strong>
+        角度を変えてからぶつけるので、自分自身との内積が最大とは限らなくなる——これが射影行列の存在理由です。
+      </p>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <table style="width:100%; font-size:0.83rem; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);">
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700; width:6rem;">行列</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">決めていること</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^Q$</td>
+              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">自分は<strong style="color:var(--text);">何を探しに行くか</strong></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^K$</td>
+              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">自分の<strong style="color:var(--text);">どの側面を看板として掲げるか</strong></td>
+            </tr>
+            <tr>
+              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^V$</td>
+              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">注目された結果、<strong style="color:var(--text);">何を渡すか</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
+          ハンズオン③ Part 2-3 では、この 3 つを手で設計して
+          「食べた → サカナ に 0.99 注目」を作り出します。同じ $X$・同じ式で、
+          ねじり方を与えただけで「自分しか見ない機構」が「動詞が目的語を見つける機構」に変わります。
+        </p>
+      </div>
+
       <!-- マルチヘッド -->
       <div class="note-green">
         <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Multi-Head Attention</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          実際には Self-Attention を複数の「ヘッド」で並列に実行します。
-          各ヘッドは異なる $W^Q, W^K, W^V$ を持ち、<strong>異なる「注目パターン」を同時に学習</strong>できます。
+          $W^Q$ と $W^K$ は「$X$ をどうねじってからぶつけるか」を決めていました。
+          <strong>ねじり方を変えれば、測れる関係も変わります。</strong>
+          そこで Self-Attention を複数の「ヘッド」で並列に実行します。
+          各ヘッドは異なる $W^Q, W^K, W^V$ を持ち、<strong>異なる「注目パターン」を同時に学習</strong>できます。<br>
+          一言でいえば、<strong>Multi-Head Attention とは「同じ文の類似度を、いろんな角度から測る」こと</strong>です。
           一方のヘッドが「構文的な依存」を、別のヘッドが「意味的な類似性」を捉えるといった役割分担が生まれます。
         </p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.6rem;">
@@ -590,6 +743,8 @@
           それが <strong>16 層</strong>なので、モデル全体で <strong>512 枚</strong>の注目度マップが動いています。
           実装上はヘッドごとに別の行列を持つのではなく、
           $d_{model} = 2048$ を 32 分割して 1 ヘッドあたり 64 次元を担当させます（計算量を増やさないため）。
+          ヘッドを 2 つ手で作って違いを見る実験と、$d_{model}$ を分割する実装は、
+          ハンズオン③の付録 B にあります。
         </p>
       </div>
 
@@ -686,7 +841,7 @@
           どこかに注目を割り振らざるを得ません。その捨て場所として文頭トークンが使われるのです。
           これを <strong>Attention Sink</strong> と呼びます。バグではありません。
           Llama-3.2-1B では最終トークンから見た注目のうち平均 <strong>約 72%</strong> が文頭に吸い込まれています
-          （ハンズオン③ Part 5 で実測します）。注目度マップを読むときは、文頭への注目は「無視」と解釈してください。
+          （ハンズオン③の付録 <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code> 付録 D で実測します）。注目度マップを読むときは、文頭への注目は「無視」と解釈してください。
         </p>
       </div>
     </section>
@@ -771,7 +926,7 @@
             層を深く積むと学習が不安定になることが分かり、現在の LLM はほぼすべて
             <strong>Pre-Norm</strong>（$x + \text{Attention}(\text{Norm}(x))$）——
             <em>正規化してからサブレイヤーに入れ、その結果を元の $x$ に足す</em>——を採用しています。
-            上の図と、ハンズオン③ Part 4 で実装するコードはこの Pre-Norm 方式です。
+            上の図と、ハンズオン③の付録 C で組み立てるコードはこの Pre-Norm 方式です。
             残差の通り道に正規化が挟まらないため、勾配がまっすぐ下層まで届きます。
           </p>
         </div>
@@ -814,22 +969,28 @@
             活性化関数は ReLU/GeLU が一般的ですが、<strong style="color:var(--text);">Llama は SwiGLU</strong>（SiLU + ゲート機構）を使い、
             線形層が 3 枚になります。
             なお <strong style="color:var(--text);">パラメータの大半を占めるのは Attention ではなく FFN</strong> です
-            （ハンズオン③ Part 4 で内訳を実測します）。
+            （ハンズオン③の付録 C-1 で内訳を実測します）。
           </p>
         </div>
       </div>
 
       <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4：このブロックを自分で組む</p>
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4／付録 C：本物と照合し、自分で組む</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
-          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
-          <strong>正味 50 行ほど</strong>で実装します。
-          そのうえで本物の Llama の 1 層を <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> し、
+          <strong>本編 Part 4</strong> では、本物の Llama の 1 層を
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> して、
+          Part 2 で自分が書いた $W^Q, W^K, W^V$ が
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">q_proj</code> /
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> /
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code> といった
-          <em>名前まで同じ部品</em>が並んでいることを確認します。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">k_proj</code> /
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">v_proj</code> として
+          <em>名前まで同じ形</em>で入っていることを確認します。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> や
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code>、
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">mlp</code> は、
+          本編では「まだ作っていない部品」として眺めるだけです。
+          さらに<strong>付録 C</strong> では、上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
+          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
+          <strong>正味 50 行ほど</strong>で自分で組み立てます。
           自作したものと本物の違いは、規模と「学習済みかどうか」だけです。
         </p>
       </div>
@@ -931,15 +1092,18 @@
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
       <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>言語→ベクトル変換</strong>によって、テキストが NN の標準演算パイプラインに乗る</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Self-Attention</strong> が全トークン間の関連度を一度に計算し、文脈を表現に反映させる</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>因果マスク</strong>が未来のトークンへの注目を 0 にする——LLM が左から右にしか書けない理由</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + 正規化</strong> の組み合わせ。形が変わらないので何段でも積める</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">05</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成する</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Self-Attention は「あいまい検索できる辞書」</strong>。内積で「似ている度」を測り、Value を重み付きで混ぜて返す</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>$W^Q, W^K, W^V$ は「ねじる」ためにある</strong>。素の $X$ 同士では自分にしか注目できない。Multi-Head はそのねじり方を複数持ち、いろんな角度から類似度を測る</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span><strong>因果マスク</strong>が未来のトークンへの注目を 0 にする——LLM が左から右にしか書けない理由</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">05</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + 正規化</strong> の組み合わせ。形が変わらないので何段でも積める</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">06</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成する</span></li>
       </ul>
       <p style="font-size:0.83rem; line-height:1.8; margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.18);">
         ここまでの内容は、すべて <a href="index.html">ハンズオン③</a>
         （<code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_llm_inference.ipynb</code>）の
-        Part 1〜5 で実際にコードとして書き、本物の Llama と照合します。
+        Part 1〜5 で実際に手を動かして確かめます（約 30 分）。
+        Multi-Head の実装・Transformer ブロックの組み立て・Attention Sink の実測は、
+        同じフォルダの <code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code>（付録）へ。
         <strong>読んで分かった気になる前に、手を動かしてください。</strong>
       </p>
     </div>
@@ -947,7 +1111,7 @@
     <!-- ━━━ ナビゲーション ━━━ -->
     <nav class="no-print" style="display:flex; justify-content:space-between; font-size:0.8rem;">
       <a href="supplement_neural_network.html" style="color:var(--green-mid);" class="hover:underline">← ニューラルネットワーク</a>
-      <a href="index.html" style="color:var(--green-mid);" class="hover:underline">第1章トップへ →</a>
+      <a href="supplement_pretraining.html" style="color:var(--green-mid);" class="hover:underline">次の補足資料：事前学習 →</a>
     </nav>
 
   </main>
