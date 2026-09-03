@@ -196,7 +196,7 @@
     <div class="summary-block">
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">読み始める前に</p>
       <h2 style="font-size:1.2rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:1rem;">
-        LLM の知識は、<br><span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">誰も教えていません</span>。
+        LLM の知識そのものは、<br><span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">誰も教えていません</span>。
       </h2>
       <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
         膨大なテキストから「次に来る単語」を当てる練習を、ただひたすら繰り返す。
@@ -647,44 +647,53 @@
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
         事前学習は莫大な計算資源を要します。
         ほとんどの実務では<strong style="color:var(--text);">事前学習済みモデルを出発点として活用</strong>します。
-        目的・予算・性能要件によって4つのアプローチが使い分けられます。
+        目的・予算・性能要件によって3つのアプローチが使い分けられます。
       </p>
 
-      <!-- 4つのアプローチ -->
+      <!-- 3つのアプローチ -->
       <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
 
-        <!-- ゼロショット -->
-        <div class="card" style="border-left:3px solid var(--border-strong);">
-          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
-            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); flex-shrink:0;">① ゼロショット</span>
-            <div style="flex:1; height:1px; background:var(--border);"></div>
-            <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
-          </div>
-          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
-            事前学習済みモデルをそのままプロンプトで指示する。
-            「このメールを要約してください」のように自然言語で指定するだけ。
-          </p>
-          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 汎用タスク・プロトタイピング。追加コストなし。</p>
-        </div>
-
-        <!-- Few-shot -->
+        <!-- プロンプトエンジニアリング -->
         <div class="card" style="border-left:3px solid var(--amber-border);">
           <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
-            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); flex-shrink:0;">② Few-shot プロンプティング</span>
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); flex-shrink:0;">① プロンプトエンジニアリング</span>
             <div style="flex:1; height:1px; background:var(--border);"></div>
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
           </div>
-          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
-            プロンプトに入出力の例を数件（2〜10件）示すことでタスクを定義する。
-            モデルはパターンを読み取りタスクを遂行する。
+          <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+            <strong style="color:var(--text);">モデルには一切手を加えず、入力の書き方だけでタスクを定義する</strong>アプローチ。
+            最も手軽で、追加コストもゼロ。まずはここから試すのが原則です。
+            与える例の数によって、大きく 2 つの使い方があります。
           </p>
-          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 少数例で形式を揃えたいとき。コンテキスト長の消費に注意。</p>
+          <table style="width:100%; font-size:0.8rem; border-collapse:collapse; margin-bottom:0.6rem;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left; padding:0.35rem 0.5rem; color:var(--text-muted); font-weight:700; width:9rem;">使い方</th>
+                <th style="text-align:left; padding:0.35rem 0.5rem; color:var(--text-muted); font-weight:700;">内容</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.45rem 0.5rem; color:var(--text);">ゼロショット</td>
+                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">例を示さず、指示だけを書く。「このメールを要約してください」のように自然言語で指定するだけ</td>
+              </tr>
+              <tr>
+                <td style="padding:0.45rem 0.5rem; color:var(--text);">Few-shot</td>
+                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">入出力の例を数件（2〜10 件）示してタスクを定義する。モデルは例からパターンを読み取る</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.75rem; color:var(--text-muted);">
+            適用場面: 汎用タスク・プロトタイピング・出力形式を揃えたいとき。<br>
+            注意点: 例を増やすほどコンテキスト長とトークン課金を消費します。
+            例を何十件も並べたくなったら、ファインチューニングを検討する合図です。
+          </p>
         </div>
 
         <!-- ファインチューニング -->
         <div class="card" style="border-left:3px solid var(--green-border);">
           <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
-            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">③ ファインチューニング（SFT / LoRA）</span>
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">② ファインチューニング（SFT / LoRA）</span>
             <div style="flex:1; height:1px; background:var(--border);"></div>
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習あり</span>
           </div>
@@ -698,7 +707,7 @@
         <!-- RAG -->
         <div class="card" style="border-left:3px solid var(--green-border);">
           <div style="display:flex; align-items:baseline; gap:0.75rem; margin-bottom:0.5rem;">
-            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">④ RAG（検索拡張生成）</span>
+            <span style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); flex-shrink:0;">③ RAG（検索拡張生成）</span>
             <div style="flex:1; height:1px; background:var(--border);"></div>
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
           </div>
@@ -720,6 +729,10 @@
           <line x1="30" y1="140" x2="30"  y2="15"  stroke="var(--border)" stroke-width="1.5"/>
           <line x1="30" y1="140" x2="420" y2="140" stroke="var(--border)" stroke-width="1.5"/>
           <text x="225" y="158" font-size="9" fill="var(--text-muted)" text-anchor="middle">必要なデータ量・計算コスト（大）→</text>
+
+          <!-- プロンプトエンジニアリング（ゼロショット + Few-shot）をまとめる枠 -->
+          <rect x="44" y="73" width="148" height="66" rx="10" fill="none" stroke="var(--amber-border)" stroke-width="1.2" stroke-dasharray="4,3"/>
+          <text x="118" y="65" font-size="8" fill="var(--amber)" text-anchor="middle" font-weight="700">プロンプトエンジニアリング</text>
 
           <!-- ゼロショット -->
           <circle cx="70"  cy="120" r="18" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
@@ -751,7 +764,7 @@
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span>事前学習は<strong>次トークン予測</strong>という自己教師あり学習——ラベルなしで巨大テキストから学ぶ</span></li>
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span>損失関数は MNIST と同じ CrossEntropy、ただしクラス数が語彙サイズ（数万〜数十万）</span></li>
         <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>Chinchilla 法則</strong>：パラメータ数とトークン数の比率 1:20 が最適な計算効率を実現</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>実務では事前学習済みモデルに<strong>ファインチューニング・RAG</strong>を組み合わせて活用する（第2章）</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>実務ではまず<strong>プロンプトエンジニアリング</strong>を試し、足りなければ <strong>RAG・ファインチューニング</strong> を検討する——安い手段から順に（第2章）</span></li>
       </ul>
     </div>
 
