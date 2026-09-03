@@ -307,6 +307,26 @@
         この章では、単純な関数から出発して、どうやって LLM のような
         「非常に複雑なことができる関数」が作られるのかを段階的に追っていきます。
       </p>
+
+      <div style="margin-top:1.75rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.18);">
+        <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">そして、LLM について</p>
+        <h3 style="font-size:1.15rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:0.9rem;">
+          LLM がしているのは、<br>
+          <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を統計的に予測すること</span>——それだけです。
+        </h3>
+        <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
+          膨大なテキストを読んで「この文脈の次に来やすい単語は何か」を学び、
+          予測して、選んで、また予測する。これを 1 トークンずつ繰り返しているだけです。<br><br>
+          <strong>そしてこの本質は、モデルがどれだけ新しく複雑になっても変わりません。</strong>
+          パラメータが数千億個になっても、思考の過程を書き出す推論モデルでも、
+          画像や音声を扱うマルチモーダルモデルでも、中核にあるのは同じ<strong>次トークン予測</strong>です。
+          変わったのは予測の精度と、扱えるトークンの種類だけです。<br><br>
+          人間のように考えているように見えるのは、
+          <em>この単純な仕組みを途方もない量のデータで鍛え上げた結果</em>であって、
+          どこかで別の何かが起きているわけではありません。
+          <strong>この章のゴールは、これを自分の目で確かめること</strong>です。
+        </p>
+      </div>
     </section>
 
     <!-- ━━━ 章の概要と到達目標 ━━━ -->

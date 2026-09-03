@@ -192,6 +192,27 @@
 
   <main class="max-w-2xl mx-auto px-8 py-12" style="display:flex; flex-direction:column; gap:3.5rem;">
 
+    <!-- ━━━ LLM の本質（章共通のコアメッセージ） ━━━ -->
+    <div class="summary-block">
+      <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">読み始める前に</p>
+      <h2 style="font-size:1.2rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:1rem;">
+        LLM がしているのは、<br>
+        <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を統計的に予測すること</span>——それだけです。
+      </h2>
+      <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
+        膨大なテキストを読んで「この文脈の次に来やすい単語は何か」を学び、
+        予測して、選んで、また予測する。これを 1 トークンずつ繰り返しているだけです。<br><br>
+        <strong>そしてこの本質は、モデルがどれだけ新しく複雑になっても変わりません。</strong>
+        パラメータが数千億個になっても、思考の過程を書き出す推論モデルでも、
+        画像や音声を扱うマルチモーダルモデルでも、中核にあるのは同じ<strong>次トークン予測</strong>です。
+        変わったのは予測の精度と、扱えるトークンの種類だけです。<br><br>
+        人間のように考えているように見えるのは、
+        <em>この単純な仕組みを途方もない量のデータで鍛え上げた結果</em>であって、
+        どこかで別の何かが起きているわけではありません。
+        このページで扱う <strong>Attention も Transformer も、この予測を上手くやるための仕組み</strong>にすぎません。
+      </p>
+    </div>
+
     <!-- ━━━ 目標ボックス ━━━ -->
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
