@@ -209,99 +209,110 @@ Q1: タスク固有の知識が必要か？
 
 ## 4. DGX環境・インフラ設計方針
 
+> 運用手順そのものは `docs/operator_guide.md`（運営）と `docs/participant_guide.md`（参加者）にある。ここには方針と、その理由を書く。
+
 ### 4.1 前提環境
 
 | 項目 | 仕様 |
 |---|---|
-| サーバー | NVIDIA DGX（A100 x8 想定） |
-| OS | Ubuntu 22.04 |
-| アクセス方法 | 参加者各自がSSHで接続 |
-| ストレージ | `/home/<username>/` に各自の作業ディレクトリ |
-| 共有ストレージ | `/data/shared/` に事前ダウンロード済みモデル・データセットを配置 |
+| サーバー | NVIDIA DGX Spark（GB10、GPU 1基、aarch64、20コア） |
+| メモリ | CPU と GPU で共有する統合メモリ 128GB（GPU 専用メモリはない） |
+| GPU 分割 | MIG 非対応（ハードウェアで GPU を区切れない） |
+| OS | Ubuntu 24.04 |
+| 参加者数 | 最大 10 人 |
+| アカウント | 運営者 `user01`（sudo 可）と、参加者10人が共有する参加者用アカウント `handson` |
+| アクセス方法 | 参加者は SSH トンネルを張り、手元のブラウザで自分専用の JupyterLab を開く |
 
-### 4.2 ユーザー分離方針
+### 4.2 参加者の分離方針
 
-- 参加者ごとに専用のLinuxユーザーを発行する（例：`user01` 〜 `user20`）
-- Dockerコンテナを使用せず、**uv仮想環境（`.venv`）で分離**する
-  - 理由：コンテナ内からGPUを扱う設定コストを省く。condaより高速で依存解決が確実
-- パッケージ管理は **`uv`** に統一する（`pip` の直接使用は禁止）
+**運営者と参加者はアカウントで分け、参加者どうしは JupyterLab で分ける。**
 
-```bash
-# 各ユーザーの環境セットアップ例（事前に講師側が準備するスクリプト）
-# uvのインストール（未インストールの場合）
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.local/bin/env  # PATHを反映
-
-# 仮想環境の作成と有効化
-uv venv .venv --python 3.11
-source .venv/bin/activate
-
-# パッケージのインストール
-uv pip install torch transformers datasets trl peft langchain langchain-community \
-               chromadb sentence-transformers wandb langgraph
-```
-
-### 4.3 GPU割り当て方針
-
-| 章 | GPU使用 | 割り当て方針 |
+| アカウント・場所 | 役割 | 参加者から |
 |---|---|---|
-| 第1章 | 軽微（MNIST程度） | 全参加者が同時使用可 |
-| 第2章（SFT） | 高負荷（A100 40GB x1 以上） | **順番制またはジョブキュー**（後述） |
-| 第2章（RAG） | CPUのみ可 | 制限なし |
-| 第3章 | 推論のみ（中程度） | 2〜4人で1GPU共有 |
+| `user01`（`/home/user01`） | 運営者。リポジトリ、GitHub・Claude Code の認証情報、会話履歴を置く | 読めない（ホームが `drwxr-x---`） |
+| `/opt/handson`（所有者 `user01`・グループ `handson`・`2750`） | 教材・infra・`.venv`・Python・モデル。`deploy.sh` がリポジトリから配置する | 読めるが書き換えられない |
+| `handson`（`/home/handson`） | 参加者用。10人全員がこのアカウントで SSH し、`handson.sh` が参加者ごとの JupyterLab を起動する | 読み書きできる |
 
-### 4.4 ジョブスケジューリング
+- アカウントの作成は sudo で1回だけ行う（`infra/multiuser/setup_account.sh`）。以降の運用は sudo 不要
+- 参加者ごとに Linux アカウントを作らないのは、10人分のアカウント・パスワード管理の手間に見合わないため。参加者どうしの分離は、JupyterLab のトークンと運用ルールで行う
+- 運営者の認証情報を守ることが目的なので、**`handson` で GitHub・HuggingFace・Claude Code にログインしない**
+- 運営者 `user01` はグループ `handson` に入れる。Linux は「所有グループに属さないユーザーが権限を変えると setgid を外す」ため、属していないと `deploy.sh` の配置で所有グループが崩れ、`handson` から読めなくなる（実際に起きた）
+- 参加者用アカウントを作れない環境では、運営者のアカウントで直接動かすことになり、参加者は運営者のホーム以下をすべて読める。その場合の注意は `docs/operator_guide.md` 付録 B
 
-第2章のSFTは参加者が同時実行するとVRAMが枯渇する。以下のいずれかで対処する。
+| 分けるもの | 方法 |
+|---|---|
+| 作業ディレクトリ | `/home/handson/handson-work/pNN/` に教材をコピー（`solutions/`・`web/` は除く） |
+| JupyterLab | `127.0.0.1:88NN` で待ち受け、参加者ごとにトークンを発行。外部からは SSH トンネル経由でしか届かない |
+| 教材の Web ページ | 全員共通の静的サーバー `127.0.0.1:8800`（4.7）。参加者は SSH トンネルに `-L 8800:localhost:8800` を加える |
+| CPU メモリ・CPU | `systemd-run --user` の cgroup（`MemoryMax`・`CPUQuota`）。sudo 不要 |
+| GPU メモリ | カーネル起動時に `torch.cuda.set_per_process_memory_fraction` をかける（4.3） |
+| 放置カーネル | 30 分使われていないカーネルを自動終了（`cull_idle_timeout`） |
 
-**オプションA：手動順番制（推奨・シンプル）**
+- 仮想環境（`/opt/handson/app/.venv`）は1つだけ作り、全員で共有する。リポジトリの `.venv` と同じバージョンを `deploy.sh` が作る（uv の既定の Python 置き場所 `~/.local/share/uv` は `handson` から読めないため、Python も `/opt/handson/python` に入れる）。パッケージ管理は **`uv`** に統一する（`pip` の直接使用は禁止）
+- 参加者どうしは同じ `handson` アカウントのため、分離は完全ではない（他人のディレクトリを見たり消したりできてしまう）。「自分の `pNN` 以外は触らない」を運用ルールとして周知する
+- 参加者がサーバー上でコマンドを打って環境を作る必要はない
 
-```bash
-# 共有のキューファイルで管理
-echo "$(date) $USER" >> /data/shared/gpu_queue.txt
-# 自分の順番になったらGPU_IDを指定して実行
-CUDA_VISIBLE_DEVICES=0 python train_sft.py
-```
+### 4.3 メモリ・GPU の割り当て方針
 
-**オプションB：Slurmによるジョブキュー（環境があれば）**
+GB10 では、**cgroup のメモリ上限は GPU に確保したメモリを数えない**（実測: `MemoryMax=4G` の中で GPU に 6GB 確保できた）。そのため上限は2段構えにする。
 
-```bash
-sbatch --gres=gpu:1 --time=01:00:00 train_sft.py
-squeue  # 状況確認
-```
+1. CPU 側: cgroup の `MemoryMax`（強制力あり。超えるとそのカーネルだけが落ちる）
+2. GPU 側: PyTorch のアロケータ上限（超えると `torch.OutOfMemoryError`。参加者のコードで外せる程度の強さ）
+
+上限は章ごとに運営者が切り替える（`stop` → 環境変数を付けて `start`。作業ファイルは残る）。
+
+| 場面 | RAM 上限 | GPU 上限 | 学習の同時実行 | 状態 |
+|---|---|---|---|---|
+| 第1章（MNIST、Llama-3.2-1B 推論） | 6GB | 5GB | ― | 1B 推論まで実機で確認済み |
+| 第2章（Llama-3-8B QLoRA の SFT / DPO） | 8GB | 14GB | 2 本 | **暫定値。リハーサルで要確認** |
+| 第2章（RAG・評価） | 6GB | 5GB〜 | ― | 埋め込み・BERTScore は確認済み。評価で 8B を読むなら第2章 SFT と同じ値 |
+
+- 目安: `(RAM 上限 + GPU 上限) × 人数` が統合メモリ 128GB を大きく超えないこと。上限は「全員が同時に使い切った場合」の値なので、実際の使用量はこれより小さい
+- 第2章で 8B を全員が同時に学習するのは不可能なため、学習の同時実行数を制限する（4.4）
+
+### 4.4 重い学習の同時実行制御
+
+第2章の SFT / DPO は、同時に走る本数を `HANDSON_GPU_SLOTS`（既定 2）に制限する。枠が埋まっていれば自動で順番待ちになる。
+
+| 実行場所 | 使い方 |
+|---|---|
+| ノートブック | `with gpu_slot(): trainer.train()`（`gpu_slot` はカーネル起動時に用意される） |
+| スクリプト | JupyterLab のターミナルで `gpu_queue.sh python chapter2/scripts/train_sft.py` |
+
+- どちらも同じロックファイル（`~/handson-work/.gpu-locks/`）を使うので、枠は共通
+- カーネルが落ちるとロックは自動で解放される（`flock`）
+- 旧方針の「共有キューファイルに名前を書いて順番を待つ」運用や Slurm は使わない
 
 ### 4.5 モデル・データセットの事前配置
 
-ネットワーク帯域を節約するため、以下を事前にダウンロードして共有ストレージに配置する。
+- 参加者の JupyterLab は `HF_HUB_OFFLINE=1` で動く。**事前にダウンロードしたものしか使えない**
+- 取得対象は `infra/required_assets.py` に一覧で持ち、`infra/predownload.sh` が取得、`infra/check_env.py` が「オフラインで読めるか」を確認する。**教材で新しいモデルやデータセットを使うときは、必ずこの一覧に追加する**
+- モデルの保存先は `/opt/handson/hf_cache`（`HF_HOME`）で、全参加者が読み取り専用で共有する。取得は運営者が `deploy.sh --models` で行い、gated モデル（Llama）のトークンは運営者だけが持つ（`/opt/handson` にはコピーしない）
+- **datasets ライブラリは、読むだけでもキャッシュにロックファイルを書く**ため、読み取り専用の共有キャッシュでは `load_dataset` が失敗する。データセット部分（数十MB）だけ参加者ごとにコピーし、`HF_DATASETS_CACHE` で渡す（`handson.sh`）。モデル（`hub/`）は読み取り専用のままで読める
+- MNIST は `/opt/handson/app/data` に置き、`HANDSON_DATA_DIR` で参加者に渡す
+- 教材のコードでは `HF_HOME` を上書きしない（`setdefault` で既定値を置くだけにする）。`/data/shared` のような環境固有のパスは書かない
 
-```
-/data/shared/
-├── models/
-│   ├── meta-llama/Meta-Llama-3-8B/          # 第2章SFT用
-│   ├── elyza/ELYZA-japanese-llama-2-7b/     # 第1・2章推論デモ用
-│   └── sentence-transformers/all-MiniLM-L6-v2/  # 第2章RAG用
-└── datasets/
-    ├── kunishou/databricks-dolly-15k-ja/    # 第2章SFT用
-    └── handson-docs/                        # 第2章RAG用ドキュメント群
-```
+| 用途 | モデル / データセット |
+|---|---|
+| 第1章 LLM 推論 | `meta-llama/Llama-3.2-1B-Instruct` |
+| 第2章 SFT / DPO / 評価 | `meta-llama/Meta-Llama-3-8B` |
+| 第2章 SFT | `kunishou/databricks-dolly-15k-ja` |
+| 第2章 RAG 埋め込み | `sentence-transformers/all-MiniLM-L6-v2` |
+| 第2章 BERTScore | `bert-base-multilingual-cased` |
+| 第1章 | MNIST |
 
-HuggingFace のキャッシュを共有パスに向ける設定を `.bashrc` に追加する。
+### 4.6 SSH 切断対策
 
-```bash
-export HF_HOME=/data/shared/hf_cache
-export TRANSFORMERS_CACHE=/data/shared/hf_cache
-```
+- ノートブックもターミナルも JupyterLab のサーバー側で動くため、参加者のブラウザや SSH が切れても処理は続く。**参加者に tmux を使わせる必要はない**
+- `handson` は linger を有効にしてあるので、SSH がすべて切れても JupyterLab は止まらない（`setup_account.sh`）
 
-### 4.6 tmux の使用を標準化
+### 4.7 教材の配布
 
-長時間かかるSFT学習はSSH切断に備えて `tmux` セッション内で実行させる。
-セッション名の命名規則を統一することで講師がモニタリングしやすくする。
-
-```bash
-# 参加者は以下の命名規則でセッションを作成する
-tmux new -s sft-train   # SFT学習用
-tmux new -s rag-dev     # RAG開発用
-```
+- 教材はリポジトリで直し、`deploy.sh` で `/opt/handson/app` に反映する。`solutions/`・`design/`・`.git` は配置しない（講師のみ参照）
+- `handson.sh start` の初回に、`/opt/handson/app` の `chapter1〜3` を各参加者のディレクトリにコピーする
+- **Web ページ（`chapter*/web`・`assets`）は参加者に配らず、全員共通の静的サーバー（`127.0.0.1:8800`、`python -m http.server`）で配信する。** JupyterLab の中で HTML を開くとサンドボックス化され（`Content-Security-Policy: sandbox`）、KaTeX・Tailwind などのスクリプトと相対リンクが動かないため。公開するのは `chapter*/web` と `assets` だけで、リポジトリの他のファイル（解答・設計書）は見えない
+- Web ページは CDN（Tailwind・KaTeX・highlight.js・Google Fonts）を読み込むため、参加者のブラウザがインターネットにつながっていることが前提
+- 開催前に教材を直したら `handson.sh refresh` で配り直す（トークン＝配布済み URL は変わらない。参加者の編集は消えるので開催中は使わない）
 
 ---
 
@@ -338,10 +349,20 @@ handson/
 │   ├── notebooks/
 │   ├── exercises/
 │   └── solutions/
+├── docs/
+│   ├── operator_guide.md      # 開催側の手順書
+│   └── participant_guide.md   # 参加者向けの手順書（接続方法・ルール・トラブル対処）
 └── infra/
-    ├── setup.sh               # 参加者環境セットアップスクリプト（uv使用）
-    ├── predownload.sh         # モデル・データセット事前取得スクリプト
-    └── check_env.py           # 環境確認スクリプト（参加者が自分で実行）
+    ├── setup.sh               # 共有 .venv の構築（運営者が1回だけ実行。uv使用）
+    ├── predownload.sh         # モデル・データセット事前取得（運営者が実行）
+    ├── required_assets.py     # 事前取得するモデル・データセットの一覧
+    ├── check_env.py           # 環境確認（運営者が本番前に実行）
+    └── multiuser/
+        ├── setup_account.sh   # 参加者用アカウントと /opt/handson の作成（sudo で1回だけ）
+        ├── deploy.sh          # 教材・.venv・モデルを /opt/handson に配置
+        ├── handson.sh         # 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
+        ├── ipython_startup.py # カーネル起動時の GPU メモリ上限と gpu_slot()
+        └── gpu_queue.sh       # スクリプトで学習するときの同時実行制御
 ```
 
 ### 5.2 Notebookの実装規約
@@ -367,7 +388,7 @@ handson/
 - 外部APIキーをコードにハードコードしない（すべて環境変数経由）
 - 参加者のGPU環境を前提としたコード（`device="cuda"` の固定記述）を書かない
   - 代わりに `device = "cuda" if torch.cuda.is_available() else "cpu"` を使用する
-- モデルを毎回ダウンロードするコードを書かない（`/data/shared/` のキャッシュを参照）
+- 事前取得していないモデル・データセットを使うコードを書かない（当日はオフライン。新しく使うものは `infra/required_assets.py` に追加する。4.5 参照）
 - `pip` コマンドを直接使用したコード・スクリプト・手順書を書かない
   - パッケージのインストールは必ず `uv pip install` を使用する
   - requirements.txtからのインストールは `uv pip install -r requirements.txt` を使用する

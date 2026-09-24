@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# setup.sh  —  DGX ハンズオン環境構築スクリプト
+# setup.sh  —  DGX ハンズオン環境構築スクリプト（運営者が1回だけ実行）
 #
 # 使い方:
-#   cd /home/chinchilla/pjt/sbcs-work/dgx-handson
+#   cd ~/dgx-handson
 #   bash infra/setup.sh
+#
+# ここで作る .venv を全参加者の JupyterLab で共有する（infra/multiuser/handson.sh）。
+# 参加者が自分で実行するものではない。手順全体は docs/operator_guide.md を参照。
 #
 # 実行すること:
 #   1. uv の存在確認（未インストールの場合は案内を表示）
@@ -110,7 +113,7 @@ if command -v nvidia-smi &>/dev/null; then
   else
     warn "PyTorch が CPU 版の可能性があります。必要に応じて手動で再インストールしてください:"
     echo "    uv pip install --python .venv/bin/python torch torchvision \\"
-    echo "        --index-url https://download.pytorch.org/whl/cu121"
+    echo "        --index-url https://download.pytorch.org/whl/cu130   # DGX Spark (GB10 / CUDA 13)"
   fi
 fi
 
@@ -154,15 +157,8 @@ echo -e "${BOLD}${GREEN}══════════════════�
 echo -e "${BOLD}${GREEN}  セットアップ完了！${RESET}"
 echo -e "${BOLD}${GREEN}════════════════════════════════════════════════════${RESET}"
 echo ""
-echo -e "  仮想環境を有効化するには:"
-echo -e "    ${GREEN}source .venv/bin/activate${RESET}"
-echo ""
-echo -e "  Jupyter Lab を起動するには:"
-echo -e "    ${GREEN}source .venv/bin/activate && jupyter lab${RESET}"
-echo ""
-echo -e "  環境確認スクリプト:"
-echo -e "    ${GREEN}python infra/check_env.py${RESET}"
-echo ""
-echo -e "  モデル・データ事前ダウンロード:"
-echo -e "    ${GREEN}bash infra/predownload.sh${RESET}"
+echo -e "  次の手順（docs/operator_guide.md）:"
+echo -e "    ${GREEN}bash infra/predownload.sh${RESET}            # モデル・データ事前ダウンロード"
+echo -e "    ${GREEN}.venv/bin/python infra/check_env.py${RESET}  # 環境確認"
+echo -e "    ${GREEN}bash infra/multiuser/handson.sh start${RESET} # 参加者用 JupyterLab を起動"
 echo ""

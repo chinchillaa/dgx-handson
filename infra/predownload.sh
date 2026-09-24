@@ -1,24 +1,23 @@
 #!/usr/bin/env bash
 # =============================================================================
-# predownload.sh  —  モデル・データセットの事前ダウンロードスクリプト
+# predownload.sh  —  モデル・データセットの事前ダウンロードスクリプト（運営者が実行）
 #
 # 使い方:
-#   cd /home/chinchilla/pjt/sbcs-work/dgx-handson
-#   source .venv/bin/activate
+#   cd ~/dgx-handson
+#   export HF_TOKEN=hf_xxxx      # Llama（gated モデル）の取得に必要
 #   bash infra/predownload.sh
 #
-# ダウンロードするもの:
-#   - MNIST データセット（torchvision 経由）
-#   - meta-llama/Llama-3.2-1B-Instruct（HuggingFace Hub）
+# ハンズオン当日、参加者の JupyterLab は HF_HUB_OFFLINE=1 で動く（handson.sh）。
+# つまり「ここでダウンロードしたものだけが使える」。取得対象の一覧は
+# infra/required_assets.py にあり、教材で新しいモデルやデータセットを使うときはそこに追加する。
 #
-# 保存先（優先順）:
-#   1. /data/shared/  が存在する場合 → 共有ストレージに保存（全ユーザーが共有）
-#   2. それ以外 → ~/.cache/huggingface / ./data に保存
+# 保存先:
+#   HuggingFace  → ${HF_HOME:-~/.cache/huggingface}（全参加者で共有）
+#   MNIST        → <リポジトリ>/data（handson.sh が HANDSON_DATA_DIR で参加者に渡す）
 #
-# 事前条件:
-#   - setup.sh によるパッケージインストール済み
-#   - Llama モデルは HuggingFace のアクセス許可が必要:
-#       huggingface-cli login  （または HF_TOKEN 環境変数）
+# Llama は事前に HuggingFace でアクセス申請が必要:
+#   https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct
+#   https://huggingface.co/meta-llama/Meta-Llama-3-8B
 # =============================================================================
 
 set -euo pipefail
@@ -38,195 +37,87 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
 
-# 仮想環境の Python
 VENV_PYTHON="${REPO_ROOT}/.venv/bin/python"
 if [ ! -f "${VENV_PYTHON}" ]; then
   error ".venv が見つかりません。先に setup.sh を実行してください。"
   exit 1
 fi
 
-# =============================================================================
-# Step 1: 保存先の決定
-# =============================================================================
-section "Step 1: 保存先の決定"
+export HF_HOME="${HF_HOME:-${HOME}/.cache/huggingface}"
+export HF_HUB_OFFLINE=0
+DATA_DIR="${REPO_ROOT}/data"
 
-SHARED_ROOT="/data/shared"
-if [ -d "${SHARED_ROOT}" ]; then
-  DATA_DIR="${SHARED_ROOT}/datasets"
-  HF_HOME="${SHARED_ROOT}/models"
-  info "共有ストレージを使用します: ${SHARED_ROOT}"
-  mkdir -p "${DATA_DIR}" "${HF_HOME}"
-  # HuggingFace キャッシュを共有ストレージに向ける
-  export HF_HOME="${HF_HOME}"
-  info "HF_HOME=${HF_HOME}"
-  info "DATA_DIR=${DATA_DIR}"
+section "保存先"
+info "HF_HOME=${HF_HOME}"
+info "DATA_DIR=${DATA_DIR}"
+AVAIL_GB=$(df -BG "${HOME}" | awk 'NR==2{gsub("G",""); print $4}')
+info "空き容量: ${AVAIL_GB} GB（必要量の目安: 約 25 GB）"
 
-  # 共有ストレージの空き容量確認
-  AVAIL_GB=$(df -BG "${SHARED_ROOT}" | awk 'NR==2{gsub("G",""); print $4}')
-  info "共有ストレージの空き容量: ${AVAIL_GB} GB"
-  if [ "${AVAIL_GB}" -lt 10 ]; then
-    warn "空き容量が 10 GB 未満です。ダウンロードに失敗する可能性があります。"
-  fi
-else
-  DATA_DIR="${REPO_ROOT}/data"
-  HF_HOME="${HOME}/.cache/huggingface"
-  warn "共有ストレージ (${SHARED_ROOT}) が見つかりません。ローカルに保存します。"
-  info "DATA_DIR=${DATA_DIR}"
-  info "HF_HOME=${HF_HOME}"
-  mkdir -p "${DATA_DIR}"
-fi
-
-# =============================================================================
-# Step 2: MNIST データセット
-# =============================================================================
-section "Step 2: MNIST データセットのダウンロード"
-
-"${VENV_PYTHON}" - <<PYEOF
-import sys, os
-sys.stdout.reconfigure(line_buffering=True)
-
-data_dir = "${DATA_DIR}"
-print(f"  保存先: {data_dir}")
-
-try:
-    from torchvision import datasets, transforms
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-    print("  訓練データをダウンロード中...")
-    datasets.MNIST(root=data_dir, train=True,  download=True, transform=transform)
-    print("  テストデータをダウンロード中...")
-    datasets.MNIST(root=data_dir, train=False, download=True, transform=transform)
-    print("  MNIST ダウンロード完了")
-
-    # サイズ確認
-    import os
-    mnist_dir = os.path.join(data_dir, "MNIST")
-    if os.path.exists(mnist_dir):
-        total = sum(
-            os.path.getsize(os.path.join(dp, f))
-            for dp, _, fns in os.walk(mnist_dir)
-            for f in fns
-        )
-        print(f"  MNIST サイズ: {total / 1024 / 1024:.1f} MB")
-
-except Exception as e:
-    print(f"  MNIST ダウンロード失敗: {e}", file=sys.stderr)
-    sys.exit(1)
-PYEOF
-
-# =============================================================================
-# Step 3: HuggingFace ログイン確認
-# =============================================================================
-section "Step 3: HuggingFace ログイン確認"
-
-HF_LOGGED_IN=false
-
-if [ -n "${HF_TOKEN:-}" ]; then
-  info "HF_TOKEN 環境変数が設定されています"
-  HF_LOGGED_IN=true
-elif "${VENV_PYTHON}" -c "
+section "ダウンロード"
+"${VENV_PYTHON}" - "${DATA_DIR}" "${SCRIPT_DIR}" <<'PYEOF'
 import sys
-from huggingface_hub import whoami
-try:
-    info = whoami()
-    print(f'  ログイン済み: {info[\"name\"]}')
-    sys.exit(0)
-except Exception:
-    sys.exit(1)
-" 2>/dev/null; then
-  HF_LOGGED_IN=true
-else
-  warn "HuggingFace にログインしていません。"
-  warn "Llama モデルのダウンロードには認証が必要です。"
-  echo ""
-  echo "  以下のいずれかでログインしてください:"
-  echo ""
-  echo "    方法 1: .venv/bin/hf auth login"
-  echo "    方法 2: export HF_TOKEN=hf_xxxxxxxxxxxx  (アクセストークン)"
-  echo ""
-  echo "  また、以下の URL でモデルへのアクセス申請が必要です:"
-  echo "    https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct"
-  echo ""
-  read -rp "  ログインせずに続行しますか？Llama のダウンロードはスキップされます。[y/N]: " CONTINUE
-  if [[ ! "${CONTINUE}" =~ ^[Yy]$ ]]; then
-    info "スクリプトを終了します。ログイン後に再実行してください。"
-    exit 0
-  fi
-fi
-
-# =============================================================================
-# Step 4: Llama-3.2-1B-Instruct のダウンロード
-# =============================================================================
-section "Step 4: meta-llama/Llama-3.2-1B-Instruct のダウンロード"
-
-MODEL_NAME="meta-llama/Llama-3.2-1B-Instruct"
-
-if [ "${HF_LOGGED_IN}" = "false" ]; then
-  warn "HuggingFace 未ログインのためスキップします"
-else
-  info "モデルのダウンロードを開始します（初回: 約 2.5 GB）..."
-  info "HF_HOME: ${HF_HOME}"
-
-  "${VENV_PYTHON}" - <<PYEOF
-import sys, os
 sys.stdout.reconfigure(line_buffering=True)
+data_dir = sys.argv[1]
+sys.path.insert(0, sys.argv[2])
+from required_assets import MODELS, DATASETS, cached_model_path
 
-os.environ["HF_HOME"] = "${HF_HOME}"
-model_name = "${MODEL_NAME}"
-print(f"  モデル: {model_name}")
+failed = []
 
+print("  MNIST（第1章）...")
 try:
-    from transformers import AutoTokenizer, AutoModelForCausalLM
-    import torch
-
-    print("  トークナイザーをダウンロード中...")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    print(f"  トークナイザー完了 (語彙サイズ: {tokenizer.vocab_size:,})")
-
-    print("  モデルをダウンロード中（時間がかかります）...")
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=torch.float16,
-    )
-    params = sum(p.numel() for p in model.parameters())
-    print(f"  モデル完了 (パラメータ数: {params / 1e9:.2f}B)")
-
-    # キャッシュサイズ確認
-    cache_dir = os.path.join("${HF_HOME}", "hub")
-    if os.path.exists(cache_dir):
-        total = sum(
-            os.path.getsize(os.path.join(dp, f))
-            for dp, _, fns in os.walk(cache_dir)
-            for f in fns
-        )
-        print(f"  HF キャッシュ合計: {total / 1024 / 1024 / 1024:.2f} GB")
-
+    from torchvision import datasets
+    datasets.MNIST(root=data_dir, train=True,  download=True)
+    datasets.MNIST(root=data_dir, train=False, download=True)
+    print("    ✓ MNIST")
 except Exception as e:
-    print(f"  モデルダウンロード失敗: {e}", file=sys.stderr)
-    print("  アクセス権限がない場合は以下を確認してください:", file=sys.stderr)
-    print("    https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct", file=sys.stderr)
+    print(f"    ✗ MNIST: {e}")
+    failed.append("MNIST")
+
+from huggingface_hub import snapshot_download
+# 重みは safetensors のみ取得（.bin / .pth / onnx などの重複を避ける）
+IGNORE = ["*.bin", "*.pth", "*.h5", "*.msgpack", "*.onnx", "*.ot", "original/*", "onnx/*", "openvino/*"]
+
+for repo_id, purpose, gated in MODELS:
+    print(f"  {repo_id}（{purpose}）...")
+    if cached_model_path(repo_id):
+        print("    ✓ キャッシュ済み")
+        continue
+    try:
+        path = snapshot_download(repo_id, ignore_patterns=IGNORE)
+        print(f"    ✓ {path}")
+    except Exception as e:
+        if gated:
+            print(f"    ✗ {type(e).__name__}: {str(e)[:120]}（アクセス申請と HF_TOKEN を確認）")
+            failed.append(repo_id)
+            continue
+        # 旧名のリポジトリ（bert-base-multilingual-cased など）は snapshot_download が
+        # 失敗することがあるため、教材と同じ transformers 経由で取得する
+        try:
+            from transformers import AutoModel, AutoTokenizer
+            AutoTokenizer.from_pretrained(repo_id)
+            AutoModel.from_pretrained(repo_id)
+            print("    ✓ transformers 経由で取得")
+        except Exception as e2:
+            print(f"    ✗ {type(e2).__name__}: {str(e2)[:200]}")
+            failed.append(repo_id)
+
+from datasets import load_dataset
+for name, split, purpose in DATASETS:
+    print(f"  {name}（{purpose}）...")
+    try:
+        ds = load_dataset(name, split=split)
+        print(f"    ✓ {len(ds):,} 件")
+    except Exception as e:
+        print(f"    ✗ {type(e).__name__}: {str(e)[:200]}")
+        failed.append(name)
+
+if failed:
+    print("\n  取得できなかったもの:")
+    for f in failed:
+        print(f"    - {f}")
     sys.exit(1)
 PYEOF
-fi
 
-# =============================================================================
-# 完了メッセージ
-# =============================================================================
 echo ""
-echo -e "${BOLD}${GREEN}════════════════════════════════════════════════════${RESET}"
-echo -e "${BOLD}${GREEN}  事前ダウンロード完了！${RESET}"
-echo -e "${BOLD}${GREEN}════════════════════════════════════════════════════${RESET}"
-echo ""
-echo -e "  ダウンロードしたデータ:"
-echo -e "    MNIST データセット  → ${DATA_DIR}"
-if [ "${HF_LOGGED_IN}" = "true" ]; then
-echo -e "    Llama-3.2-1B-Instruct → ${HF_HOME}"
-fi
-echo ""
-echo -e "  環境確認:"
-echo -e "    ${GREEN}python infra/check_env.py${RESET}"
-echo ""
+info "完了。オフラインで読み込めるかは次で確認できます:"
+echo -e "    ${GREEN}.venv/bin/python infra/check_env.py${RESET}"

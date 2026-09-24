@@ -665,27 +665,25 @@
       </div>
     </section>
 
-    <!-- ━━━ 環境セットアップ ━━━ -->
+    <!-- ━━━ 接続方法 ━━━ -->
     <section>
-      <div class="section-heading"><h2>環境セットアップ</h2></div>
-      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0.875rem;">ハンズオンを開始する前に、以下のコマンドで環境を確認してください。</p>
+      <div class="section-heading"><h2>接続方法</h2></div>
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0.875rem;">環境構築は不要です。運営側で1人1つずつ JupyterLab を用意しています。配布された<strong>参加者番号（p01〜p10）・SSH コマンド・URL</strong>を使って、手元の PC から次の 2 ステップで接続してください。詳しい手順とトラブル対処は参加者手順書（<code>docs/participant_guide.md</code>）にあります。</p>
       <div class="code-label">
         <div class="code-dots">
           <i style="background:#FF5F57;"></i>
           <i style="background:#FEBC2E;"></i>
           <i style="background:#28C840;"></i>
         </div>
-        <span>ターミナル</span>
+        <span>手元の PC のターミナル</span>
       </div>
-      <pre class="hljs-wrap"><code class="language-bash"># 仮想環境の作成と有効化（初回のみ）
-uv venv .venv --python 3.11
-source .venv/bin/activate
+      <pre class="hljs-wrap"><code class="language-bash"># 1. SSH トンネルを張る（88NN は自分の番号。p01 なら 8801。8800 は教材ページで全員共通）
+#    パスワード入力後に何も表示されなくなれば成功。このウィンドウは閉じない
+ssh -N -L 88NN:localhost:88NN -L 8800:localhost:8800 handson@&lt;DGX のアドレス&gt;
 
-# パッケージのインストール
-uv pip install -r requirements.txt
-
-# 環境確認スクリプトの実行
-python infra/check_env.py</code></pre>
+# 2. ブラウザで、配布された URL を開く
+#    JupyterLab : http://localhost:88NN/lab?token=...
+#    教材ページ : http://localhost:8800/（このページもここで開きます）</code></pre>
     </section>
 
     <!-- ━━━ 章間ナビゲーション ━━━ -->

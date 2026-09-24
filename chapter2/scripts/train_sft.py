@@ -3,13 +3,15 @@
 第2章 SFT 学習スクリプト
 LLaMA 3 8B + LoRA + SFTTrainer による教師ありファインチューニング
 
-使用方法:
-  tmux new -s sft-train
-  CUDA_VISIBLE_DEVICES=0 python scripts/train_sft.py
+使用方法（JupyterLab のターミナルで、自分の作業ディレクトリ直下から）:
+  gpu_queue.sh python chapter2/scripts/train_sft.py
+
+  gpu_queue.sh は同時に走る学習の本数を制限する（ノートブックの gpu_slot() と同じ枠）。
+  枠が埋まっていれば空くまで待つ。ターミナルのプロセスはサーバー側で動くので、
+  ブラウザを閉じたり SSH が切れたりしても学習は続く（JupyterLab が止まらない限り）。
 
 環境変数:
-  CUDA_VISIBLE_DEVICES  使用する GPU の番号 (例: 0)
-  HF_HOME               HuggingFace キャッシュパス（デフォルト: /data/shared/hf_cache）
+  HF_HOME               HuggingFace キャッシュパス（当日は運営側で設定済み）
   WANDB_PROJECT         wandb プロジェクト名（デフォルト: dgx-handson-sft）
 """
 
@@ -27,9 +29,7 @@ from peft import LoraConfig, TaskType, get_peft_model
 from trl import SFTTrainer, SFTConfig
 
 # ── 環境設定 ─────────────────────────────────────────────────────────────
-HF_HOME = os.environ.get("HF_HOME", "/data/shared/hf_cache")
-os.environ.setdefault("HF_HOME", HF_HOME)
-os.environ.setdefault("TRANSFORMERS_CACHE", HF_HOME)
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
 os.environ.setdefault("WANDB_PROJECT", "dgx-handson-sft")
 
 # ── ハイパーパラメータ（ここを変更して実験） ──────────────────────────────
