@@ -45,7 +45,12 @@ RAM_GB="${HANDSON_RAM_GB:-6}"
 GPU_GB="${HANDSON_GPU_GB:-5}"
 CPU_PCT="${HANDSON_CPU_PCT:-400}"
 GPU_SLOTS="${HANDSON_GPU_SLOTS:-2}"
-HF_CACHE="${HF_HOME:-${HOME}/.cache/huggingface}"
+# 参加者用アカウントで /opt/handson/app から動かすときは、隣の hf_cache を使う（deploy.sh が配置）
+if [ -z "${HF_HOME:-}" ] && [ -d "${REPO_ROOT}/../hf_cache" ]; then
+  HF_CACHE="$(cd "${REPO_ROOT}/../hf_cache" && pwd)"
+else
+  HF_CACHE="${HF_HOME:-${HOME}/.cache/huggingface}"
+fi
 
 GREEN='\033[0;32m'; AMBER='\033[0;33m'; RED='\033[0;31m'; RESET='\033[0m'
 info() { echo -e "${GREEN}[INFO]${RESET}  $*"; }
@@ -98,6 +103,13 @@ init_participant() {
   # カーネル起動時に GPU メモリ上限と gpu_slot() を用意する IPython スタートアップ
   mkdir -p "${dir}/.ipython/profile_default/startup"
   cp "${SCRIPT_DIR}/ipython_startup.py" "${dir}/.ipython/profile_default/startup/00-handson.py"
+  # datasets は読むだけでもキャッシュにロックファイルを書くため、読み取り専用の共有キャッシュ
+  # （/opt/handson/hf_cache）では load_dataset が失敗する。データセット（数十MB）だけ参加者ごとにコピーする。
+  # モデル（hub/）は読み取り専用のままで読める
+  if [ -d "${HF_CACHE}/datasets" ]; then
+    mkdir -p "${dir}/.hf_datasets"
+    rsync -a --ignore-existing --exclude='*.lock' "${HF_CACHE}/datasets/" "${dir}/.hf_datasets/"
+  fi
   if [ ! -f "${dir}/.token" ]; then
     (umask 077; "${VENV_BIN}/python" -c 'import secrets; print(secrets.token_hex(16))' > "${dir}/.token")
   fi
@@ -126,6 +138,7 @@ start() {
       --setenv=IPYTHONDIR="${dir}/.ipython" \
       --setenv=JUPYTER_RUNTIME_DIR="${dir}/.jupyter-runtime" \
       --setenv=HF_HOME="${HF_CACHE}" \
+      --setenv=HF_DATASETS_CACHE="${dir}/.hf_datasets" \
       --setenv=HF_HUB_OFFLINE=1 \
       --setenv=WANDB_MODE=offline \
       --setenv=MPLCONFIGDIR="${dir}/.matplotlib" \

@@ -20,6 +20,22 @@ import shutil
 import subprocess
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+# /opt/handson/app から実行したときは、隣の hf_cache（deploy.sh が配置）を見る。
+# huggingface_hub は import 時に HF_HOME を読むので、パッケージを import する前に設定する
+if 'HF_HOME' not in os.environ and (REPO_ROOT.parent / 'hf_cache').is_dir():
+    os.environ['HF_HOME'] = str(REPO_ROOT.parent / 'hf_cache')
+# datasets は読むだけでもキャッシュにロックファイルを書く。共有キャッシュが読み取り専用のとき
+# （参加者用アカウントで実行したとき）は、一時ディレクトリにコピーして確認する（handson.sh と同じ扱い）
+_ds_cache = Path(os.environ.get('HF_HOME', Path.home() / '.cache' / 'huggingface')) / 'datasets'
+if 'HF_DATASETS_CACHE' not in os.environ and _ds_cache.is_dir() and not os.access(_ds_cache, os.W_OK):
+    import tempfile
+    _tmp = Path(tempfile.mkdtemp(prefix='check_env_datasets_'))
+    shutil.copytree(_ds_cache, _tmp, dirs_exist_ok=True, ignore=shutil.ignore_patterns('*.lock'))
+    os.environ['HF_DATASETS_CACHE'] = str(_tmp)
+    import atexit
+    atexit.register(shutil.rmtree, _tmp, True)
+
 # ── カラー出力 ──────────────────────────────────────────────────────────────
 GREEN  = '\033[0;32m'
 AMBER  = '\033[0;33m'
@@ -139,7 +155,6 @@ section('4. モデル・データセット')
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from required_assets import MODELS, DATASETS, cached_model_path  # noqa: E402
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
 HF_HOME = os.environ.get('HF_HOME', str(Path.home() / '.cache' / 'huggingface'))
 ok(f'HF_HOME: {HF_HOME}')
 

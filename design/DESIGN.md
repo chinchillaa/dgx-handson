@@ -220,24 +220,36 @@ Q1: タスク固有の知識が必要か？
 | GPU 分割 | MIG 非対応（ハードウェアで GPU を区切れない） |
 | OS | Ubuntu 24.04 |
 | 参加者数 | 最大 10 人 |
-| アカウント | 共有アカウント `user01` を全員で使う（sudo は使えない） |
+| アカウント | 運営者 `user01`（sudo 可）と、参加者10人が共有する参加者用アカウント `handson` |
 | アクセス方法 | 参加者は SSH トンネルを張り、手元のブラウザで自分専用の JupyterLab を開く |
 
 ### 4.2 参加者の分離方針
 
-sudo が使えないため、参加者ごとの Linux アカウントの作成や JupyterHub の導入はできない。代わりに、**運営者が参加者ごとの JupyterLab を1つずつ起動する**（`infra/multiuser/handson.sh`）。
+**運営者と参加者はアカウントで分け、参加者どうしは JupyterLab で分ける。**
+
+| アカウント・場所 | 役割 | 参加者から |
+|---|---|---|
+| `user01`（`/home/user01`） | 運営者。リポジトリ、GitHub・Claude Code の認証情報、会話履歴を置く | 読めない（ホームが `drwxr-x---`） |
+| `/opt/handson`（所有者 `user01`・グループ `handson`・`2750`） | 教材・infra・`.venv`・Python・モデル。`deploy.sh` がリポジトリから配置する | 読めるが書き換えられない |
+| `handson`（`/home/handson`） | 参加者用。10人全員がこのアカウントで SSH し、`handson.sh` が参加者ごとの JupyterLab を起動する | 読み書きできる |
+
+- アカウントの作成は sudo で1回だけ行う（`infra/multiuser/setup_account.sh`）。以降の運用は sudo 不要
+- 参加者ごとに Linux アカウントを作らないのは、10人分のアカウント・パスワード管理の手間に見合わないため。参加者どうしの分離は、JupyterLab のトークンと運用ルールで行う
+- 運営者の認証情報を守ることが目的なので、**`handson` で GitHub・HuggingFace・Claude Code にログインしない**
+- 運営者 `user01` はグループ `handson` に入れる。Linux は「所有グループに属さないユーザーが権限を変えると setgid を外す」ため、属していないと `deploy.sh` の配置で所有グループが崩れ、`handson` から読めなくなる（実際に起きた）
+- 参加者用アカウントを作れない環境では、運営者のアカウントで直接動かすことになり、参加者は運営者のホーム以下をすべて読める。その場合の注意は `docs/operator_guide.md` 付録 B
 
 | 分けるもの | 方法 |
 |---|---|
-| 作業ディレクトリ | `~/handson-work/pNN/` に教材をコピー（`solutions/` は除く） |
+| 作業ディレクトリ | `/home/handson/handson-work/pNN/` に教材をコピー（`solutions/`・`web/` は除く） |
 | JupyterLab | `127.0.0.1:88NN` で待ち受け、参加者ごとにトークンを発行。外部からは SSH トンネル経由でしか届かない |
 | 教材の Web ページ | 全員共通の静的サーバー `127.0.0.1:8800`（4.7）。参加者は SSH トンネルに `-L 8800:localhost:8800` を加える |
 | CPU メモリ・CPU | `systemd-run --user` の cgroup（`MemoryMax`・`CPUQuota`）。sudo 不要 |
 | GPU メモリ | カーネル起動時に `torch.cuda.set_per_process_memory_fraction` をかける（4.3） |
 | 放置カーネル | 30 分使われていないカーネルを自動終了（`cull_idle_timeout`） |
 
-- 仮想環境（`.venv`）は1つだけ作り、全員で共有する。パッケージ管理は **`uv`** に統一する（`pip` の直接使用は禁止）
-- 同じアカウントのため、分離は完全ではない（他人のディレクトリを見たり消したりできてしまう）。「自分の `pNN` 以外は触らない」を運用ルールとして周知する
+- 仮想環境（`/opt/handson/app/.venv`）は1つだけ作り、全員で共有する。リポジトリの `.venv` と同じバージョンを `deploy.sh` が作る（uv の既定の Python 置き場所 `~/.local/share/uv` は `handson` から読めないため、Python も `/opt/handson/python` に入れる）。パッケージ管理は **`uv`** に統一する（`pip` の直接使用は禁止）
+- 参加者どうしは同じ `handson` アカウントのため、分離は完全ではない（他人のディレクトリを見たり消したりできてしまう）。「自分の `pNN` 以外は触らない」を運用ルールとして周知する
 - 参加者がサーバー上でコマンドを打って環境を作る必要はない
 
 ### 4.3 メモリ・GPU の割り当て方針
@@ -275,8 +287,9 @@ GB10 では、**cgroup のメモリ上限は GPU に確保したメモリを数�
 
 - 参加者の JupyterLab は `HF_HUB_OFFLINE=1` で動く。**事前にダウンロードしたものしか使えない**
 - 取得対象は `infra/required_assets.py` に一覧で持ち、`infra/predownload.sh` が取得、`infra/check_env.py` が「オフラインで読めるか」を確認する。**教材で新しいモデルやデータセットを使うときは、必ずこの一覧に追加する**
-- 保存先は運営者のキャッシュ `~/.cache/huggingface`（`HF_HOME`）で、全参加者が共有する。gated モデル（Llama）のトークンは運営者だけが持てばよい
-- MNIST はリポジトリの `data/` に置き、`HANDSON_DATA_DIR` で参加者に渡す
+- モデルの保存先は `/opt/handson/hf_cache`（`HF_HOME`）で、全参加者が読み取り専用で共有する。取得は運営者が `deploy.sh --models` で行い、gated モデル（Llama）のトークンは運営者だけが持つ（`/opt/handson` にはコピーしない）
+- **datasets ライブラリは、読むだけでもキャッシュにロックファイルを書く**ため、読み取り専用の共有キャッシュでは `load_dataset` が失敗する。データセット部分（数十MB）だけ参加者ごとにコピーし、`HF_DATASETS_CACHE` で渡す（`handson.sh`）。モデル（`hub/`）は読み取り専用のままで読める
+- MNIST は `/opt/handson/app/data` に置き、`HANDSON_DATA_DIR` で参加者に渡す
 - 教材のコードでは `HF_HOME` を上書きしない（`setdefault` で既定値を置くだけにする）。`/data/shared` のような環境固有のパスは書かない
 
 | 用途 | モデル / データセット |
@@ -291,11 +304,12 @@ GB10 では、**cgroup のメモリ上限は GPU に確保したメモリを数�
 ### 4.6 SSH 切断対策
 
 - ノートブックもターミナルも JupyterLab のサーバー側で動くため、参加者のブラウザや SSH が切れても処理は続く。**参加者に tmux を使わせる必要はない**
-- ただし、このアカウントは linger が無効なので、**`user01` の SSH 接続がすべて切れると JupyterLab も止まる**。開催中は運営者の SSH を1本つないだままにする（`loginctl enable-linger` が通れば不要）
+- `handson` は linger を有効にしてあるので、SSH がすべて切れても JupyterLab は止まらない（`setup_account.sh`）
 
 ### 4.7 教材の配布
 
-- `handson.sh start` の初回に、`chapter1〜3` を各参加者のディレクトリにコピーする。`solutions/` は講師のみ参照なので配らない
+- 教材はリポジトリで直し、`deploy.sh` で `/opt/handson/app` に反映する。`solutions/`・`design/`・`.git` は配置しない（講師のみ参照）
+- `handson.sh start` の初回に、`/opt/handson/app` の `chapter1〜3` を各参加者のディレクトリにコピーする
 - **Web ページ（`chapter*/web`・`assets`）は参加者に配らず、全員共通の静的サーバー（`127.0.0.1:8800`、`python -m http.server`）で配信する。** JupyterLab の中で HTML を開くとサンドボックス化され（`Content-Security-Policy: sandbox`）、KaTeX・Tailwind などのスクリプトと相対リンクが動かないため。公開するのは `chapter*/web` と `assets` だけで、リポジトリの他のファイル（解答・設計書）は見えない
 - Web ページは CDN（Tailwind・KaTeX・highlight.js・Google Fonts）を読み込むため、参加者のブラウザがインターネットにつながっていることが前提
 - 開催前に教材を直したら `handson.sh refresh` で配り直す（トークン＝配布済み URL は変わらない。参加者の編集は消えるので開催中は使わない）
@@ -344,6 +358,8 @@ handson/
     ├── required_assets.py     # 事前取得するモデル・データセットの一覧
     ├── check_env.py           # 環境確認（運営者が本番前に実行）
     └── multiuser/
+        ├── setup_account.sh   # 参加者用アカウントと /opt/handson の作成（sudo で1回だけ）
+        ├── deploy.sh          # 教材・.venv・モデルを /opt/handson に配置
         ├── handson.sh         # 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
         ├── ipython_startup.py # カーネル起動時の GPU メモリ上限と gpu_slot()
         └── gpu_queue.sh       # スクリプトで学習するときの同時実行制御

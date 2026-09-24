@@ -169,6 +169,24 @@ sudo なしの共有アカウント `user01` で最大10人が同時に参加す
 | `infra/*` | `/data/shared` 前提をやめ、全章のモデルを `required_assets.py` の一覧で管理。`check_env.py` はオフライン読み込みと起動条件を確認 |
 | Web ページの配信 | JupyterLab の中で HTML を開くとサンドボックス化され、数式・リンクが動かない。全員共通の静的サーバー（ポート 8800）で配信する形にし、参加者ディレクトリには `web/` を配らない。headless Firefox で KaTeX・CSS の描画を確認 |
 
+### 参加者用アカウントの分離（2026-09-24）
+
+共有アカウント `user01` のままでは、参加者が運営者の GitHub・Claude Code の認証情報と会話履歴を読めることを実機で確認した。sudo が使えるようになったため、参加者用アカウント `handson` を作り、教材・`.venv`・モデルを `/opt/handson`（`handson` は読み取り専用）に移した。
+
+| 確認内容（p01 のカーネル、`handson` として） | 結果 |
+|---|---|
+| 運営者の GitHub・Claude Code の認証情報、リポジトリ | ✅ 読めない |
+| `/opt/handson` の `.venv`・スクリプト・モデル | ✅ 書き換えも新規作成もできない |
+| オフラインでの MNIST・Llama-1B 生成・埋め込み・BERTScore・dolly、GPU 上限、`gpu_slot()` | ✅ |
+| 教材ページ（8800） | ✅ 解答は 404 |
+
+作業中に見つけた落とし穴:
+
+- `/opt/handson` の setgid が、`deploy.sh` の実行で外れた。**所有グループに属さないユーザーが `chmod` すると、Linux は setgid を外す**ため。運営者をグループ `handson` に入れ、`deploy.sh` の最後にグループと setgid を付け直すようにした
+- uv の既定はキャッシュからの**ハードリンク**で、`.venv` のファイルの所有グループが運営者のままになる → `UV_LINK_MODE=copy`
+- uv の既定の Python（`~/.local/share/uv/python`）は `handson` から読めない → `UV_PYTHON_INSTALL_DIR=/opt/handson/python`
+- datasets は読むだけでもキャッシュにロックファイルを書く → データセットだけ参加者ごとにコピーし `HF_DATASETS_CACHE` で渡す
+
 ### 注意点
 
 - huggingface_hub の `snapshot_download(local_files_only=True)` は、使わない onnx / .bin まで揃っていないと `IncompleteSnapshotError` になる。キャッシュ確認は `required_assets.cached_model_path()` を使う
@@ -186,6 +204,7 @@ sudo なしの共有アカウント `user01` で最大10人が同時に参加す
 | Llama-3-8B のダウンロード（HF のアクセス申請＋`HF_TOKEN`） | 未 |
 | 第2章の上限値（RAM 8GB / GPU 14GB / 同時2本）の確認 | 未（10人同時リハーサルで確認） |
 | 10人同時リハーサル | 未 |
+| 参加者用アカウント `handson` への移行 | 済（2026-09-24） |
 
 ### chapter2・chapter3
 

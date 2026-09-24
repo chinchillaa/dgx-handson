@@ -14,7 +14,7 @@
 | 項目 | 例 |
 |---|---|
 | 参加者番号 | `p01` |
-| SSH コマンド | `ssh -N -L 8801:localhost:8801 -L 8800:localhost:8800 user01@10.1.3.220` |
+| SSH コマンド | `ssh -N -L 8801:localhost:8801 -L 8800:localhost:8800 handson@10.1.3.220` |
 | JupyterLab の URL | `http://localhost:8801/lab?token=xxxxxxxx` |
 | 教材ページの URL | `http://localhost:8800/`（全員共通） |
 | SSH のパスワード | 運営から別途お知らせします |
@@ -30,7 +30,7 @@
 手元の PC でターミナル（Windows は PowerShell）を開き、受け取った SSH コマンドを実行します。
 
 ```bash
-ssh -N -L 8801:localhost:8801 -L 8800:localhost:8800 user01@10.1.3.220
+ssh -N -L 8801:localhost:8801 -L 8800:localhost:8800 handson@10.1.3.220
 ```
 
 `-L` が2つあるのは、JupyterLab（8801。番号は人によって違います）と教材ページ（8800。全員共通）の2つをつなぐためです。
@@ -67,7 +67,7 @@ JupyterLab の左側のファイル一覧から、講師の指示に従ってノ
 
 ## VS Code を使っている場合
 
-VS Code の Remote-SSH で `user01@<DGX のアドレス>` に接続し、「ポート」タブで自分の番号のポート（例: `8801`）と `8800` を転送すれば、手順 1 の代わりになります。
+VS Code の Remote-SSH で `handson@<DGX のアドレス>` に接続し、「ポート」タブで自分の番号のポート（例: `8801`）と `8800` を転送すれば、手順 1 の代わりになります。
 VS Code が別の番号に転送した場合は、URL の番号をその番号に読み替えてください。
 
 ---
