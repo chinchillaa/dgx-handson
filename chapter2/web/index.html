@@ -387,10 +387,10 @@
           <div>
             <p class="font-bold text-sm mb-1" style="color: var(--amber-text);">GPU 使用時の注意事項</p>
             <ul class="text-sm space-y-1" style="color: var(--amber-text);">
-              <li>SFT・DPO の学習は <strong>A100 1枚を約30〜60分</strong> 占有します</li>
-              <li>実行前に <code>/data/shared/gpu_queue.txt</code> で順番を確認してください</li>
-              <li>必ず <code>tmux new -s sft-train</code> セッション内で実行してください（SSH切断対策）</li>
-              <li>学習スクリプトは <code>scripts/train_sft.py</code>・<code>scripts/train_dpo.py</code> を使用します</li>
+              <li>DGX の GPU は 1 基を全員で共有しています。SFT・DPO の学習は同時に走らせる人数を運営側で制限しており、枠が埋まっているときは<strong>自動で順番待ち</strong>になります（セルに「待機します」と表示されます）</li>
+              <li>1人あたりの GPU メモリには上限があります。<code>OutOfMemoryError</code> が出たら、カーネルを再起動してから batch size などを小さくしてください</li>
+              <li>スクリプトで学習するときは、JupyterLab のターミナルで <code>gpu_queue.sh python chapter2/scripts/train_sft.py</code> のように実行します（ノートブックと同じ順番待ちの枠を使います）</li>
+              <li>学習はサーバー側で動くので、ブラウザを閉じたり SSH が切れたりしても止まりません。つなぎ直して同じ URL を開けば続きを確認できます</li>
             </ul>
           </div>
         </div>

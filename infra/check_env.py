@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
-check_env.py  —  DGX ハンズオン環境確認スクリプト
+check_env.py  —  DGX ハンズオン環境確認スクリプト（運営者が本番前に実行）
 
 使い方:
-    python infra/check_env.py
+    .venv/bin/python infra/check_env.py
 
 確認項目:
     1. Python バージョン
-    2. GPU 情報（台数・VRAM・CUDA バージョン）
+    2. GPU 情報（GPU 名・メモリ・CUDA バージョン）
     3. 必須パッケージのバージョン
-    4. 共有ストレージの存在・空き容量
-    5. HuggingFace ログイン状態
-    6. ダウンロード済みモデル・データセットの確認
+    4. モデル・データセットがオフラインで読み込めるか（当日は HF_HUB_OFFLINE=1）
+    5. 参加者用 JupyterLab の起動条件（systemd --user・linger・空きポート）
+    6. 動作確認（簡易テスト）
 """
 
 import sys
@@ -132,87 +132,80 @@ if all_ok:
     ok('必須パッケージはすべてインストール済みです')
 
 # =============================================================================
-# Section 4: 共有ストレージ
+# Section 4: モデル・データセット（オフライン読み込み）
 # =============================================================================
-section('4. 共有ストレージ')
+section('4. モデル・データセット')
 
-SHARED_ROOT = Path('/data/shared')
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from required_assets import MODELS, DATASETS, cached_model_path  # noqa: E402
 
-if SHARED_ROOT.exists():
-    ok(f'共有ストレージ: {SHARED_ROOT}')
+REPO_ROOT = Path(__file__).resolve().parent.parent
+HF_HOME = os.environ.get('HF_HOME', str(Path.home() / '.cache' / 'huggingface'))
+ok(f'HF_HOME: {HF_HOME}')
 
-    # 空き容量
-    total, used, free = shutil.disk_usage(SHARED_ROOT)
-    free_gb  = free  / 1024**3
-    total_gb = total / 1024**3
-    used_pct = used / total * 100
-
-    if free_gb >= 20:
-        ok(f'空き容量: {free_gb:.1f} GB / {total_gb:.1f} GB  (使用率 {used_pct:.0f}%)')
-    elif free_gb >= 5:
-        warn(f'空き容量: {free_gb:.1f} GB / {total_gb:.1f} GB  (使用率 {used_pct:.0f}%)')
-    else:
-        fail(f'空き容量が少ない: {free_gb:.1f} GB — モデルダウンロードに支障が出る可能性があります')
-        ISSUES.append(f'共有ストレージの空き容量が {free_gb:.1f} GB しかありません')
-
-    # データセット確認
-    datasets_dir = SHARED_ROOT / 'datasets'
-    if datasets_dir.exists():
-        ok(f'datasets/ ディレクトリ存在: {datasets_dir}')
-        mnist_dir = datasets_dir / 'MNIST'
-        if mnist_dir.exists():
-            ok(f'MNIST データセット: ダウンロード済み')
-        else:
-            warn(f'MNIST データセット: 未ダウンロード → bash infra/predownload.sh を実行してください')
-    else:
-        warn(f'datasets/ ディレクトリなし → bash infra/predownload.sh を実行してください')
-
-    # モデル確認
-    models_dir = SHARED_ROOT / 'models'
-    if models_dir.exists():
-        ok(f'models/ ディレクトリ存在: {models_dir}')
-        # Llama モデルの確認
-        hub_dir = models_dir / 'hub'
-        llama_exists = False
-        if hub_dir.exists():
-            for d in hub_dir.iterdir():
-                if 'llama-3.2-1b' in d.name.lower() or 'llama-3_2-1b' in d.name.lower():
-                    llama_exists = True
-                    model_size = sum(
-                        f.stat().st_size
-                        for f in d.rglob('*') if f.is_file()
-                    )
-                    ok(f'Llama-3.2-1B: ダウンロード済み ({model_size / 1024**3:.1f} GB)')
-                    break
-        if not llama_exists:
-            warn('Llama-3.2-1B: 未ダウンロード → bash infra/predownload.sh を実行してください')
-    else:
-        warn(f'models/ ディレクトリなし → bash infra/predownload.sh を実行してください')
-
+mnist_raw = REPO_ROOT / 'data' / 'MNIST' / 'raw'
+if mnist_raw.exists() and any(mnist_raw.iterdir()):
+    ok(f'{"MNIST":<40} {REPO_ROOT / "data"}')
 else:
-    warn(f'共有ストレージ ({SHARED_ROOT}) が見つかりません')
-    warn('DGX 上では /data/shared/ が利用可能なはずです。管理者に確認してください。')
-    warn('ローカル実行の場合は ~/.cache/huggingface と ./data が使用されます。')
+    fail(f'{"MNIST":<40} 未ダウンロード')
+    ISSUES.append('MNIST がありません → bash infra/predownload.sh')
 
-# =============================================================================
-# Section 5: HuggingFace ログイン状態
-# =============================================================================
-section('5. HuggingFace 認証')
+for repo_id, purpose, gated in MODELS:
+    path = cached_model_path(repo_id)
+    if path:
+        size_gb = sum(f.stat().st_size for f in Path(path).rglob('*') if f.is_file()) / 1024**3
+        ok(f'{repo_id:<40} {size_gb:5.1f} GB  （{purpose}）')
+    else:
+        fail(f'{repo_id:<40} 未ダウンロード  （{purpose}）')
+        hint = '（HF のアクセス申請と HF_TOKEN が必要）' if gated else ''
+        ISSUES.append(f'{repo_id} がありません → bash infra/predownload.sh {hint}')
 
-hf_token = os.environ.get('HF_TOKEN', '')
-if hf_token:
-    ok(f'HF_TOKEN 環境変数が設定されています')
-else:
+os.environ['HF_HUB_OFFLINE'] = '1'  # 当日と同じ条件で読む
+for name, split, purpose in DATASETS:
     try:
-        from huggingface_hub import whoami
-        info = whoami()
-        ok(f'HuggingFace ログイン済み: {info["name"]}')
+        from datasets import load_dataset
+        n = len(load_dataset(name, split=split))
+        ok(f'{name:<40} {n:,} 件  （{purpose}）')
     except Exception:
-        warn('HuggingFace 未ログインです')
-        warn('Llama モデルには認証が必要です:')
-        print(f'{AMBER}       hf auth login{RESET}')
-        print(f'{AMBER}       # または: export HF_TOKEN=hf_xxxx{RESET}')
-        ISSUES.append('HuggingFace にログインしてください: huggingface-cli login')
+        fail(f'{name:<40} 未ダウンロード  （{purpose}）')
+        ISSUES.append(f'{name} がありません → bash infra/predownload.sh')
+
+total, used, free = shutil.disk_usage(Path.home())
+if free / 1024**3 >= 30:
+    ok(f'空き容量: {free / 1024**3:.0f} GB')
+else:
+    warn(f'空き容量: {free / 1024**3:.0f} GB — 参加者の学習出力（outputs/）で不足する可能性があります')
+
+# =============================================================================
+# Section 5: 参加者用 JupyterLab の起動条件
+# =============================================================================
+section('5. 参加者用 JupyterLab（infra/multiuser/handson.sh）')
+
+def _run(cmd):
+    return subprocess.run(cmd, capture_output=True, text=True)
+
+r = _run(['systemd-run', '--user', '--scope', '-q', '-p', 'MemoryMax=1G', 'true'])
+if r.returncode == 0:
+    ok('systemd-run --user でメモリ上限（cgroup）をかけられます')
+else:
+    fail(f'systemd-run --user が使えません: {r.stderr.strip()[:120]}')
+    ISSUES.append('systemd --user が使えないため handson.sh が動きません')
+
+r = _run(['loginctl', 'show-user', os.environ.get('USER', ''), '-p', 'Linger', '--value'])
+if r.stdout.strip() == 'yes':
+    ok('linger 有効: SSH を全部切っても JupyterLab は止まりません')
+else:
+    warn('linger 無効: このアカウントの SSH 接続が全部切れると JupyterLab も止まります')
+    warn('  運営者の SSH を1本つないだままにする（loginctl enable-linger が通れば不要）')
+
+r = _run(['ss', '-ltnH'])
+busy = sorted({int(l.split()[3].rsplit(':', 1)[1]) for l in r.stdout.splitlines() if l.split()[3].rsplit(':', 1)[1].isdigit()})
+base = int(os.environ.get('HANDSON_BASE_PORT', '8800'))
+taken = [p for p in range(base + 1, base + 11) if p in busy]
+if not taken:
+    ok(f'ポート {base + 1}〜{base + 10} は空いています')
+else:
+    warn(f'ポート使用中: {taken}（handson.sh 起動済みなら問題なし）')
 
 # =============================================================================
 # Section 6: 動作確認（簡易テスト）
@@ -275,8 +268,8 @@ section('サマリー')
 
 if not ISSUES:
     print(f'\n{BOLD}{GREEN}  すべてのチェックが通過しました。ハンズオンを開始できます！{RESET}')
-    print(f'\n  Jupyter Lab を起動するには:')
-    print(f'    {GREEN}source .venv/bin/activate && jupyter lab{RESET}\n')
+    print(f'\n  参加者用 JupyterLab を起動するには:')
+    print(f'    {GREEN}bash infra/multiuser/handson.sh start{RESET}\n')
 else:
     print(f'\n{BOLD}{AMBER}  {len(ISSUES)} 件の問題が見つかりました:{RESET}')
     for i, issue in enumerate(ISSUES, 1):

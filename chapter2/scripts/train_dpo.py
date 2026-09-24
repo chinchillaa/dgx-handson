@@ -3,14 +3,16 @@
 第2章 DPO 学習スクリプト
 SFT 済みモデルに DPOTrainer で preference alignment を適用する
 
-使用方法:
-  tmux new -s dpo-train
-  CUDA_VISIBLE_DEVICES=1 python scripts/train_dpo.py \
+使用方法（JupyterLab のターミナルで、自分の作業ディレクトリ直下から）:
+  gpu_queue.sh python chapter2/scripts/train_dpo.py \
       --sft_model_path ./outputs/sft_<timestamp>
 
+  gpu_queue.sh は同時に走る学習の本数を制限する（ノートブックの gpu_slot() と同じ枠）。
+  枠が埋まっていれば空くまで待つ。ターミナルのプロセスはサーバー側で動くので、
+  ブラウザを閉じたり SSH が切れたりしても学習は続く（JupyterLab が止まらない限り）。
+
 環境変数:
-  CUDA_VISIBLE_DEVICES  使用する GPU の番号
-  HF_HOME               HuggingFace キャッシュパス
+  HF_HOME               HuggingFace キャッシュパス（当日は運営側で設定済み）
   WANDB_PROJECT         wandb プロジェクト名（デフォルト: dgx-handson-dpo）
 """
 
@@ -25,9 +27,7 @@ from peft import LoraConfig, TaskType, get_peft_model
 from trl import DPOTrainer, DPOConfig
 
 # ── 環境設定 ─────────────────────────────────────────────────────────────
-HF_HOME = os.environ.get("HF_HOME", "/data/shared/hf_cache")
-os.environ.setdefault("HF_HOME", HF_HOME)
-os.environ.setdefault("TRANSFORMERS_CACHE", HF_HOME)
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
 os.environ.setdefault("WANDB_PROJECT", "dgx-handson-dpo")
 
 # ── ハイパーパラメータ ───────────────────────────────────────────────────

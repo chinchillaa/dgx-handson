@@ -17,7 +17,8 @@
 
 ## プロジェクト概要
 
-DGX（A100 x8）上で実施する ML ハンズオンセッション用コンテンツ一式。
+DGX Spark（GB10・統合メモリ 128GB・GPU 1基）上で、最大10人が同時に参加する ML ハンズオンセッション用コンテンツ一式。
+開催方式（共有アカウント＋参加者ごとの JupyterLab）は `design/DESIGN.md` 4章、手順は `docs/` の手順書を参照。
 設計仕様は `design/DESIGN.md` が正とする。**実装に迷ったら必ず DESIGN.md に立ち返ること。**
 
 ### 3章構成
@@ -70,10 +71,18 @@ dgx-handson/
 │       ├── supplement_evaluation.html            ✅ 評価指標補足（ROUGE・BERTScore・LLM-as-judge）
 │       └── quiz_ch2.html                         ✅ 第2章 理解確認クイズ
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
+├── docs/
+│   ├── operator_guide.md                             ✅ 開催側の手順書
+│   └── participant_guide.md                          ✅ 参加者向けの手順書
 └── infra/
-    ├── setup.sh                                      ✅ 環境構築（uv + venv + パッケージ + Jupyter カーネル）
-    ├── predownload.sh                                ✅ MNIST + Llama-3.2-1B-Instruct 事前ダウンロード
-    └── check_env.py                                  ✅ 環境確認（GPU・パッケージ・共有ストレージ・HF認証）
+    ├── setup.sh                                      ✅ 共有 .venv の構築（uv + パッケージ + Jupyter カーネル）
+    ├── predownload.sh                                ✅ 全章のモデル・データセット事前ダウンロード
+    ├── required_assets.py                            ✅ 事前取得するモデル・データセットの一覧
+    ├── check_env.py                                  ✅ 環境確認（GPU・パッケージ・オフライン読み込み・起動条件）
+    └── multiuser/
+        ├── handson.sh                                ✅ 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
+        ├── ipython_startup.py                        ✅ GPU メモリ上限 + gpu_slot()
+        └── gpu_queue.sh                              ✅ スクリプト学習の同時実行制御
 ```
 
 ---
@@ -132,7 +141,51 @@ bash infra/predownload.sh          # Llama ダウンロード（約 2.5 GB）
 
 ---
 
+## マルチユーザー開催方式への移行（2026-09-24）
+
+sudo なしの共有アカウント `user01` で最大10人が同時に参加する方式を正とし、既存資料をこれに合わせた。
+方針は `DESIGN.md` 4章、手順は `docs/operator_guide.md`・`docs/participant_guide.md`。
+
+### 実機（DGX Spark / GB10）で確認したこと
+
+| 確認内容 | 結果 |
+|---|---|
+| `systemd-run --user` による cgroup 上限（sudo なし） | ✅ 使える |
+| cgroup の `MemoryMax` が GPU 確保分を数えるか | ❌ 数えない（上限 4GB の中で GPU に 6GB 確保できた）→ PyTorch 側の上限を併用 |
+| `set_per_process_memory_fraction` による GPU 上限 | ✅ 上限で `OutOfMemoryError` |
+| 10人分の JupyterLab 起動・トークン認証 | ✅ トークンなしは 403 |
+| p01 カーネルでの動作（`HF_HUB_OFFLINE=1`） | ✅ MNIST・Llama-1B 生成・MiniLM 埋め込み・BERTScore・dolly 読み込み |
+| `gpu_slot()` と `gpu_queue.sh` の枠の共有 | ✅ スクリプトが2枠使用中はノートブックが待機し、空くと開始 |
+| Llama-3-8B の QLoRA 学習（第2章） | ⏳ 未確認（モデル未ダウンロード。HF トークンが必要） |
+
+### 既存資料の変更
+
+| 対象 | 変更 |
+|---|---|
+| ノートブック17本 | `/data/shared` 参照を削除し、運営側が渡す `HF_HOME`・`HANDSON_DATA_DIR` を使う形に。第2章の `trainer.train()` を `gpu_slot()` で囲む。`gpu_queue.txt`・tmux・A100 前提の記述を削除 |
+| `chapter2/scripts/train_*.py` | 使い方を `gpu_queue.sh` 経由に。`/data/shared`・`CUDA_VISIBLE_DEVICES` を削除 |
+| `chapter1/web/index.html` | 「環境セットアップ」を「接続方法」に差し替え |
+| `chapter2/web/index.html` | GPU 注意事項を順番待ち・メモリ上限の説明に差し替え |
+| `infra/*` | `/data/shared` 前提をやめ、全章のモデルを `required_assets.py` の一覧で管理。`check_env.py` はオフライン読み込みと起動条件を確認 |
+| Web ページの配信 | JupyterLab の中で HTML を開くとサンドボックス化され、数式・リンクが動かない。全員共通の静的サーバー（ポート 8800）で配信する形にし、参加者ディレクトリには `web/` を配らない。headless Firefox で KaTeX・CSS の描画を確認 |
+
+### 注意点
+
+- huggingface_hub の `snapshot_download(local_files_only=True)` は、使わない onnx / .bin まで揃っていないと `IncompleteSnapshotError` になる。キャッシュ確認は `required_assets.cached_model_path()` を使う
+- `bert-base-multilingual-cased` は旧名リポジトリで、`snapshot_download` が 404 になる。`predownload.sh` は transformers 経由で取得する
+- transformers 5.x は `TRANSFORMERS_CACHE` を無視する（`HF_HOME` だけ設定すればよい）
+
+---
+
 ## 残タスク
+
+### 開催方式
+
+| 項目 | 状態 |
+|---|---|
+| Llama-3-8B のダウンロード（HF のアクセス申請＋`HF_TOKEN`） | 未 |
+| 第2章の上限値（RAM 8GB / GPU 14GB / 同時2本）の確認 | 未（10人同時リハーサルで確認） |
+| 10人同時リハーサル | 未 |
 
 ### chapter2・chapter3
 
