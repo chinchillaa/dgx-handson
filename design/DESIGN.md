@@ -221,7 +221,7 @@ Q1: タスク固有の知識が必要か？
 | OS | Ubuntu 24.04 |
 | 参加者数 | 最大 10 人 |
 | アカウント | 運営者 `user01`（sudo 可）と、参加者10人が共有する参加者用アカウント `handson` |
-| アクセス方法 | 参加者は SSH トンネルを張り、手元のブラウザで自分専用の JupyterLab を開く |
+| アクセス方法 | 参加者は会社の PC から貸与 VM（1人1台、管理者が用意）に入り、VM の中で SSH トンネルを張って、VM のブラウザで自分専用の JupyterLab を開く。DGX はプライベートアドレスで、会社の PC や自宅のネットワークからは直接届かない |
 
 ### 4.2 参加者の分離方針
 
@@ -236,6 +236,8 @@ Q1: タスク固有の知識が必要か？
 - アカウントの作成は sudo で1回だけ行う（`infra/multiuser/setup_account.sh`）。以降の運用は sudo 不要
 - 参加者ごとに Linux アカウントを作らないのは、10人分のアカウント・パスワード管理の手間に見合わないため。参加者どうしの分離は、JupyterLab のトークンと運用ルールで行う
 - 運営者の認証情報を守ることが目的なので、**`handson` で GitHub・HuggingFace・Claude Code にログインしない**
+- `handson` の SSH は `restrict_ssh.sh`（`/etc/ssh/sshd_config.d/50-handson.conf`）で制限する。接続元は貸与 VM と localhost だけ、トンネルの行き先は localhost:8800〜8810 だけ（DGX を踏み台にした社内へのトンネルを防ぐ）。運営者の SSH に影響しないことを `sshd -T` の比較で確認してから適用する
+- 運営者が普段使う VM は参加者に渡さない（運営者のアカウントに入るための情報が残っている可能性があるため）
 - 運営者 `user01` はグループ `handson` に入れる。Linux は「所有グループに属さないユーザーが権限を変えると setgid を外す」ため、属していないと `deploy.sh` の配置で所有グループが崩れ、`handson` から読めなくなる（実際に起きた）
 - 参加者用アカウントを作れない環境では、運営者のアカウントで直接動かすことになり、参加者は運営者のホーム以下をすべて読める。その場合の注意は `docs/operator_guide.md` 付録 B
 
@@ -360,6 +362,7 @@ handson/
     └── multiuser/
         ├── setup_account.sh   # 参加者用アカウントと /opt/handson の作成（sudo で1回だけ）
         ├── deploy.sh          # 教材・.venv・モデルを /opt/handson に配置
+        ├── restrict_ssh.sh    # handson の SSH の接続元・トンネル先を制限（sudo）
         ├── handson.sh         # 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
         ├── ipython_startup.py # カーネル起動時の GPU メモリ上限と gpu_slot()
         └── gpu_queue.sh       # スクリプトで学習するときの同時実行制御

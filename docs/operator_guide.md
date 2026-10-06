@@ -6,12 +6,15 @@ DGX Spark 1台を、最大10人の参加者で同時に使うハンズオンの�
 ## 全体像
 
 ```
-参加者 p01 ─ ssh -N -L 8801:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8801 → /home/handson/handson-work/p01/
-                                                        └▶ 教材ページ :8800（全員共通）
-参加者 p02 ─ ssh -N -L 8802:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8802 → /home/handson/handson-work/p02/
-                                                        └▶ 教材ページ :8800
+会社の PC ─▶ 貸与 VM p01 ─ ssh -N -L 8801:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8801 → /home/handson/handson-work/p01/
+                                                                      └▶ 教材ページ :8800（全員共通）
+会社の PC ─▶ 貸与 VM p02 ─ ssh -N -L 8802:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8802 → /home/handson/handson-work/p02/
+                                                                      └▶ 教材ページ :8800
   ...（最大 p10）
 ```
+
+- **参加者は、管理者から貸与された VM（1人1台）から接続します。** DGX（10.1.3.220）はプライベートアドレスで、会社の PC や自宅のネットワークからは直接届きません（社内接続ソフトなどで遮断されます）。SSH もブラウザも VM の中で使います
+- 貸与 VM は、運営者が普段 DGX に入っている VM と同じものです（会社の PC から入れる、ブラウザとインターネットが使える）
 
 アカウントと置き場所は3つに分かれています。
 
@@ -114,11 +117,31 @@ HF_TOKEN=hf_xxxx bash infra/multiuser/deploy.sh --models
 3. [handson] `bash infra/multiuser/handson.sh status` と `free -h` でメモリの余裕を確認する
 4. 足りなければ手順 4-2 の上限値を調整し、`design/DESIGN.md` 4.3 の表も更新する
 
-### 2-2. 参加者番号の割り当て
+### 2-2. 参加者番号と貸与 VM の割り当て
 
-参加者ごとに `p01`〜`p10` を割り当て、名簿を作っておきます。
+参加者ごとに `p01`〜`p10` と貸与 VM を1台ずつ割り当て、名簿を作っておきます。
 
-### 2-3. 接続情報の配布 [handson]
+| 参加者番号 | 参加者 | 貸与 VM（名前・IP） |
+|---|---|---|
+| p01 | | |
+| … | | |
+
+- **運営者が普段使っている VM を参加者に渡さないでください。** その VM には、運営者のアカウント（`user01`。sudo が使える）で DGX に入るための情報（保存されたパスワード、SSH の鍵、VS Code の設定、接続履歴など）が残っている可能性があります。渡す場合は、運営者の情報をすべて消してからにしてください
+- リハーサルで、**各 VM から1回ずつ** SSH と JupyterLab・教材ページの表示を確認してください（VM ごとにネットワークの設定が違うことがあるため）
+
+### 2-3. SSH の制限 [sudo]
+
+```bash
+sudo bash infra/multiuser/restrict_ssh.sh 10.1.3.x 10.1.3.y …   # 貸与 VM の IP をすべて並べる
+```
+
+- `handson` でログインできるのを、貸与 VM と localhost（運営者の `ssh handson@localhost`）だけにします。10人で1つのパスワードを共有しているので、接続元を絞っておきます
+- `handson` の SSH トンネルの行き先を、JupyterLab と教材ページ（localhost:8800〜8810）だけにします。DGX を踏み台にして社内の他の機器へトンネルを張れないようにするためです
+- 運営者（`user01`）の SSH には影響しません。適用前後で運営者の実効設定が変わらないことをスクリプトが確認し、変わった場合や設定エラーの場合は元に戻します
+- VM の IP が分かる前でも、引数なしで実行すればトンネルの制限だけかかります。外すときは `--remove`
+- JupyterLab のターミナルからは、参加者は DGX から社内ネットワークへ通信できてしまいます（SSH の制限では防げません）。気になる場合は、DGX からの外向き通信の制限をネットワーク管理者と相談してください
+
+### 2-4. 接続情報の配布 [handson]
 
 サーバーを起動したあと（手順 3）、次のコマンドで参加者ごとの接続情報を表示できます。
 
@@ -133,12 +156,12 @@ bash infra/multiuser/handson.sh urls
   教材ページ : http://localhost:8800/
 ```
 
-- **各参加者には、自分の番号の行だけを個別に渡してください。** トークンを知っていれば、他人の JupyterLab を開けてしまいます
-- 参加者手順書 `docs/participant_guide.md` もあわせて配布します
+- **各参加者には、自分の番号の行だけを、貸与 VM の情報（名前・アドレス・ログイン方法）と一緒に個別に渡してください。** トークンを知っていれば、他人の JupyterLab を開けてしまいます
+- 参加者手順書 `docs/participant_guide.md` もあわせて配布します。貸与 VM へのログイン方法は会社の方式に合わせて、手順書の「0. 貸与 VM にログインする」に追記してください
 - `handson` の SSH パスワード（手順 1-2 で設定したもの）の渡し方は別途決めてください。全員が同じパスワードを使います
 - トークンは、`/home/handson/handson-work` を消さない限り再起動しても変わりません。前日に配布して問題ありません
 
-### 2-4. 参加者から見えるもの・見えないもの
+### 2-5. 参加者から見えるもの・見えないもの
 
 参加者の JupyterLab は `handson` として動きます。参加者は、Python の `open()` やターミナルで、**`handson` が読めるファイルはすべて読めます**。JupyterLab のファイル一覧で自分の `pNN` しか見えないのは、見た目だけです。
 
@@ -238,7 +261,9 @@ bash infra/multiuser/handson.sh start
 | 症状 | 確認・対処 |
 |---|---|
 | 参加者のブラウザで何も開かない | ① [handson] `status` でその番号が `active` か確認 → ② 参加者の SSH トンネルが張られているか（`ssh -N -L ...` のウィンドウが開いたままか）→ ③ URL の番号とトークンが本人のものか |
-| 参加者の SSH が `kex_exchange_identification: Connection closed by remote host` で切れる | DGX の sshd まで届いていない可能性が高いです。`/var/log/auth.log`（[user01] で読めます）にその時刻の記録がなければ、途中のネットワーク機器か IP の重複が原因です。ネットワーク管理者に確認してください |
+| 参加者の SSH が `Connection closed by 10.1.3.220 port 22` や `kex_exchange_identification` で切れる | **貸与 VM ではなく、会社の PC から実行している**可能性が高いです（会社の PC からは途中で遮断されます）。VM の中で実行するよう案内してください。VM から実行しても出る場合は、`/var/log/auth.log`（[user01] で読めます）にその時刻の記録があるか確認します。記録がなければ VM から DGX までのネットワークの問題なので、管理者に確認してください |
+| 参加者の SSH が `Permission denied` になる（パスワードは正しい） | `restrict_ssh.sh` に、その VM の IP が入っていない可能性があります。`/var/log/auth.log` で接続元の IP を確認し、[sudo] 許可する IP を全部並べて再実行します |
+| 参加者のトンネルで `channel ... open failed: administratively prohibited` と出る | トンネルの行き先が 8800〜8810 以外になっています。配布した SSH コマンドのとおりか確認してください |
 | 教材ページが開かない | [handson] `status` で `web` が `active` か確認し、止まっていれば `start` を実行します（起動済みの JupyterLab には影響しません）。参加者の SSH コマンドに `-L 8800:localhost:8800` が入っているかも確認してください |
 | 教材ページで数式が崩れる・リンクが開けない | JupyterLab の中で HTML を開いています。`http://localhost:8800/` から開くよう案内してください |
 | 1人だけ調子が悪い（固まった・遅い） | [handson] `systemctl --user restart handson-pNN`（例: `handson-p03`）。上限もトークンも変わりません |
@@ -299,6 +324,7 @@ rm -rf ~/handson-work
 |---|---|
 | `infra/multiuser/setup_account.sh` | 参加者用アカウントと `/opt/handson` の作成（sudo で1回だけ） |
 | `infra/multiuser/deploy.sh` | 教材・`.venv`・モデルを `/opt/handson` に配置（sudo 不要） |
+| `infra/multiuser/restrict_ssh.sh` | `handson` の SSH の接続元とトンネルの行き先を制限（sudo） |
 | `infra/multiuser/handson.sh` | JupyterLab と教材ページの起動・停止・状態表示・URL 発行・教材の配り直し（`handson` で実行） |
 | `infra/multiuser/ipython_startup.py` | カーネル起動時の GPU メモリ上限と `gpu_slot()` |
 | `infra/multiuser/gpu_queue.sh` | スクリプトで学習するときの同時実行制御 |
