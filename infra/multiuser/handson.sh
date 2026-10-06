@@ -202,14 +202,14 @@ refresh() {
 urls() {
   local host
   host="$(hostname -I | awk '{print $1}')"
-  echo "参加者に配布する接続手順（各自の手元PCで実行）"
+  echo "参加者に配布する接続手順（各自の貸与 VM で実行。URL は SSH でログインしたときにも表示される）"
   echo "================================================================"
   for i in $(seq 1 "${N}"); do
     local p port dir
     p="$(pid_of "$i")"; port="$(port_of "$i")"; dir="${WORK_ROOT}/${p}"
     [ -f "${dir}/.token" ] || { warn "${p}: 未初期化（start を先に実行）"; continue; }
     echo "[${p}]"
-    echo "  ssh -N -L ${port}:localhost:${port} -L ${WEB_PORT}:localhost:${WEB_PORT} ${USER}@${host}"
+    echo "  ssh -L ${port}:localhost:${port} -L ${WEB_PORT}:localhost:${WEB_PORT} ${USER}@${host}"
     echo "  JupyterLab : http://localhost:${port}/lab?token=$(cat "${dir}/.token")"
     echo "  教材ページ : http://localhost:${WEB_PORT}/"
   done

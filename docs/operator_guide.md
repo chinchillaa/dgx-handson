@@ -6,9 +6,9 @@ DGX Spark 1台を、最大10人の参加者で同時に使うハンズオンの�
 ## 全体像
 
 ```
-会社の PC ─▶ 貸与 VM p01 ─ ssh -N -L 8801:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8801 → /home/handson/handson-work/p01/
+会社の PC ─▶ 貸与 VM p01 ─ ssh -L 8801:… -L 8800:… handson@<DGX>    ─┬▶ JupyterLab :8801 → /home/handson/handson-work/p01/
                                                                       └▶ 教材ページ :8800（全員共通）
-会社の PC ─▶ 貸与 VM p02 ─ ssh -N -L 8802:… -L 8800:… handson@<DGX> ─┬▶ JupyterLab :8802 → /home/handson/handson-work/p02/
+会社の PC ─▶ 貸与 VM p02 ─ ssh -L 8802:… -L 8800:… handson@<DGX>    ─┬▶ JupyterLab :8802 → /home/handson/handson-work/p02/
                                                                       └▶ 教材ページ :8800
   ...（最大 p10）
 ```
@@ -121,10 +121,20 @@ HF_TOKEN=hf_xxxx bash infra/multiuser/deploy.sh --models
 
 参加者ごとに `p01`〜`p10` と貸与 VM を1台ずつ割り当て、名簿を作っておきます。
 
-| 参加者番号 | 参加者 | 貸与 VM（名前・IP） |
-|---|---|---|
-| p01 | | |
-| … | | |
+貸与 VM の IP は固定で、1号機〜10号機が 10.1.3.221〜10.1.3.230 です（管理者からの回答）。号機の番号と参加者番号をそろえます。
+
+| 参加者番号 | 貸与 VM | IP | 参加者 |
+|---|---|---|---|
+| p01 | 1号機 | 10.1.3.221 | |
+| p02 | 2号機 | 10.1.3.222 | |
+| p03 | 3号機 | 10.1.3.223 | |
+| p04 | 4号機 | 10.1.3.224 | |
+| p05 | 5号機 | 10.1.3.225 | |
+| p06 | 6号機 | 10.1.3.226 | |
+| p07 | 7号機 | 10.1.3.227 | |
+| p08 | 8号機 | 10.1.3.228 | |
+| p09 | 9号機 | 10.1.3.229 | |
+| p10 | 10号機 | 10.1.3.230 | |
 
 - **運営者が普段使っている VM を参加者に渡さないでください。** その VM には、運営者のアカウント（`user01`。sudo が使える）で DGX に入るための情報（保存されたパスワード、SSH の鍵、VS Code の設定、接続履歴など）が残っている可能性があります。渡す場合は、運営者の情報をすべて消してからにしてください
 - リハーサルで、**各 VM から1回ずつ** SSH と JupyterLab・教材ページの表示を確認してください（VM ごとにネットワークの設定が違うことがあるため）
@@ -132,11 +142,16 @@ HF_TOKEN=hf_xxxx bash infra/multiuser/deploy.sh --models
 ### 2-3. SSH の制限 [sudo]
 
 ```bash
-sudo bash infra/multiuser/restrict_ssh.sh 10.1.3.x 10.1.3.y …   # 貸与 VM の IP をすべて並べる
+sudo bash infra/multiuser/restrict_ssh.sh 10.1.3.219 10.1.3.{221..230}   # 運営者の VM + 貸与 VM 10台（1号機〜10号機）
 ```
 
 - `handson` でログインできるのを、貸与 VM と localhost（運営者の `ssh handson@localhost`）だけにします。10人で1つのパスワードを共有しているので、接続元を絞っておきます
+- 運営者の VM（10.1.3.219）も許可しています。参加者と同じ `handson` での接続を、運営者の VM から確認できるようにするためです。運営者の VM では VS Code の Remote-SSH の自動ポート転送が 8800・8801 などを確保していることがあるので、試すときは VS Code の転送を使うか、手元側の番号を変えてください（5. トラブル対応）
 - `handson` の SSH トンネルの行き先を、JupyterLab と教材ページ（localhost:8800〜8810）だけにします。DGX を踏み台にして社内の他の機器へトンネルを張れないようにするためです
+- 貸与 VM から `handson` でログインすると、シェルの代わりに `infra/multiuser/welcome.sh` が動き、**接続元の VM から参加者番号を決めて、その人の JupyterLab の URL（トークン付き）を表示**します。そのまま待ち続けてトンネルを保ちます。参加者は DGX のシェルを使えません（`ssh handson@localhost` は対象外）
+  - **先に 1-3 の `deploy.sh` を実行してください。** `/opt/handson/app/infra/multiuser/welcome.sh` がないと、スクリプトはエラーで止まります
+  - VM と参加者番号の対応（10.1.3.221 = p01 … 10.1.3.230 = p10）は `welcome.sh` の `VM_IPS` に書いてあります。割り当てを変えたら `welcome.sh` を直して `deploy.sh` を実行します（sudo は不要）
+  - 運営者の VM（10.1.3.219）からは「参加者用の VM として登録されていません」と表示されます（トンネルは使えます）。参加者の表示を確かめるときは、[handson] で接続元を偽って実行します: `SSH_CLIENT="10.1.3.221 0 22" bash /opt/handson/app/infra/multiuser/welcome.sh`（Ctrl+C で終了）
 - 運営者（`user01`）の SSH には影響しません。適用前後で運営者の実効設定が変わらないことをスクリプトが確認し、変わった場合や設定エラーの場合は元に戻します
 - VM の IP が分かる前でも、引数なしで実行すればトンネルの制限だけかかります。外すときは `--remove`
 - JupyterLab のターミナルからは、参加者は DGX から社内ネットワークへ通信できてしまいます（SSH の制限では防げません）。気になる場合は、DGX からの外向き通信の制限をネットワーク管理者と相談してください
@@ -151,15 +166,23 @@ bash infra/multiuser/handson.sh urls
 
 ```
 [p01]
-  ssh -N -L 8801:localhost:8801 -L 8800:localhost:8800 handson@10.1.3.220
+  ssh -L 8801:localhost:8801 -L 8800:localhost:8800 handson@10.1.3.220
   JupyterLab : http://localhost:8801/lab?token=xxxxxxxx
   教材ページ : http://localhost:8800/
 ```
 
 - **各参加者には、自分の番号の行だけを、貸与 VM の情報（名前・アドレス・ログイン方法）と一緒に個別に渡してください。** トークンを知っていれば、他人の JupyterLab を開けてしまいます
+- JupyterLab の URL は、参加者が SSH でログインしたときにも表示されます（2-3）。そのため、事前に渡すのは SSH コマンドと貸与 VM の情報だけでも構いません。URL も渡しておくと、表示がうまくいかないときの予備になります
 - 参加者手順書 `docs/participant_guide.md` もあわせて配布します。貸与 VM へのログイン方法は会社の方式に合わせて、手順書の「0. 貸与 VM にログインする」に追記してください
 - `handson` の SSH パスワード（手順 1-2 で設定したもの）の渡し方は別途決めてください。全員が同じパスワードを使います
 - トークンは、`/home/handson/handson-work` を消さない限り再起動しても変わりません。前日に配布して問題ありません
+- **リハーサルや動作確認で使ったトークンは、本番の配布前に作り直してください**（チャットや画面共有に載っている可能性があるため）。作業ファイルは残ります
+  ```bash
+  bash infra/multiuser/handson.sh stop
+  rm -f ~/handson-work/p*/.token
+  bash infra/multiuser/handson.sh start
+  bash infra/multiuser/handson.sh urls     # 新しい URL を配り直す
+  ```
 
 ### 2-5. 参加者から見えるもの・見えないもの
 
@@ -260,8 +283,11 @@ bash infra/multiuser/handson.sh start
 
 | 症状 | 確認・対処 |
 |---|---|
-| 参加者のブラウザで何も開かない | ① [handson] `status` でその番号が `active` か確認 → ② 参加者の SSH トンネルが張られているか（`ssh -N -L ...` のウィンドウが開いたままか）→ ③ URL の番号とトークンが本人のものか |
+| 参加者のブラウザで何も開かない | ① [handson] `status` でその番号が `active` か確認 → ② 参加者の SSH トンネルが張られているか（`ssh -L ...` のウィンドウが開いたままか）→ ③ URL の番号とトークンが本人のものか |
 | 参加者の SSH が `Connection closed by 10.1.3.220 port 22` や `kex_exchange_identification` で切れる | **貸与 VM ではなく、会社の PC から実行している**可能性が高いです（会社の PC からは途中で遮断されます）。VM の中で実行するよう案内してください。VM から実行しても出る場合は、`/var/log/auth.log`（[user01] で読めます）にその時刻の記録があるか確認します。記録がなければ VM から DGX までのネットワークの問題なので、管理者に確認してください |
+| 参加者の SSH で `bind [127.0.0.1]:88NN: Permission denied` と出る（ログイン自体は成功している） | VM の中でその番号が使われています。多いのは **VS Code の Remote-SSH の自動ポート転送**です。VS Code は、DGX で開いたポートだけでなく、**ターミナルに表示された「localhost と番号」の文字も拾って**、VM の同じ番号に自動で転送します。VS Code の「ポート」タブで転送を止め、設定 `remote.autoForwardPorts` を `false` にしてもらいます |
+| 運営者の VM で、ポートの番号を変えても `bind ... Permission denied` が続く | 運営者が VS Code の Remote-SSH で DGX につなぎ、そのターミナルで Claude Code などを使っていると、表示された番号を VS Code が次々に転送します。上と同じく、自動転送を止めてください。VM 側の `localhost` の 22番が DGX につながることもあります（`handson@localhost` が VM で通ってしまう） |
+| 参加者のログイン後に URL が表示されない | ① SSH コマンドに `-N` が付いていないか（付いているとコマンドが動かない。トンネルは使える）→ ② 「登録されていません」と出るなら、その VM の IP が `welcome.sh` の `VM_IPS` にない（`/var/log/auth.log` で接続元を確認）→ ③ ログイン直後に切れるなら、`/opt/handson/app/infra/multiuser/welcome.sh` が配置されているか確認し、`deploy.sh` を実行 |
 | 参加者の SSH が `Permission denied` になる（パスワードは正しい） | `restrict_ssh.sh` に、その VM の IP が入っていない可能性があります。`/var/log/auth.log` で接続元の IP を確認し、[sudo] 許可する IP を全部並べて再実行します |
 | 参加者のトンネルで `channel ... open failed: administratively prohibited` と出る | トンネルの行き先が 8800〜8810 以外になっています。配布した SSH コマンドのとおりか確認してください |
 | 教材ページが開かない | [handson] `status` で `web` が `active` か確認し、止まっていれば `start` を実行します（起動済みの JupyterLab には影響しません）。参加者の SSH コマンドに `-L 8800:localhost:8800` が入っているかも確認してください |
