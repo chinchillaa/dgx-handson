@@ -237,6 +237,12 @@ Q1: タスク固有の知識が必要か？
 - 参加者ごとに Linux アカウントを作らないのは、10人分のアカウント・パスワード管理の手間に見合わないため。参加者どうしの分離は、JupyterLab のトークンと運用ルールで行う
 - 運営者の認証情報を守ることが目的なので、**`handson` で GitHub・HuggingFace・Claude Code にログインしない**
 - `handson` の SSH は `restrict_ssh.sh`（`/etc/ssh/sshd_config.d/50-handson.conf`）で制限する。接続元は貸与 VM と localhost だけ、トンネルの行き先は localhost:8800〜8810 だけ（DGX を踏み台にした社内へのトンネルを防ぐ）。運営者の SSH に影響しないことを `sshd -T` の比較で確認してから適用する
+- 貸与 VM から `handson` でログインすると、シェルの代わりに `welcome.sh` を実行する（`restrict_ssh.sh` が ForceCommand に設定。localhost は対象外）。接続元の IP から参加者番号を決め（1〜10号機 = p01〜p10。対応は `welcome.sh` の `VM_IPS`）、その人のトークン付き URL を表示して待機し、トンネルを保つ。そのため参加者の SSH コマンドには `-N` を付けない
+  - 目的: URL の受け渡しミスを減らす（`-N` ではログイン後に何も表示されず、成功したか分かりにくかった）。参加者は DGX のシェルを使えなくなる
+  - 全員が同じアカウントなので、参加者の区別は接続元の IP でしかできない（貸与 VM は1人1台・IP 固定のため成り立つ）
+  - 認証前に出る `Banner` を IP ごとに変える方法は採らなかった。パスワードなしでトークンが見えてしまうため
+  - `SSH_CLIENT` は `handson` の `~/.bashrc` で書き換えられるが、参加者は JupyterLab のターミナルから他人の `.token` をもともと読める（同じアカウントのため）ので、新たな穴にはならない
+  - `welcome.sh` は `/opt/handson/app` に置く（`handson` は書き換えられない）。表示が終わっても `sleep` でトンネルを保つ
 - 運営者が普段使う VM は参加者に渡さない（運営者のアカウントに入るための情報が残っている可能性があるため）
 - 運営者 `user01` はグループ `handson` に入れる。Linux は「所有グループに属さないユーザーが権限を変えると setgid を外す」ため、属していないと `deploy.sh` の配置で所有グループが崩れ、`handson` から読めなくなる（実際に起きた）
 - 参加者用アカウントを作れない環境では、運営者のアカウントで直接動かすことになり、参加者は運営者のホーム以下をすべて読める。その場合の注意は `docs/operator_guide.md` 付録 B
@@ -363,6 +369,7 @@ handson/
         ├── setup_account.sh   # 参加者用アカウントと /opt/handson の作成（sudo で1回だけ）
         ├── deploy.sh          # 教材・.venv・モデルを /opt/handson に配置
         ├── restrict_ssh.sh    # handson の SSH の接続元・トンネル先を制限（sudo）
+        ├── welcome.sh         # 貸与 VM からのログイン時に参加者の URL を表示（ForceCommand）
         ├── handson.sh         # 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
         ├── ipython_startup.py # カーネル起動時の GPU メモリ上限と gpu_slot()
         └── gpu_queue.sh       # スクリプトで学習するときの同時実行制御
