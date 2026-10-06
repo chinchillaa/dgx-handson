@@ -678,10 +678,10 @@
         <span>貸与 VM のターミナル</span>
       </div>
       <pre class="hljs-wrap"><code class="language-bash"># 1. SSH トンネルを張る（88NN は自分の番号。p01 なら 8801。8800 は教材ページで全員共通）
-#    パスワード入力後に何も表示されなくなれば成功。このウィンドウは閉じない
-ssh -N -L 88NN:localhost:88NN -L 8800:localhost:8800 handson@&lt;DGX のアドレス&gt;
+#    パスワード入力後に、自分の JupyterLab の URL が表示されれば成功。このウィンドウは閉じない
+ssh -L 88NN:localhost:88NN -L 8800:localhost:8800 handson@&lt;DGX のアドレス&gt;
 
-# 2. VM の中のブラウザで、配布された URL を開く
+# 2. VM の中のブラウザで、表示された URL を開く
 #    JupyterLab : http://localhost:88NN/lab?token=...
 #    教材ページ : http://localhost:8800/（このページもここで開きます）</code></pre>
     </section>

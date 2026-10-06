@@ -14,6 +14,10 @@
 #   2. 接続元を指定したとき: handson でログインできるのは、指定した IP と localhost
 #      （運営者が ssh handson@localhost で操作するため）だけにする
 #      それ以外からは認証方法をすべて無効にし、万一ログインできても何もできないようにする
+#   3. localhost 以外から handson でログインしたら、シェルの代わりに welcome.sh を動かす
+#      （ForceCommand）。接続元の貸与 VM から参加者番号を決めて、その人の URL を表示し、
+#      トンネルを保ったまま待つ。参加者は DGX のシェルを使えなくなる
+#      → 先に deploy.sh で /opt/handson/app に welcome.sh を配置しておくこと
 #
 # 影響するのは handson だけ。運営者（user01 など）の SSH は変わらない。
 # 設定は sshd -t で検査し、さらに運営者の実効設定（sshd -T）が適用前と同じかを比べる。
@@ -25,6 +29,7 @@ set -euo pipefail
 HANDSON_USER="${HANDSON_USER:-handson}"
 BASE_PORT="${HANDSON_BASE_PORT:-8800}"
 CONF="/etc/ssh/sshd_config.d/50-handson.conf"
+WELCOME="${HANDSON_OPT:-/opt/handson}/app/infra/multiuser/welcome.sh"
 
 GREEN='\033[0;32m'; AMBER='\033[0;33m'; RED='\033[0;31m'; RESET='\033[0m'
 info() { echo -e "${GREEN}[INFO]${RESET}  $*"; }
@@ -45,6 +50,11 @@ if [ "${1:-}" = "--remove" ]; then
   reload_sshd
   info "制限を外しました（${CONF} を削除）"
   exit 0
+fi
+
+if [ ! -f "${WELCOME}" ]; then
+  error "${WELCOME} がありません。先に運営者のアカウントで bash infra/multiuser/deploy.sh を実行してください"
+  exit 1
 fi
 
 for ip in "$@"; do
@@ -73,18 +83,11 @@ fi
   echo "# 参加者用アカウント ${HANDSON_USER} の SSH 制限。infra/multiuser/restrict_ssh.sh が生成（手で編集しない）"
   echo "# 生成: $(date '+%F %T') / 実行者: ${SUDO_USER:-root}"
   echo ""
-  echo "Match User ${HANDSON_USER}"
-  echo "    AllowTcpForwarding local"
-  echo "    PermitOpen${PERMIT_OPEN}"
-  echo "    X11Forwarding no"
-  echo "    AllowAgentForwarding no"
-  echo "    AllowStreamLocalForwarding no"
-  echo "    PermitTunnel no"
-  echo "    GatewayPorts no"
+  # sshd は同じ項目なら「最初に現れた値」が勝つ。許可外の接続元の制限を先に書き、
+  # 後ろの handson 全体の設定（AllowTcpForwarding local など）に上書きされないようにする
   if [ $# -gt 0 ]; then
     NOT_ALLOWED="*,!127.0.0.1,!::1"
     for ip in "$@"; do NOT_ALLOWED+=",!${ip}"; done
-    echo ""
     echo "# 許可した接続元（$*）と localhost 以外からは、認証方法をすべて無効にする。"
     echo "# 万一ログインできても、シェルもトンネルも使えないようにする"
     echo "Match User ${HANDSON_USER} Address ${NOT_ALLOWED}"
@@ -94,7 +97,22 @@ fi
     echo "    AllowTcpForwarding no"
     echo "    PermitOpen none"
     echo "    ForceCommand /bin/false"
+    echo ""
   fi
+  # 貸与 VM からのログインでは、シェルの代わりに参加者の URL を表示して待つ。
+  # welcome.sh が何かで終わっても、sleep でトンネルを保つ（-N なしの接続はコマンドが終わると切れる）
+  echo "# localhost 以外からのログインでは、シェルを開かずに参加者の URL を表示する"
+  echo "Match User ${HANDSON_USER} Address *,!127.0.0.1,!::1"
+  echo "    ForceCommand /bin/bash ${WELCOME}; exec /bin/sleep infinity"
+  echo ""
+  echo "Match User ${HANDSON_USER}"
+  echo "    AllowTcpForwarding local"
+  echo "    PermitOpen${PERMIT_OPEN}"
+  echo "    X11Forwarding no"
+  echo "    AllowAgentForwarding no"
+  echo "    AllowStreamLocalForwarding no"
+  echo "    PermitTunnel no"
+  echo "    GatewayPorts no"
 } > "${CONF}"
 chmod 644 "${CONF}"
 
@@ -117,10 +135,11 @@ if [ $# -gt 0 ]; then
 else
   warn "2. 接続元は制限していません（貸与 VM の IP が分かったら、引数に付けて再実行してください）"
 fi
+info "3. localhost 以外からのログイン: シェルの代わりに ${WELCOME} を実行"
 echo ""
 info "実効設定（sshd -T）:"
 echo "  ${HANDSON_USER} @ localhost  : $(effective "${HANDSON_USER}" 127.0.0.1 | grep -E '^(allowtcpforwarding|passwordauthentication) ' | tr '\n' ' ')"
-[ $# -gt 0 ] && echo "  ${HANDSON_USER} @ $1 : $(effective "${HANDSON_USER}" "$1" | grep -E '^(allowtcpforwarding|passwordauthentication) ' | tr '\n' ' ')"
+[ $# -gt 0 ] && echo "  ${HANDSON_USER} @ $1 : $(effective "${HANDSON_USER}" "$1" | grep -E '^(allowtcpforwarding|passwordauthentication|forcecommand) ' | tr '\n' ' ')"
 echo "  ${HANDSON_USER} @ 192.0.2.1（許可外の例）: $(effective "${HANDSON_USER}" 192.0.2.1 | grep -E '^(allowtcpforwarding|passwordauthentication|forcecommand) ' | tr '\n' ' ')"
 echo "  ${OPERATOR} @ 10.1.3.219  : $(effective "${OPERATOR}" 10.1.3.219 | grep -E '^(allowtcpforwarding|passwordauthentication|x11forwarding) ' | tr '\n' ' ')"
 info "設定: ${CONF}（外すとき: sudo bash $0 --remove）"
