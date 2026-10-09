@@ -199,17 +199,17 @@
         LLM の知識そのものは、<br><span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">誰も教えていません</span>。
       </h2>
       <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
-        膨大なテキストから「次に来る単語」を当てる練習を、ただひたすら繰り返す。
-        それだけで、翻訳も、要約も、コーディングも、事実の記憶も身についてしまいました。
-        <strong>人間がラベルを 1 つも付けていないのに</strong>、です。<br><br>
-        ハンズオン②の MNIST では「この画像は 7 です」という正解を人が用意する必要がありました。
-        しかし事前学習では、<strong>テキストそのものが正解になります</strong>。
-        次の単語を隠せば、隠した単語がそのまま答えです。
-        だからインターネット上のあらゆる文章がそのまま教材になり、
-        学習データを人手のコストから解放できました。
-        <em>LLM が桁違いに強くなれた理由は、賢いアルゴリズムより先に、まずここにあります。</em><br><br>
-        このページで扱うのは、その「ラベルのいらない学習」の仕組みと、
-        どれだけ大きくすればどれだけ賢くなるのか、という法則です。
+        膨大なテキストから「次に来る単語」を当てる練習を、ただひたすら繰り返します。
+        それだけで LLM は、翻訳も、要約も、コーディングも、事実の記憶も身につけました。
+        しかも人間はラベルを 1 つも付けていません。<br><br>
+        ハンズオン②の MNIST では、「この画像は 7 です」という正解を人が用意する必要がありました。
+        一方、事前学習では<strong>テキストそのものが正解になります</strong>。
+        次の単語を隠せば、隠した単語がそのまま答えになるからです。
+        そのためインターネット上のあらゆる文章がそのまま教材になり、
+        学習データを人手で用意するコストがなくなりました。
+        <em>LLM が桁違いに強くなれた理由は、アルゴリズムの工夫よりも先に、まずこの点にあります。</em><br><br>
+        このページでは、この「ラベルのいらない学習」の仕組みと、
+        モデルをどれだけ大きくすればどれだけ賢くなるのかという法則を扱います。
       </p>
     </div>
 
@@ -217,10 +217,10 @@
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
-        <li>事前学習が「ラベルなしで自己教師あり学習する」仕組みを掴む</li>
-        <li>次トークン予測がどのように教師信号を自動生成するかを掴む</li>
-        <li>スケーリング則——パラメータ・データ・計算量の三角関係を掴む</li>
-        <li>事前学習済みモデルをどう活用するかの選択肢を掴む</li>
+        <li>事前学習が「ラベルなしで自己教師あり学習する」仕組みを掴みます</li>
+        <li>次トークン予測が教師信号をどのように自動生成するかを掴みます</li>
+        <li>スケーリング則が示す、パラメータ・データ・計算量の 3 者の関係を掴みます</li>
+        <li>事前学習済みモデルを活用する方法の選択肢を掴みます</li>
       </ol>
     </div>
 
@@ -235,8 +235,8 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        ニューラルネットワークの学習には「正解ラベル」が必要です——線形回帰では正解値 $y$ が、
-        MNIST 分類では手書き数字の正解クラスが必要でした。
+        ニューラルネットワーク（NN）の学習には「正解ラベル」が必要です。
+        線形回帰では正解値 $y$ が、MNIST 分類では手書き数字の正解クラスが必要でした。
         しかし LLM の事前学習は<strong style="color:var(--text);">ラベルを一切用意せず</strong>、
         テキストそのものから教師信号を自動生成します。
       </p>
@@ -246,26 +246,26 @@
         <div class="card">
           <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.6rem;">教師あり学習（これまで）</p>
           <div style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-            <p style="margin-bottom:0.5rem;">入力 $x$ と正解ラベル $y$ のペアが必要。</p>
+            <p style="margin-bottom:0.5rem;">入力 $x$ と正解ラベル $y$ のペアが必要です。</p>
             <div style="background:var(--surface2); border-radius:6px; padding:0.6rem 0.75rem; font-size:0.78rem; font-family:monospace; color:var(--text-sub);">
               画像 → ラベル「猫」「犬」<br>
               文章 → 感情「ポジティブ」
             </div>
             <p style="margin-top:0.5rem; font-size:0.78rem; color:var(--text-muted);">
-              ラベル付けには人手が必要——大規模化にコストがかかる
+              ラベル付けには人手が必要なので、大規模化にはコストがかかります
             </p>
           </div>
         </div>
         <div class="card" style="border-color:var(--green-border);">
           <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.6rem;">自己教師あり学習（事前学習）</p>
           <div style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-            <p style="margin-bottom:0.5rem;">テキスト自体から教師信号を自動生成。</p>
+            <p style="margin-bottom:0.5rem;">テキスト自体から教師信号を自動生成します。</p>
             <div style="background:var(--green-bg); border-radius:6px; padding:0.6rem 0.75rem; font-size:0.78rem; font-family:monospace; color:var(--green);">
               「猫が____」 → 正解「好き」<br>
               「今日の____は晴れ」 → 正解「天気」
             </div>
             <p style="margin-top:0.5rem; font-size:0.78rem; color:var(--green-mid);">
-              インターネット上のテキストすべてが学習データになる
+              インターネット上のテキストすべてが学習データになります
             </p>
           </div>
         </div>
@@ -274,9 +274,9 @@
       <div class="note-amber">
         <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">重要な視点</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          事前学習は「テキストの統計的なパターンを学ぶ」作業ですが、
-          大量・多様なテキストを学ぶ過程で<strong>推論・翻訳・コーディング</strong>といった能力が創発的に現れます。
-          これが LLM の能力の源泉です。
+          事前学習でモデルが学ぶのは、テキストの統計的なパターンです。
+          それでも大量で多様なテキストを学ぶうちに、推論・翻訳・コーディングといった能力が創発的に現れます。
+          この創発が LLM の能力の源泉です。
         </p>
       </div>
     </section>
@@ -292,9 +292,9 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        GPT 系モデル（Decoder-only Transformer）の事前学習タスクは極めてシンプルです——
-        <strong style="color:var(--text);">それまでのトークン列を与え、次に来るトークンを予測する</strong>。
-        1つの文章から複数の「問題」が自動的に生成されます。
+        GPT 系モデル（Decoder-only Transformer）の事前学習タスクは、とてもシンプルです。
+        <strong style="color:var(--text);">それまでのトークン列を与え、次に来るトークンを予測します</strong>。
+        このタスクでは、1つの文章から複数の「問題」を自動的に作れます。
       </p>
 
       <!-- 1文→複数サンプル -->
@@ -343,12 +343,12 @@
             </tbody>
           </table>
           <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
-            8トークンの文から7個の学習サンプルが自動生成される。
-            <strong style="color:var(--text-sub);">ハンズオン③の付録 E-1</strong> では、実際に
-            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">logits</code> の形が
-            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">(1, トークン数, 語彙数)</code> になっていること——
-            つまりモデルが<em>全位置ぶんの「次は何か」を同時に出している</em>ことを目で確認します。
-            1兆トークンのデータセットなら、約1兆個の学習サンプルが得られる。
+            8トークンの文から、7個の学習サンプルが自動生成されます。
+            ハンズオン③の付録 E-1 では、
+            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">logits</code> の形が実際に
+            <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">(1, トークン数, 語彙数)</code> になっていることを確認します。
+            この形から、モデルが<em>全位置ぶんの「次は何か」を同時に出している</em>ことを目で確かめられます。
+            1兆トークンのデータセットなら、約1兆個の学習サンプルが得られます。
           </p>
         </div>
       </div>
@@ -374,29 +374,29 @@
           </tr>
           <tr>
             <td>$-\log P$</td>
-            <td>交差エントロピー損失——正解トークンの確率を最大化する方向にパラメータを更新</td>
+            <td>交差エントロピー損失。正解トークンの確率を最大化する方向にパラメータを更新します</td>
           </tr>
         </table>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
           MNIST の分類で使った CrossEntropyLoss と本質的に同じです。
-          クラス数が「10クラス」ではなく「語彙サイズ（数万〜数十万）」になっただけです。
+          違いは、クラス数が「10クラス」から「語彙サイズ（数万〜数十万）」に増えた点だけです。
         </p>
       </div>
 
       <!-- Causal Masking -->
       <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Causal Masking（因果マスキング）</p>
+        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">因果マスク（Causal Mask）</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          Decoder-only モデルでは Self-Attention の計算時に<strong>「未来のトークンを参照しない」</strong>よう
-          上三角行列でマスクします。これにより 1 回の順伝播で全ポジションの損失を同時に計算でき、
-          学習効率が大幅に向上します。
+          Decoder-only モデルは Self-Attention の計算で、「未来のトークンを参照しない」よう
+          上三角行列でマスクします。この因果マスクにより、1 回の順伝播で全ポジションの損失を同時に計算でき、
+          学習効率が上がります。
         </p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.5rem;">
-          もしマスクを外すと、モデルは「次のトークン」をそのまま覗き見できてしまい、
-          <em>答えを見ながら答えを当てる練習</em>になって学習が成立しません。
+          マスクを外した場合、モデルは「次のトークン」をそのまま覗き見できます。
+          その結果、<em>答えを見ながら答えを当てる練習</em>になり、学習が成立しません。
           仕組みと実装は
           <a href="supplement_transformer.html" style="color:var(--green); text-decoration:underline; text-underline-offset:2px;">補足資料：Transformer</a> の
-          Section 2、および <strong>ハンズオン③ Part 3</strong> を参照してください。
+          Section 2、および ハンズオン③ Part 3 を参照してください。
         </p>
       </div>
     </section>
@@ -412,7 +412,7 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        事前学習の能力は<strong style="color:var(--text);">データの量・質・多様性</strong>に大きく依存します。
+        事前学習の能力はデータの量・質・多様性に大きく依存します。
         現代の LLM は数千億〜数兆トークンのテキストで学習されています。
       </p>
 
@@ -430,35 +430,35 @@
           <tbody>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">Common Crawl</td>
-              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">ウェブ全体のクロールデータ。量は最大だがノイズも多い</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">ウェブ全体のクロールデータです。量は最大ですが、ノイズも多く含みます</td>
               <td style="padding:0.4rem 0.75rem; text-align:right;">
                 <span style="background:var(--amber-bg); color:var(--amber); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">中</span>
               </td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">書籍・論文</td>
-              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">長い文脈・論理構造が豊富。推論能力の育成に寄与</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">長い文脈と論理構造が豊富で、推論能力の育成に寄与します</td>
               <td style="padding:0.4rem 0.75rem; text-align:right;">
                 <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
               </td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">コード（GitHub 等）</td>
-              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">構造化された論理表現。コーディング・推論能力に寄与</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">構造化された論理表現です。コーディングと推論の能力に寄与します</td>
               <td style="padding:0.4rem 0.75rem; text-align:right;">
                 <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
               </td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">Wikipedia</td>
-              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">百科事典的な知識。ファクト精度に寄与</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">百科事典的な知識です。事実の正確さに寄与します</td>
               <td style="padding:0.4rem 0.75rem; text-align:right;">
                 <span style="background:var(--green-bg); color:var(--green-mid); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">高</span>
               </td>
             </tr>
             <tr>
               <td style="padding:0.4rem 0.75rem; color:var(--text); font-weight:600;">会話データ</td>
-              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">対話形式。指示への応答能力に寄与</td>
+              <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">対話形式のデータです。指示への応答能力に寄与します</td>
               <td style="padding:0.4rem 0.75rem; text-align:right;">
                 <span style="background:var(--amber-bg); color:var(--amber); font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">中</span>
               </td>
@@ -496,9 +496,9 @@
       <div class="note-amber">
         <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">データ品質は量より重要</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          Meta の研究（LLaMA 3）では、低品質データを除外することで<strong>同じ計算コストで大幅な性能向上</strong>が
-          得られることが報告されています。10兆トークンの粗いデータより、
-          1兆トークンの高品質データの方が優れたモデルを生む場合があります。
+          Llama 3 の論文でも、データのフィルタリングと品質管理を重視したと述べられています。
+          同じ計算量なら、品質の高いデータで学習したほうが性能が上がる傾向が、複数の研究で報告されています（例: Microsoft の phi シリーズ、Hugging Face の FineWeb-Edu）。
+          量をただ増やすより、質の悪いデータを除くことが効く場合があります。
         </p>
       </div>
     </section>
@@ -514,8 +514,8 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        2020年にOpenAIが発見した「スケーリング則」は、LLM 開発の指針となっています——
-        <strong style="color:var(--text);">パラメータ数・学習トークン数・計算量を増やすと、損失が予測可能に低下する</strong>。
+        2020年に OpenAI が発見した「スケーリング則」は、LLM 開発の指針になっています。
+        この法則は、<strong style="color:var(--text);">パラメータ数・学習トークン数・計算量を増やすと、損失が予測できる形で下がる</strong>ことを示します。
       </p>
 
       <!-- Kaplan vs Chinchilla -->
@@ -543,8 +543,8 @@
           </tr>
         </table>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
-          $N$ と $D$ をそれぞれ独立に増やすと損失が下がりますが、
-          一方だけ増やしても効率が悪くなります。
+          $N$ と $D$ のどちらを増やしても損失は下がります。
+          ただし、一方だけを増やすと効率が悪くなります。
         </p>
       </div>
 
@@ -552,8 +552,8 @@
       <div class="card" style="margin-bottom:1.25rem;">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Chinchilla 法則（2022年、DeepMind）</p>
         <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.85; margin-bottom:1rem;">
-          固定した計算予算（FLOPs）のもとで損失を最小化するには、
-          パラメータ数 $N$ とトークン数 $D$ の<strong style="color:var(--text);">比率を約 1:20 に保つ</strong>のが最適と判明しました。
+          計算予算（FLOPs）を固定した場合、損失を最小化するには
+          パラメータ数 $N$ とトークン数 $D$ の<strong style="color:var(--text);">比率を約 1:20 に保つ</strong>のが最適だと判明しました。
         </p>
         <!-- 比率図 -->
         <svg viewBox="0 0 440 120" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
@@ -572,11 +572,11 @@
           <text x="330" y="48" font-size="10" fill="var(--green)" text-anchor="middle" font-weight="700">Chinchilla（最適設計）</text>
           <text x="330" y="66" font-size="9" fill="var(--green)" text-anchor="middle">700億パラメータ</text>
           <text x="330" y="82" font-size="9" fill="var(--green)" text-anchor="middle">1.4兆トークン（約 20倍）</text>
-          <text x="330" y="97" font-size="8" fill="var(--green-mid)" text-anchor="middle">← 同計算コストで GPT-3 を超越</text>
+          <text x="330" y="97" font-size="8" fill="var(--green-mid)" text-anchor="middle">← 同じ計算量で Gopher（2800億）を上回る</text>
         </svg>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
-          Chinchilla の発見以降、LLaMA・Mistral などの効率的なモデルが続々登場しました。
-          現在の主流は「小さいパラメータ＋大量データ」で、推論コストを下げながら高性能を実現しています。
+          Chinchilla の発見以降、LLaMA や Mistral などの効率的なモデルが次々に登場しました。
+          現在の主流は「小さいパラメータ＋大量データ」の設計で、推論コストを下げながら高い性能を実現しています。
         </p>
       </div>
 
@@ -589,47 +589,48 @@
               <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">モデル</th>
               <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">パラメータ数</th>
               <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">学習トークン数</th>
-              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">GPU（A100換算）</th>
+              <th style="text-align:right; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">学習の計算量（H100 GPU 時間）</th>
             </tr>
           </thead>
           <tbody>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">HO-2（MNIST）</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">20 万</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">300 万</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">1（数分）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">—（画像 6 万枚 × 5 エポック）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">1 未満（GPU 1 基で約 30 秒）</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border); background:var(--green-bg);">
               <td style="padding:0.4rem 0.75rem; color:var(--green); font-weight:600;">HO-3（Llama-3.2-1B）</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">12 億</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">9 兆</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">〜 1,000（数日）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--green);">約 37 万</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">LLaMA 3 8B</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">80 億</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">15 兆</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 1,000（数週）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">約 130 万</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">LLaMA 3 70B</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">700 億</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">15 兆</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 6,000（数ヶ月）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">約 640 万</td>
             </tr>
             <tr>
               <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">GPT-4（推定）</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 1 兆</td>
               <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">未公表</td>
-              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">〜 25,000（数ヶ月）</td>
+              <td style="padding:0.4rem 0.75rem; text-align:right; font-family:monospace; color:var(--text-sub);">未公表</td>
             </tr>
           </tbody>
         </table>
         <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
-          ※ GPU 数・学習期間はすべて公開情報からの概算です。
-          ハンズオン③で動かす Llama-3.2-1B も、<strong style="color:var(--text-sub);">推論は手元の GPU で数秒</strong>ですが、
-          その事前学習には数千 GPU 日規模の計算が投じられています。
-          私たちが第2章以降で行うのは、この成果物を<em>出発点として活用する</em>ことです。
+          ※ Llama の値は Meta のモデルカードによります（H100 GPU 時間、トークン数は Llama 3.2 が最大 9 兆、Llama 3 が 15 兆超）。GPT-4 のパラメータ数は非公式の推定です。
+          MNIST は画像分類なので、トークン数の代わりに学習した画像の延べ枚数を示しています。
+          ハンズオン③で動かす Llama-3.2-1B も、推論なら手元の GPU で数秒で終わります。
+          しかし、その事前学習には約 37 万 H100 GPU 時間（約 1.5 万 GPU 日）の計算が投じられています。
+          第2章以降で私たちが行うのは、この事前学習済みモデルを<em>出発点として活用する</em>ことです。
         </p>
       </div>
     </section>
@@ -645,9 +646,9 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        事前学習は莫大な計算資源を要します。
+        事前学習には莫大な計算資源が必要なので、
         ほとんどの実務では<strong style="color:var(--text);">事前学習済みモデルを出発点として活用</strong>します。
-        目的・予算・性能要件によって3つのアプローチが使い分けられます。
+        活用のアプローチは3つあり、目的・予算・性能要件に応じて使い分けます。
       </p>
 
       <!-- 3つのアプローチ -->
@@ -661,9 +662,9 @@
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
           </div>
           <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
-            <strong style="color:var(--text);">モデルには一切手を加えず、入力の書き方だけで出力の質を上げるアプローチ。</strong>
-            <br>最も手軽で、追加コストもゼロ。まずはここから試すのが原則です。
-            代表例としては下記の2つ。
+            モデルには一切手を加えず、入力の書き方だけで出力の質を上げるアプローチです。
+            <br>最も手軽で、追加コストもゼロなので、まずはここから試すのが原則です。
+            代表例は、次の表の2つです。
           </p>
           <table style="width:100%; font-size:0.8rem; border-collapse:collapse; margin-bottom:0.6rem;">
             <thead>
@@ -675,18 +676,18 @@
             <tbody>
               <tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:0.45rem 0.5rem; color:var(--text);">ゼロショット</td>
-                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">例を示さず、指示だけを書く。「このメールを要約してください」のように自然言語で指定するだけ</td>
+                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">例を示さず、指示だけを書きます。「このメールを要約してください」のように、自然言語で指定するだけです</td>
               </tr>
               <tr>
                 <td style="padding:0.45rem 0.5rem; color:var(--text);">Few-shot</td>
-                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">入出力の例を数件（2〜10 件）示してタスクを定義する。モデルは例からパターンを読み取る</td>
+                <td style="padding:0.45rem 0.5rem; color:var(--text-sub);">入出力の例を数件（2〜10 件）示して、タスクを定義します。モデルは例からパターンを読み取ります</td>
               </tr>
             </tbody>
           </table>
           <p style="font-size:0.75rem; color:var(--text-muted);">
             適用場面: 汎用タスク・プロトタイピング・出力形式を揃えたいとき。<br>
-            注意点: 例を増やすほどコンテキスト長とトークン課金を消費します。
-            例を何十件も並べたくなったら、ファインチューニングを検討する合図です。
+            注意点: 例を増やすほど、コンテキスト長とトークン課金を消費します。
+            例を何十件も並べたくなったら、ファインチューニングを検討するタイミングです。
           </p>
         </div>
 
@@ -698,10 +699,10 @@
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習あり</span>
           </div>
           <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
-            タスク固有データでパラメータを更新し、特定ドメインへの適応・指示への応答能力を強化する。
-            LoRA（Low-Rank Adaptation）を使えば、更新するパラメータを全体の 1% 以下に絞れる。
+            タスク固有のデータでパラメータを更新し、特定ドメインへの適応力や指示への応答能力を強化します。
+            LoRA（Low-Rank Adaptation）を使えば、更新するパラメータを全体の 1% 以下に絞れます。
           </p>
-          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 社内文書・専門用語・特定スタイルへの適応。第2章のメインテーマ。</p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 社内文書・専門用語・特定スタイルへの適応。第2章のメインテーマです。</p>
         </div>
 
         <!-- RAG -->
@@ -712,10 +713,10 @@
             <span style="font-size:0.7rem; color:var(--text-muted);">追加学習なし</span>
           </div>
           <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
-            質問に関連する文書をベクトル検索で取得し、コンテキストとしてプロンプトに挿入する。
-            モデルのパラメータを変えずに「最新情報」「社内知識」を参照させられる。
+            質問に関連する文書をベクトル検索で取得し、コンテキストとしてプロンプトに挿入します。
+            モデルのパラメータを変えずに、「最新情報」や「社内知識」を参照させられます。
           </p>
-          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 知識ベースの頻繁な更新・ハルシネーション抑制。第2章のメインテーマ。</p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">適用場面: 知識ベースを頻繁に更新するとき・ハルシネーションを抑えたいとき。第2章のメインテーマです。</p>
         </div>
 
       </div>
@@ -761,10 +762,10 @@
     <div class="summary-block">
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
       <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span>事前学習は<strong>次トークン予測</strong>という自己教師あり学習——ラベルなしで巨大テキストから学ぶ</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span>損失関数は MNIST と同じ CrossEntropy、ただしクラス数が語彙サイズ（数万〜数十万）</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>Chinchilla 法則</strong>：パラメータ数とトークン数の比率 1:20 が最適な計算効率を実現</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>実務ではまず<strong>プロンプトエンジニアリング</strong>を試し、足りなければ <strong>RAG・ファインチューニング</strong> を検討する——安い手段から順に（第2章）</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span>事前学習は次トークン予測による自己教師あり学習です。ラベルなしで巨大なテキストから学びます</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span>損失関数は MNIST と同じ CrossEntropy です。ただし、クラス数は語彙サイズ（数万〜数十万）になります</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>Chinchilla 法則によると、パラメータ数とトークン数の比率を 1:20 にすると計算効率が最適になります</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span>実務では安い手段から順に試します。まずプロンプトエンジニアリングを試し、足りなければ RAG・ファインチューニング を検討します（第2章）</span></li>
       </ul>
     </div>
 

@@ -298,14 +298,14 @@
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">この章の核心</p>
       <h2 style="font-size:1.5rem; font-weight:800; color:#FFFFFF; line-height:1.4; margin-bottom:1rem;">
         AI とは、<br>
-        「複雑な入出力を扱えるようにした<span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">関数</span>」である。
+        「複雑な入出力を扱えるようにした<span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">関数</span>」です。
       </h2>
       <p style="font-size:0.9rem; color:#C8E6DA; line-height:1.85;">
-        線形回帰も、ニューラルネットワークも、最新の大規模言語モデルも、
+        線形回帰も、ニューラルネットワーク（NN）も、最新の大規模言語モデル（LLM）も、
         突き詰めれば <strong>「入力を受け取って出力を返す関数」</strong> に過ぎません。<br>
         違いは<em>表現できる複雑さ</em>だけです。<br>
-        この章では、単純な関数から出発して、どうやって LLM のような
-        「非常に複雑なことができる関数」が作られるのかを段階的に追っていきます。
+        この章では単純な関数から出発し、LLM のような
+        「非常に複雑なことができる関数」がどう作られるのかを段階的に追っていきます。
       </p>
 
     </section>
@@ -314,28 +314,28 @@
     <section>
       <div class="section-heading"><h2>章の概要と到達目標</h2></div>
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        本章では <strong style="color:var(--text);">「動かしながら理解する」</strong> 順序を徹底します。
+        本章では 「動かしながら理解する」 順序を徹底します。
         コードを先に動かし、その後で「なぜそう動くのか」を説明します。
-        理論の数式導出は行いません。「式が何を意味するか」に集中してください。
+        理論の数式は導出しないので、「式が何を意味するか」に集中してください。
       </p>
       <div class="card">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.875rem;">到達目標</p>
         <ol style="display:flex; flex-direction:column; gap:0.75rem; padding-left:0; list-style:none;">
           <li style="display:flex; align-items:flex-start; gap:0.75rem;">
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">1</span>
-            <span style="font-size:0.875rem; color:var(--text-sub);">LLM が「何をしているか」を <strong style="color:var(--text);">自分の言葉で</strong> 説明できる</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">LLM が「何をしているか」を 自分の言葉で 説明できます</span>
           </li>
           <li style="display:flex; align-items:flex-start; gap:0.75rem;">
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">2</span>
-            <span style="font-size:0.875rem; color:var(--text-sub);">推論パラメータ（temperature・top_p 等）を <strong style="color:var(--text);">意図的に</strong> 調整できる</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">推論パラメータ（<code>temperature</code>・<code>top_p</code> 等）を 意図的に 調整できます</span>
           </li>
           <li style="display:flex; align-items:flex-start; gap:0.75rem;">
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">3</span>
-            <span style="font-size:0.875rem; color:var(--text-sub);">「線形回帰 → NN → Transformer → LLM」という <strong style="color:var(--text);">拡張の流れ</strong> を説明できる</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">「線形回帰 → NN → Transformer → LLM」という 拡張の流れ を説明できます</span>
           </li>
           <li style="display:flex; align-items:flex-start; gap:0.75rem;">
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">4</span>
-            <span style="font-size:0.875rem; color:var(--text-sub);">Self-Attention を <strong style="color:var(--text);">自分で実装できる</strong>（Q・K・V の役割／なぜ射影行列が要るのか／因果マスク）</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">Self-Attention を 自分で実装できます（Q・K・V の役割／射影行列が必要な理由／因果マスク（Causal Mask））</span>
           </li>
         </ol>
       </div>
@@ -359,7 +359,7 @@
           <!-- 導入：「関数とは何か」段階的拡張 -->
           <div style="display:flex; flex-direction:column; gap:1.125rem; margin-bottom:1rem;">
             <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8;">
-              AI の話をする前に、まず <strong style="color:var(--text);">「関数」という言葉の解釈を少しずつ広げていきましょう。</strong><br>
+              AI の話をする前に、まず 「関数」という言葉の解釈を少しずつ広げていきましょう。<br>
               最終的に「LLM も関数である」という視点に自然にたどり着くことが目標です。
             </p>
 
@@ -371,26 +371,26 @@
               <div class="math-inline-box">$$ y = ax + b $$</div>
               <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.75;">
                 $a$（傾き）と $b$（切片）が<strong style="color:var(--text-sub);">パラメータ</strong>です。
-                「学習」とは、後ほど見るように <strong style="color:var(--text-sub);">このパラメータを自動で調整する作業</strong> に他なりません。
+                後ほど見るように、「学習」とは このパラメータを自動で調整する作業 のことです。
               </p>
             </div>
 
             <div class="step-box">
               <p class="step-label">Step 2 ─ 入力を複数にする</p>
               <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-                入力が1つだと表現できることに限界があります。
-                例えば「部屋の広さ・駅からの距離・築年数」から家賃を予測したいなら入力は複数必要です。
+                入力が1つだけでは、表現できることに限界があります。
+                例えば「部屋の広さ・駅からの距離・築年数」から家賃を予測する場合は、入力が複数必要です。
               </p>
               <div class="math-inline-box">$$ y = w_1 x_1 + w_2 x_2 + w_3 x_3 + b $$</div>
               <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.75;">
-                入力ごとに重み $w_i$ が付きます。重みが大きいほどその入力が出力に強く影響します。これが <strong style="color:var(--text-sub);">線形回帰</strong> の本質です。
+                入力ごとに重み $w_i$ が付き、重みが大きいほどその入力が出力に強く影響します。この仕組みが <strong style="color:var(--text-sub);">線形回帰</strong> の本質です。
               </p>
             </div>
 
             <div class="step-box">
               <p class="step-label">Step 3 ─ 行列で「まとめて変換する関数」へ</p>
               <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-                入力が数百・数千になると式を1行で書ける <strong style="color:var(--text-sub);">行列表記</strong> が便利です。
+                入力が数百・数千になる場合は、式を1行で書ける 行列表記 が便利です。
                 入力ベクトル $\mathbf{x} \in \mathbb{R}^n$ を、重み行列 $\mathbf{W} \in \mathbb{R}^{m \times n}$ で別のベクトル空間へ変換します。
               </p>
               <div class="math-inline-box">$$ \mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b} $$</div>
@@ -399,7 +399,7 @@
                 画像・テキスト・音声はすべて数値のベクトルとして表現できます。
               </p>
               <div class="note-green-inline">
-                💡 ここまでは <strong>線形変換</strong> しか表現できません。
+                💡 ここまでの式で表現できるのは 線形変換 だけです。
                 現実の複雑な問題（画像認識・翻訳など）を解くには <strong>「非線形な変換」</strong> が必要になります。
               </div>
             </div>
@@ -407,26 +407,26 @@
             <div class="step-box" style="border-left-color:var(--green-mid);">
               <p class="step-label">Step 4 ─ 変換を「重ねる」と何が起きるか？</p>
               <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-                $\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$ を何層重ねても数学的には1回の線形変換と等価です。
-                そこで各層の出力に <strong style="color:var(--text-sub);">活性化関数</strong>（非線形の変換）を挟みます。
+                $\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$ は何層重ねても、数学的には1回の線形変換と等価です。
+                そこで、各層の出力に <strong style="color:var(--text-sub);">活性化関数</strong>（非線形の変換）を挟みます。
               </p>
               <div class="math-inline-box">
                 $$ \mathbf{h} = f\!\left(\mathbf{W}_1\mathbf{x} + \mathbf{b}_1\right), \quad \mathbf{y} = \mathbf{W}_2\mathbf{h} + \mathbf{b}_2 $$
               </div>
               <div class="terminal-inline">
                 <span class="comment"># 層を深くする = 関数を「複雑にする」</span><br>
-                線形回帰 (1層) → 2層NN → 多層NN → <strong style="color:#FFFFFF;">Transformer (LLM)</strong>
+                線形回帰 (1層) → 2層NN → 多層NN → Transformer (LLM)
               </div>
               <p style="font-size:0.83rem; color:var(--text-sub); font-weight:600; line-height:1.75;">
-                LLM は、この「変換を重ねる」発想を何百層・何百億パラメータの規模で実現したものです。
-                <strong style="color:var(--text);">複雑さのスケールが違うだけで、本質は同じ「関数」です。</strong>
+                LLM はこの「変換を重ねる」発想を数十〜百層程度・数十億〜数千億パラメータの規模で実現したものです（ハンズオンで使う Llama-3.2-1B は 16 層・約 12 億パラメータです）。
+                <strong style="color:var(--text);">違うのは複雑さの規模だけで、本質は同じ「関数」です。</strong>
               </p>
             </div>
           </div>
 
           <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.625rem; line-height:1.75;">
-            ここから、線形回帰を実際にコードで実装し、損失関数・勾配降下法で
-            <strong style="color:var(--text-sub);">「パラメータを自動調整する = 学習」</strong> という核心を体感します。
+            ここからは線形回帰を実際にコードで実装します。損失関数と勾配降下法を使い、
+            「パラメータを自動調整する = 学習」 という核心を体感します。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_linear_regression.html" class="link-chip">📄 補足資料：線形回帰・損失関数・勾配降下法</a>
@@ -444,8 +444,8 @@
             <span class="time-chip">実習 30分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            sklearn を使わず for ループで重みを更新する。損失曲線をリアルタイムで可視化し、
-            「学習とは何か」を手で動かして体感する。
+            sklearn を使わず、for ループで重みを更新します。損失曲線をリアルタイムで可視化し、
+            「学習とは何か」を手を動かして体感します。
           </p>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <span class="file-chip">📓 notebooks/ch1_01_linear_regression.ipynb</span>
@@ -463,9 +463,9 @@
             <span class="time-chip">講義 20分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            線形回帰では解けない問題を NN がどう解くかを示す。
-            層・重み・活性化関数を「関数を複雑にするための部品」として位置づける。
-            自動微分（autograd）により人手で微分不要になった意義を説明する。
+            線形回帰では解けない問題を、NN がどう解くかを示します。
+            層・重み・活性化関数は「関数を複雑にするための部品」という位置づけです。
+            自動微分（autograd）で微分を自動計算できるようになった意義も説明します。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_neural_network.html" class="link-chip">📄 補足資料：ニューラルネットワーク</a>
@@ -482,8 +482,8 @@
             <span class="time-chip">実習 30分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            nn.Module の最小構成に絞って実装。Epoch ごとに loss と accuracy を記録・可視化し、
-            自動微分とミニバッチ更新の流れを体感する。
+            <code>nn.Module</code> の最小構成に絞って実装します。Epoch ごとに loss と accuracy を記録・可視化し、
+            自動微分とミニバッチ更新の流れを体感できます。
           </p>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <span class="file-chip">📓 notebooks/ch1_02_mnist_nn.ipynb</span>
@@ -501,10 +501,10 @@
             <span class="time-chip">講義 25分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            NN の構造的な限界（語順・長距離依存）を示し、Attention 機構がどう解決するかを説明。
-            Self-Attention の直感「どのトークンに注目するか」と、因果マスクが生む
-            「左から右にしか書けない」という性質を図解で理解する。
-            <strong style="color:var(--text);">Self-Attention と因果マスクはハンズオン③ Part 2〜3 で実装し、Transformer ブロックの組み立ては付録 C で扱います。</strong>
+            NN の構造的な限界（語順・長距離依存）を示し、Attention 機構がどう解決するかを説明します。
+            Self-Attention の直感である「どのトークンに注目するか」と、因果マスクが生む
+            「左から右にしか書けない」という性質を、図解で理解しましょう。
+            Self-Attention と因果マスクはハンズオン③ Part 2〜3 で実装し、Transformer ブロックの組み立ては付録 C で扱います。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_transformer.html" class="link-chip">📄 補足資料：Transformer / Attention</a>
@@ -521,8 +521,8 @@
             <span class="time-chip">講義 15分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            事前学習（Pre-training）と Fine-tuning の関係を整理。
-            「汎用的な能力を持つ関数」を作ることの意味と、第2章の SFT との接続を予告する。
+            事前学習（Pre-training）と Fine-tuning の関係を整理します。
+            「汎用的な能力を持つ関数」を作ることの意味と、第2章の SFT とのつながりも予告します。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_pretraining.html" class="link-chip">📄 補足資料：事前学習の概念</a>
@@ -539,9 +539,9 @@
             <span class="time-chip">講義 15分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            temperature / top_p / max_new_tokens が出力に与える影響を理論と実験で理解する。
-            「同じ関数でも引数次第で出力が変わる」という視点を強調する。
-            <strong style="color:var(--text);">ハンズオン③ Part 6 では generate() を使わずに文章を生成し、Part 7 で確率分布の変形を可視化します。</strong>
+            <code>temperature</code> / <code>top_p</code> / <code>max_new_tokens</code> が出力に与える影響を、理論と実験で理解します。
+            「同じ関数でも引数次第で出力が変わる」という視点が、このセクションの要点です。
+            ハンズオン③ Part 6 では <code>generate()</code> を使わずに文章を生成し、Part 7 で確率分布の変形を可視化します。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="supplement_inference_params.html" class="link-chip">📄 補足資料：推論パラメータ</a>
@@ -558,11 +558,11 @@
             <span class="time-chip">実習 30分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            セクション 1-3 〜 1-5 を貫く総合ハンズオン。トークン化と埋め込みから始め、
-            <strong style="color:var(--text);">Self-Attention と因果マスクを自分の手で実装する</strong>。
-            そのうえで本物の Llama-3.2-1B の Attention を覗き、自作したものと同じ仕組みが
-            動いていることを確認する。最後に <code>generate()</code> を使わず文章を生成し、
-            temperature / top_p が確率分布に何をしているのかを可視化する。
+            セクション 1-3 〜 1-5 にまたがる総合ハンズオンです。トークン化と埋め込みから始め、
+            <strong style="color:var(--text);">Self-Attention と因果マスクを自分の手で実装します</strong>。
+            そのうえで実際の Llama-3.2-1B の Attention を観察し、自作したものと同じ仕組みが
+            動いていることを確かめます。最後に <code>generate()</code> を使わずに文章を生成し、
+            <code>temperature</code> / <code>top_p</code> が確率分布をどう変えるのかを可視化します。
           </p>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.625rem;">
             <span class="file-chip">📓 notebooks/ch1_03_llm_inference.ipynb</span>
@@ -573,7 +573,7 @@
               <strong style="color:var(--text);">発展（任意・約45分）</strong>：Multi-Head Attention の実装、
               Transformer ブロックの組み立て、Attention Sink の実測、KV キャッシュ、
               推論パラメータの定量評価（TTR・Jaccard）は付録にまとめてあります。
-              時間に余裕がある人・自習用。<br>
+              時間に余裕がある場合や自習に使ってください。<br>
               <span class="file-chip" style="margin-top:0.4rem;">📓 notebooks/ch1_03_appendix_deep_dive.ipynb</span>
             </p>
           </div>
@@ -589,7 +589,7 @@
             <span class="time-chip">自習 15分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            第1章で学んだ内容を選択式・穴埋め式・記述式で確認する。ブラウザ上で自己採点できます。
+            第1章で学んだ内容を、選択式・穴埋め式・記述式の問題で確認します。ブラウザ上で自己採点できます。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
             <a href="quiz_ch1.html" class="link-chip">✅ 理解確認クイズを開く</a>
@@ -668,7 +668,7 @@
     <!-- ━━━ 接続方法 ━━━ -->
     <section>
       <div class="section-heading"><h2>接続方法</h2></div>
-      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0.875rem;">環境構築は不要です。運営側で1人1つずつ JupyterLab を用意しています。配布された<strong>参加者番号（p01〜p10）・SSH コマンド・URL</strong>を使って、<strong>貸与された VM の中で</strong>次の 2 ステップで接続してください（会社の PC から DGX へ直接はつながりません）。詳しい手順とトラブル対処は参加者手順書（<code>docs/participant_guide.md</code>）にあります。</p>
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0.875rem;">環境構築は不要です。運営側が1人に1つずつ JupyterLab を用意しています。会社の PC から DGX へは直接つながらないため、<strong>貸与された VM の中で</strong>接続してください。配布された参加者番号（p01〜p10）・SSH コマンド・URLを使い、次の 2 ステップで接続します。詳しい手順とトラブル対処は参加者手順書（<code>docs/participant_guide.md</code>）にあります。</p>
       <div class="code-label">
         <div class="code-dots">
           <i style="background:#FF5F57;"></i>

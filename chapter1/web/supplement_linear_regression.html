@@ -214,9 +214,9 @@
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
-        <li>線形回帰が「パラメータ付きの関数」であることを掴む</li>
-        <li>損失関数が「どれだけ外れたかの指標」であることを掴む</li>
-        <li>勾配降下法が「損失を小さくするようにパラメータを動かす手続き」であることを掴む</li>
+        <li>線形回帰が「パラメータ付きの関数」であることを掴みます</li>
+        <li>損失関数が「どれだけ外れたかの指標」であることを掴みます</li>
+        <li>勾配降下法が「損失を小さくするようにパラメータを動かす手続き」であることを掴みます</li>
       </ol>
       <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
         数式の導出は行いません。「式が<em>何を意味するか</em>」に集中してください。
@@ -248,16 +248,16 @@
             <h3 style="font-size:0.9rem; font-weight:700; color:var(--green);">教師あり学習</h3>
           </div>
           <p style="font-size:0.8rem; color:#2D5E4A; line-height:1.75; margin-bottom:0.75rem;">
-            <strong>正解ラベル付きのデータ</strong> から学習する。
-            入力 $x$ に対して正解 $y$ が与えられており、$x \to y$ の対応関係を学習するのが目的。
+            正解ラベル付きのデータから学習します。
+            入力 $x$ に対する正解 $y$ が与えられており、$x \to y$ の対応関係を学習することが目的です。
           </p>
           <div style="margin-bottom:0.6rem;">
             <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.3rem;">代表的なアルゴリズム</p>
             <ul style="font-size:0.78rem; color:#2D5E4A; line-height:1.8; padding-left:1rem; list-style:disc;">
-              <li><strong>線形回帰</strong>（連続値の予測）</li>
+              <li>線形回帰（連続値の予測）</li>
               <li>ロジスティック回帰（2値分類）</li>
               <li>決定木・ランダムフォレスト</li>
-              <li>ニューラルネットワーク・LLM</li>
+              <li>ニューラルネットワーク（NN）・LLM</li>
             </ul>
           </div>
           <div>
@@ -277,8 +277,8 @@
             <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-sub);">教師なし学習</h3>
           </div>
           <p style="font-size:0.8rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
-            <strong style="color:var(--text-sub);">正解ラベルなしのデータ</strong> から構造・パターンを発見する。
-            データの中に潜む規則性を自力で見つけることが目的。
+            正解ラベルなしのデータから構造・パターンを発見します。
+            データの中に潜む規則性を、正解なしで見つけることが目的です。
           </p>
           <div style="margin-bottom:0.6rem;">
             <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.3rem;">代表的なアルゴリズム（参考）</p>
@@ -302,8 +302,8 @@
       <div class="card" style="border-left:3px solid var(--green);">
         <p style="font-size:0.875rem; color:var(--text-sub); line-height:1.85;">
           <strong style="color:var(--text);">本章で扱うのは教師あり学習です。</strong>
-          その中でも <strong style="color:var(--text);">線形回帰</strong> は最もシンプルで基礎的なアルゴリズムであり、
-          ニューラルネットワークや LLM を理解するための出発点になります。
+          その中でも線形回帰は最もシンプルで基礎的なアルゴリズムであり、
+          NN や LLM を理解するための出発点になります。
           「パラメータとは何か」「学習とは何か」という概念を、
           線形回帰という<em>見通しの良い例</em>で掴んでいきましょう。
         </p>
@@ -322,7 +322,7 @@
 
       <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
         <p>
-          線形回帰は、入力 $x$ から出力 $y$ を予測する <strong style="color:var(--text);">最もシンプルな関数</strong> です。
+          線形回帰は、入力 $x$ から出力 $y$ を予測する最もシンプルな関数です。
           「線形（linear）」とは、入力と出力の関係が<em>直線</em>で表せることを意味します。
         </p>
         <p>
@@ -385,7 +385,8 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
           予測値の例: [0. 0. 0. 0. 0.]
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          パラメータが $w=0, b=0$ では何も予測できていません。次のセクションで「どれだけ外れているか」を計測します。
+          パラメータが $w=0, b=0$ のままでは、予測値がすべて 0 になり何も予測できていません。
+          次の Section 2 で、予測が「どれだけ外れているか」を数値で測ります。
         </p>
       </div>
     </section>
@@ -404,10 +405,10 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
         <p>
           予測値 $\hat{y}$ と正解値 $y$ の「ずれ」を1つの数値にまとめたものが
           <strong style="color:var(--text);">損失関数（loss function）</strong> です。
-          損失が大きい → 予測が外れている、損失が小さい → 予測が当たっている、という指標です。
+          損失が大きいほど予測は外れており、小さいほど予測は当たっていることを示します。
         </p>
         <p>
-          回帰問題でよく使われるのは <strong style="color:var(--text);">平均二乗誤差（MSE: Mean Squared Error）</strong> です。
+          回帰問題でよく使われるのは平均二乗誤差（MSE: Mean Squared Error）です。
           「ずれを二乗して平均をとる」だけのシンプルな計算です。
         </p>
       </div>
@@ -416,9 +417,9 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
       <div class="note-amber" style="margin-bottom:1.5rem;">
         <p style="font-size:0.8rem; font-weight:700; color:var(--amber); margin-bottom:0.4rem;">なぜ「二乗」するのか？</p>
         <ul style="font-size:0.82rem; color:#5C4200; line-height:1.9; padding-left:1.1rem; list-style:disc;">
-          <li>ずれにはプラス・マイナスがある。単純に合計するとキャンセルしてしまう</li>
-          <li>二乗するとすべてプラスになり、「大きなずれ」をより強くペナルティにできる</li>
-          <li>二乗は微分しやすく、後の勾配降下法と相性が良い</li>
+          <li>ずれにはプラスとマイナスがあるので、単純に合計すると打ち消し合ってしまいます</li>
+          <li>二乗するとすべてプラスになり、大きなずれほど強いペナルティを与えられます</li>
+          <li>二乗は微分しやすいので、Section 3 の勾配降下法と相性が良くなります</li>
         </ul>
       </div>
 
@@ -463,11 +464,13 @@ loss_true = mse_loss(y, y_pred_true)
 print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だけ残る</code></pre>
         <div class="output-block">
           <div class="output-label">出力</div>
-          初期損失 (w=0, b=0):   109.45<br>
-          真のパラメータの損失:    3.87
+          初期損失 (w=0, b=0):   145.37<br>
+          真のパラメータの損失:    3.62
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          真のパラメータ近くでは損失が格段に小さくなります。「損失を最小化するパラメータを探す」ことが学習のゴールです。
+          真のパラメータ（$w=2, b=1$）では、損失が初期値（$w=0, b=0$）の 145.37 から 3.62 まで小さくなります。
+          ノイズがあるため、真のパラメータでも損失は 0 になりません。
+          「損失を最小化するパラメータを探す」ことが学習のゴールです。
         </p>
       </div>
 
@@ -475,9 +478,9 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
       <div class="card">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">概念図：損失の「地形」</p>
         <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.75; margin-bottom:1rem;">
-          $w$ と $b$ の値を変えると損失 $L$ の値も変わります。(この時、$L$は$w$,$b$の関数と言う)<br>これを描くと
-          <strong style="color:var(--text);">お椀型の曲面</strong> になったとします。(曲線ではなく<strong style="color:var(--text);">曲面</strong>)<br>
-          このときのお椀の底（最小値）が「最もデータに合ったパラメータ」の位置と言えます。
+          $w$ と $b$ の値を変えると、損失 $L$ の値も変わります。このとき「$L$ は $w$ と $b$ の関数である」と言います。<br>$L$ をグラフに描いたものが
+          お椀型の曲面になったとします（曲線ではなく曲面です）。<br>
+          お椀の底（最小値）の位置が、「最もデータに合ったパラメータ」です。
         </p>
         <svg viewBox="0 0 440 200" style="width:100%; max-width:440px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
           <!-- 背景グリッド -->
@@ -507,7 +510,7 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
           </defs>
         </svg>
         <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">
-          学習 = 現在地から底（損失最小）に向かって少しずつ動く
+          学習とは、現在地から底（損失最小）に向かって少しずつ動くことです
         </p>
       </div>
     </section>
@@ -525,13 +528,13 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
       <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
         <p>
           損失関数のお椀の底を求めるには、
-          <strong style="color:var(--text);">「今いる場所の傾き（勾配）を計算して、坂を下る方向に少し移動する」</strong>
+          「今いる場所の傾き（勾配）を計算して、坂を下る方向に少し移動する」
           を繰り返します。この手続きが <strong style="color:var(--text);">勾配降下法（Gradient Descent）</strong> です。
         </p>
         <p>
           「どのくらいの歩幅で移動するか」を決める定数が
           <strong style="color:var(--text);">学習率（learning rate）</strong> $\alpha$ です。
-          大きすぎると底を飛び越え、小さすぎると収束が遅くなります。
+          学習率が大きすぎると底を飛び越え、小さすぎると収束が遅くなります。
         </p>
       </div>
 
@@ -562,7 +565,7 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
         </div>
         <div class="note-green" style="margin-top:0.75rem;">
           <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
-            これを何百・何千回繰り返すことで、パラメータが少しずつ「正解」に近づいていきます。
+            この更新を数百〜数千回繰り返すと、パラメータが少しずつ「正解」に近づいていきます。
             <strong>これが「学習」の正体です。</strong>
           </p>
         </div>
@@ -629,17 +632,34 @@ plt.savefig("loss_curve.png", dpi=120)
 plt.show()</code></pre>
         <div class="output-block">
           <div class="output-label">出力</div>
-          Epoch   0 | loss=109.4476 | w=0.5428 | b=0.1019<br>
-          Epoch  50 | loss=10.2831  | w=1.7283 | b=0.6512<br>
-          Epoch 100 | loss=4.5209   | w=1.9021 | b=0.8847<br>
-          Epoch 150 | loss=4.0382   | w=1.9512 | b=0.9511<br>
-          Epoch 200 | loss=3.9641   | w=1.9721 | b=0.9793<br>
-          Epoch 250 | loss=3.9527   | w=1.9812 | b=0.9914<br>
+          Epoch   0 | loss=145.3703 | w=1.3817 | b=0.2110<br>
+          Epoch  50 | loss=3.4073   | w=1.9798 | b=0.4886<br>
+          Epoch 100 | loss=3.3649   | w=1.9584 | b=0.6315<br>
+          Epoch 150 | loss=3.3394   | w=1.9418 | b=0.7426<br>
+          Epoch 200 | loss=3.3240   | w=1.9289 | b=0.8288<br>
+          Epoch 250 | loss=3.3147   | w=1.9189 | b=0.8958<br>
           <br>
-          最終結果: w=1.9868, b=0.9968  （真: w=2.0, b=1.0）
+          最終結果: w=1.9113, b=0.9469  （真: w=2.0, b=1.0）
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          エポックが進むにつれ、損失が下がり、$w$ と $b$ が真の値（2.0, 1.0）に近づいていることが確認できます。
+          エポックが進むにつれて損失が下がり、300 エポック後には $w=1.91, b=0.95$ と真の値（2.0, 1.0）に近い値になります。
+          ただしノイズがあるため、このデータに最も合う値（$w \approx 1.88, b \approx 1.13$、損失 3.30）は真の値と少しずれます。
+          学習後の損失（約 3.31）が真のパラメータでの損失 3.62 より小さいのはこのためです。
+        </p>
+      </div>
+
+      <!-- 解説動画（chapter1/manim/scenes で生成） -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：直線と損失の地形を同時に見る（約 24 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_gradient_descent.jpg" aria-label="勾配降下法で、データに当てはめる直線と、損失の等高線上の (w, b) が同時に動くアニメーション"
+               style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
+          <source src="media/ch1_gradient_descent.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_gradient_descent.mp4">動画ファイル</a>を直接開いてください。
+        </video>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
+          コード例と同じデータと学習率（$\alpha = 0.01$、300 エポック）で描いています。
+          最初の数エポックで傾き $w$ がほぼ決まり、その後は細長い谷底に沿って切片 $b$ がゆっくり調整されます。
+          ★は損失が最小になる点（$w \approx 1.88, b \approx 1.13$）です。
         </p>
       </div>
 
@@ -656,25 +676,27 @@ plt.show()</code></pre>
           <tbody>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--text-sub);">0.001</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">収束は遅いが安定。エポック数を増やす必要がある</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">安定しますが収束が遅く、300 エポック後も $b \approx 0.42$ で途中です。エポック数を増やす必要があります</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--green-mid); font-weight:700;">0.01</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">バランスが良い（上記コードの設定）</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">安定して収束します（勾配降下法のコード例の設定）。300 エポック後は $w \approx 1.91, b \approx 0.95$ です</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--amber);">0.1</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">速いが損失が振動することがある</td>
+              <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--amber);">0.02</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">収束は速いものの、$w$ が行き過ぎと戻りを繰り返しながら（振動しながら）収束します。300 エポック後は $w \approx 1.89, b \approx 1.09$ です</td>
             </tr>
             <tr>
-              <td style="padding:0.5rem 1rem 0.35rem 0; font-family:monospace; color:var(--red);">1.0 以上</td>
-              <td style="padding:0.5rem 0 0.35rem; color:var(--red);">発散する（損失が無限大に向かう）</td>
+              <td style="padding:0.5rem 1rem 0.35rem 0; font-family:monospace; color:var(--red);">0.03 以上</td>
+              <td style="padding:0.5rem 0 0.35rem; color:var(--red);">発散します（損失が無限大に向かいます）。50 エポック後の損失は、0.03 で約 8 万、0.1 で約 $10^{79}$ です</td>
             </tr>
           </tbody>
         </table>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
           ハンズオンでは <code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-size:0.78rem;">alpha</code>
           を変えながら損失曲線の形がどう変わるかを観察します。
+          発散し始める学習率はデータのスケールで変わります。$x$ の値が大きいほど勾配も大きくなるので、同じ学習率でも発散しやすくなります。
+          この表の値は、このページのデータ（$x$ は 0〜10）で実際に実行した結果です。このデータでは約 0.03 以上で発散します。
         </p>
       </div>
     </section>
@@ -684,22 +706,22 @@ plt.show()</code></pre>
       <h2 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:1rem; letter-spacing:0.02em;">このセクションのまとめ</h2>
       <ol style="font-size:0.875rem; color:#C8E6DA; line-height:2; padding-left:1.25rem; margin-bottom:1.25rem;">
         <li>
-          <strong>線形回帰</strong> は $\hat{y} = wx + b$ というパラメータ付きの関数。
-          学習とは $w, b$ を「データに合う値」に調整すること。
+          線形回帰は $\hat{y} = wx + b$ というパラメータ付きの関数です。
+          学習では、$w, b$ を「データに合う値」に調整します。
         </li>
         <li>
-          <strong>損失関数（MSE）</strong> は「予測がどれだけ外れているか」を1つの数値で表す指標。
-          これを最小化することが学習のゴール。
+          損失関数（MSE）は「予測がどれだけ外れているか」を1つの数値で表す指標です。
+          この損失を最小化することが学習のゴールになります。
         </li>
         <li>
-          <strong>勾配降下法</strong> は「損失の傾き（勾配）を計算して、坂を下る方向にパラメータを少し動かす」
-          という手続きの繰り返し。
+          勾配降下法は「損失の傾き（勾配）を計算して、坂を下る方向にパラメータを少し動かす」
+          という手続きの繰り返しです。
         </li>
       </ol>
       <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:1rem; font-size:0.85rem; color:#A7D4C0;">
-        <strong style="color:#FFFFFF;">次のステップ：</strong>
+        次のステップ：
         線形回帰では解けない問題（XOR・画像分類など）を見て、
-        なぜニューラルネットワークが必要になるのかを確認します。<br>
+        なぜ NN が必要になるのかを確認します。<br>
         <a href="supplement_neural_network.html" class="no-print">→ 補足資料：ニューラルネットワーク</a>
       </div>
     </section>

@@ -196,9 +196,9 @@
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
-        <li>線形回帰では解けない問題が存在する理由を掴む</li>
-        <li>ニューラルネットワークが「関数を複雑にするための部品の組み合わせ」であることを掴む</li>
-        <li>活性化関数・順伝播・自動微分の役割を掴む</li>
+        <li>線形回帰では解けない問題が存在する理由を掴みます</li>
+        <li>ニューラルネットワーク（NN）が「関数を複雑にするための部品の組み合わせ」であることを掴みます</li>
+        <li>活性化関数・順伝播・自動微分の役割を掴みます</li>
       </ol>
       <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
         PyTorch の実装は「最小構成」に絞ります。細部より<em>流れの理解</em>を優先してください。
@@ -216,8 +216,8 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        前のセクションで「AI は関数である」という視点を得ました。
-        しかし、線形回帰（$\hat{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$）は
+        前の補足資料（線形回帰）では、線形回帰を「パラメータ付きの関数」として捉え、パラメータをデータから学習する流れを確認しました。
+        ただし線形回帰（$\hat{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$）には、
         <strong style="color:var(--text);">直線・平面でしか境界を引けない</strong> という根本的な限界があります。
         現実の問題の多くはこの限界を超えています。
       </p>
@@ -231,7 +231,7 @@
             <p style="margin-bottom:0.75rem;">
               XOR は「2つの入力が異なるとき 1、同じとき 0」を返す演算です。<br>
               4点を散布図に描くと、<strong style="color:var(--text);">1本の直線で ○ と × を分けることは不可能</strong> です。<br>
-              (つまり$y = a_1 * x_1 + a_2 * x_2 + b$ では表現できない関数ということ)
+              （つまり XOR は、$y = a_1 * x_1 + a_2 * x_2 + b$ の形では表現できない関数です）
             </p>
             <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
               <thead>
@@ -276,10 +276,23 @@
       <div class="note-amber">
         <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜ線形変換では解けないのか？</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          線形変換をいくつ重ねても、結果は常に「1回の線形変換」と数学的に等価です。<br>
-          (線形変換の合成もまた線形変換になるため)<br>
-          つまり、どれだけ層を増やしても <strong>直線的な境界しか表現できません</strong>。
+          線形変換の合成もまた線形変換になるので、いくつ重ねても結果は常に「1回の線形変換」と数学的に等価です。<br>
+          つまり、どれだけ層を増やしても直線的な境界しか表現できません。
           この問題を解決するのが <strong>活性化関数（非線形変換）</strong> の導入です。
+        </p>
+      </div>
+
+      <!-- 解説動画（chapter1/manim/scenes で生成） -->
+      <div class="card" style="margin-top:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：隠れ層が平面を曲げて XOR を解く（約 28 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_xor_relu.jpg" aria-label="XOR の 4 点を、線形変換と ReLU で変換すると 1 本の直線で分けられるようになるアニメーション"
+               style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
+          <source src="media/ch1_xor_relu.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_xor_relu.mp4">動画ファイル</a>を直接開いてください。
+        </video>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
+          隠れ層 $\mathbf{h} = \mathrm{ReLU}(\mathbf{W}\mathbf{x} + \mathbf{b})$（$\mathbf{W} = \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}$、$\mathbf{b} = (-0.5, -0.5)$）の例です。
+          線形変換だけでは平面が伸びて傾くだけですが、ReLU で負の部分を折りたたむと、直線 $h_1 + h_2 = 1.25$ で ○ と × を分けられます。
         </p>
       </div>
     </section>
@@ -295,8 +308,8 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        ニューラルネットワーク（NN）は「関数を複雑にするための部品」を積み重ねた構造です。
-        <strong style="color:var(--text);">線形変換 → 活性化関数(SECTION 2で説明) → 線形変換 → …</strong>
+        NN は「関数を複雑にするための部品」を積み重ねた構造です。
+        「線形変換 → 活性化関数（Section 2 で説明）→ 線形変換 → …」
         というブロックを繰り返すことで、任意の複雑な入出力関係を近似できます。
       </p>
 
@@ -376,23 +389,23 @@
           <tbody>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding-top:0.6rem; padding-bottom:0.5rem;">ノード</td>
-              <td style="padding-top:0.6rem; padding-bottom:0.5rem; color:var(--text-sub);">1つの数値を保持する計算単位。「ニューロン」とも呼ぶ</td>
+              <td style="padding-top:0.6rem; padding-bottom:0.5rem; color:var(--text-sub);">1つの数値を保持する計算単位です。「ニューロン」とも呼びます</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding-bottom:0.5rem;">$\mathbf{W}$</td>
-              <td style="padding-bottom:0.5rem; color:var(--text-sub);">重み行列。前の層の出力を次の層の入力に変換するパラメータ</td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">重み行列です。前の層の出力を、次の層の入力に変換するパラメータです</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding-bottom:0.5rem;">$\mathbf{b}$</td>
-              <td style="padding-bottom:0.5rem; color:var(--text-sub);">バイアスベクトル。変換後の値を平行移動させるパラメータ</td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">バイアスベクトルです。変換後の値を平行移動させるパラメータです</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding-bottom:0.5rem;">$f(\cdot)$</td>
-              <td style="padding-bottom:0.5rem; color:var(--text-sub);">活性化関数。線形変換の後に適用し、<strong style="color:var(--text);">非線形性を加える</strong></td>
+              <td style="padding-bottom:0.5rem; color:var(--text-sub);">活性化関数です。線形変換の後に適用し、非線形性を加えます</td>
             </tr>
             <tr>
               <td style="padding-bottom:0.3rem;">層（layer）</td>
-              <td style="padding-bottom:0.3rem; color:var(--text-sub);">「線形変換 + 活性化関数」のセット。これを積み重ねる</td>
+              <td style="padding-bottom:0.3rem; color:var(--text-sub);">「線形変換 + 活性化関数」のセットです。NN はこのセットを積み重ねます</td>
             </tr>
           </tbody>
         </table>
@@ -410,9 +423,9 @@
       </div>
 
       <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        活性化関数は各ノードの出力に適用される<strong style="color:var(--text);">非線形変換</strong>です。
-        これがなければ、何層重ねても1回の線形変換と等価になってしまいます。
-        代表的な2つを押さえておきましょう。
+        活性化関数は、各ノードの出力に適用する非線形変換です。
+        活性化関数がなければ、何層重ねても1回の線形変換と等価になってしまいます。
+        ここでは代表的な ReLU と Sigmoid の2つを押さえておきましょう。
       </p>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
@@ -424,8 +437,8 @@
             $$ f(x) = \max(0, x) $$
           </div>
           <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
-            負の値をすべて 0 に、正の値はそのまま通す。
-            <strong style="color:var(--text);">現代の NN でも広く使われる</strong> 活性化関数。<br>(元祖Transformerでも使われている)
+            負の値はすべて 0 にし、正の値はそのまま通します。
+            現代の NN でも広く使われている活性化関数です。<br>（最初に提案された Transformer でも使われています）
           </p>
           <!-- SVG ReLU グラフ -->
           <svg viewBox="0 0 160 100" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
@@ -438,7 +451,7 @@
             <text x="95" y="35" font-size="8" fill="var(--green-mid)" font-weight="700">ReLU</text>
           </svg>
           <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
-            計算が軽く、勾配消失が起きにくい。深い NN に向いている。
+            計算が軽く、勾配消失が起きにくいので、深い NN に向いています。
           </p>
         </div>
 
@@ -449,8 +462,8 @@
             $$ f(x) = \frac{1}{1 + e^{-x}} $$
           </div>
           <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
-            任意の実数を 0〜1 の範囲に押し込む。
-            出力を「確率」として解釈したい場合（2値分類の出力層）に使われる。
+            任意の実数を 0〜1 の範囲に収めます。
+            出力を「確率」として解釈したい場合（2値分類の出力層）に使います。
           </p>
           <!-- SVG Sigmoid グラフ -->
           <svg viewBox="0 0 160 100" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
@@ -467,7 +480,7 @@
             <text x="105" y="35" font-size="8" fill="var(--border-strong)" font-weight="700">Sigmoid</text>
           </svg>
           <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
-            深い層では勾配消失が起きやすく、隠れ層では ReLU に置き換わった。
+            深い層では勾配消失が起きやすいので、隠れ層では ReLU に置き換わりました。
           </p>
         </div>
       </div>
@@ -475,8 +488,8 @@
       <div class="note-green">
         <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
           <strong>「どの活性化関数を使うか」は設計の選択です。</strong>
-          隠れ層はほぼ ReLU（またはその派生形）、出力層は問題に応じて選ぶのが現代の標準です。
-          大切なのは「<em>非線形変換が入ることで関数が複雑な形を表現できる</em>」という事実です。
+          現代の標準では、隠れ層にはほぼ ReLU（またはその派生形）を使い、出力層は問題に応じて選びます。
+          大切なのは、「<em>非線形変換が入ることで、関数が複雑な形を表現できる</em>」という点です。
         </p>
       </div>
     </section>
@@ -587,23 +600,24 @@ print(f"出力の形状:  {output.shape}")</code></pre>
 
       <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.75rem;">
         <p>
-          線形回帰のセクションでは、損失の勾配を <strong style="color:var(--text);">手で計算して</strong>
-          コードに書き下しました。しかし NN のパラメータは数百万〜数十億もあります。
-          それを人手で微分するのは現実的ではありません。
+          線形回帰の補足資料では、損失の勾配を手で計算して
+          コードに書き下しました。
+          NN のパラメータ数は、Section 3 の例のような小さなモデルなら数十個（50 個）ですが、実用的なモデルでは数百万個、LLM では数十億個以上になります。
+          これほど多くのパラメータについて人手で微分するのは現実的ではありません。
         </p>
         <p>
-          PyTorch の <strong style="color:var(--text);">autograd</strong> は、計算グラフを自動構築して
-          任意のパラメータに対する勾配を自動計算します。
-          研究者はモデルの構造（<code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">forward()</code>）を書くだけで、勾配計算は PyTorch が肩代わりします。
+          PyTorch の <strong style="color:var(--text);">autograd</strong> は計算グラフを自動で構築し、
+          任意のパラメータに対する勾配を計算します。
+          研究者はモデルの構造（<code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">forward()</code>）を書くだけで済み、勾配計算は PyTorch が担当します。
         </p>
       </div>
 
       <div class="note-amber" style="margin-bottom:1.5rem;">
         <p style="font-size:0.8rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">autograd が実現したこと</p>
         <p style="font-size:0.82rem; color:#5C4200; line-height:1.75;">
-          2012年以降の深層学習ブームの背景の一つは「自動微分フレームワークの普及」です。
-          研究者がモデルの構造設計に集中できるようになり、
-          深層ネットワークの学習が現実的になりました。
+          深層学習の研究・実装が急速に広がった背景の一つに、自動微分フレームワーク（Theano、TensorFlow、PyTorch など）の普及があります。
+          勾配を手で導出して実装する手間がなくなり、
+          研究者がモデルの構造設計に集中できるようになりました。
         </p>
       </div>
 
@@ -665,15 +679,15 @@ print(f"勾配の例: {model.fc1.weight.grad[0, :].detach().numpy().round(4)}")<
       <div class="card" style="margin-top:1.5rem;">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">PyTorch 学習ループの5ステップ</p>
         <ol style="font-size:0.85rem; color:var(--text-sub); line-height:2; padding-left:1.25rem;">
-          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">y_pred = model(x)</code> — 順伝播で予測を計算</li>
-          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss = criterion(y_pred, y_true)</code> — 損失を計算</li>
-          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.zero_grad()</code> — 前ステップの勾配をリセット</li>
-          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss.backward()</code> — 逆伝播（autograd が勾配を自動計算）</li>
-          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.step()</code> — 勾配に従いパラメータを更新</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">y_pred = model(x)</code> で、順伝播により予測を計算します</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss = criterion(y_pred, y_true)</code> で、損失を計算します</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.zero_grad()</code> で、前ステップの勾配をリセットします</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">loss.backward()</code> で逆伝播を行い、autograd が勾配を自動計算します</li>
+          <li><code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 4px;">optimizer.step()</code> で、勾配に従ってパラメータを更新します</li>
         </ol>
         <div class="note-green" style="margin-top:0.875rem;">
           <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
-            この5ステップは PyTorch の学習ループの<strong>黄金パターン</strong>です。
+            この5ステップは PyTorch の学習ループの<strong>基本パターン</strong>です。
             MNIST 分類でも LLM のファインチューニングでも、本質的にはこの繰り返しです。
           </p>
         </div>
@@ -685,25 +699,25 @@ print(f"勾配の例: {model.fc1.weight.grad[0, :].detach().numpy().round(4)}")<
       <h2 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:1rem; letter-spacing:0.02em;">このセクションのまとめ</h2>
       <ol style="font-size:0.875rem; color:#C8E6DA; line-height:2; padding-left:1.25rem; margin-bottom:1.25rem;">
         <li>
-          <strong>線形回帰の限界</strong>：直線で分離できない問題（XOR など）は解けない。
-          「非線形な関数」が必要。
+          線形回帰の限界：直線で分離できない問題（XOR など）は解けません。
+          解くには「非線形な関数」が必要です。
         </li>
         <li>
-          <strong>ニューラルネットワーク</strong>は「線形変換 + 活性化関数」のブロックを積み重ねた構造。
-          層を深くするほど複雑な入出力関係を表現できる。
+          ニューラルネットワークは「線形変換 + 活性化関数」のブロックを積み重ねた構造です。
+          層を深くするほど、複雑な入出力関係を表現できます。
         </li>
         <li>
-          <strong>活性化関数</strong>（ReLU など）が非線形性を加える。これがなければ何層重ねても意味がない。
+          活性化関数（ReLU など）が非線形性を加えます。活性化関数がなければ、何層重ねても1回の線形変換と等価になります。
         </li>
         <li>
-          <strong>autograd</strong> により勾配は自動計算される。
-          <code style="background:rgba(255,255,255,0.15); border-radius:3px; padding:1px 5px; color:#FFFFFF;">forward()</code> を書けば PyTorch が逆伝播を肩代わりする。
+          autograd が勾配を自動計算します。
+          <code style="background:rgba(255,255,255,0.15); border-radius:3px; padding:1px 5px; color:#FFFFFF;">forward()</code> を書けば、逆伝播は PyTorch が担当します。
         </li>
       </ol>
       <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:1rem; font-size:0.85rem; color:#A7D4C0;">
-        <strong style="color:#FFFFFF;">次のステップ：</strong>
-        NN が「言語」を扱えるようになるには何が必要か？
-        語順や長距離依存を捉えるための仕組み ─ Transformer と Attention を確認します。<br>
+        次のステップ：
+        NN が「言語」を扱えるようになるには、何が必要でしょうか。
+        次の補足資料では、語順や長距離依存を捉えるための仕組みである Transformer と Attention を確認します。<br>
         <a href="supplement_transformer.html" class="no-print">→ 補足資料：Transformer / Attention</a>
       </div>
     </section>
