@@ -43,7 +43,7 @@ dgx-handson/
 ├── chapter1/
 │   ├── web/
 │   │   ├── index.html                            ✅ 章の進行ガイド・目次
-│   │   ├── supplement_linear_regression.html     ✅ 線形回帰・損失関数・勾配降下法
+│   │   ├── supplement_linear_regression.html     ✅ 線形回帰・損失関数・勾配降下法（勾配降下法の試し場つき）
 │   │   ├── supplement_neural_network.html        ✅ XOR問題・NN構造・活性化関数・PyTorch autograd
 │   │   ├── supplement_transformer.html           ✅ 埋め込み・Self-Attention・Transformerブロック・LLMへのつながり
 │   │   ├── supplement_pretraining.html           ✅ 自己教師あり学習・CLM・スケーリング則・活用方法
