@@ -1,0 +1,10 @@
+# 第1章の図解アニメーション（manim）を描画する環境
+# aarch64（DGX）では pip の manim が glcontext / manimpango のビルドに失敗するため、
+# ビルド済みバイナリがある conda-forge から入れる。手順は README.md を参照。
+name: dgx-manim
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - manim=0.20.1
+  - numpy

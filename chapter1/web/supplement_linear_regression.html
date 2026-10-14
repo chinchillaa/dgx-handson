@@ -214,9 +214,9 @@
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
-        <li>線形回帰が「パラメータ付きの関数」であることを掴む</li>
-        <li>損失関数が「どれだけ外れたかの指標」であることを掴む</li>
-        <li>勾配降下法が「損失を小さくするようにパラメータを動かす手続き」であることを掴む</li>
+        <li>線形回帰が「パラメータ付きの関数」であることを掴みます</li>
+        <li>損失関数が「どれだけ外れたかの指標」であることを掴みます</li>
+        <li>勾配降下法が「損失を小さくするようにパラメータを動かす手続き」であることを掴みます</li>
       </ol>
       <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
         数式の導出は行いません。「式が<em>何を意味するか</em>」に集中してください。
@@ -248,16 +248,16 @@
             <h3 style="font-size:0.9rem; font-weight:700; color:var(--green);">教師あり学習</h3>
           </div>
           <p style="font-size:0.8rem; color:#2D5E4A; line-height:1.75; margin-bottom:0.75rem;">
-            <strong>正解ラベル付きのデータ</strong> から学習する。
-            入力 $x$ に対して正解 $y$ が与えられており、$x \to y$ の対応関係を学習するのが目的。
+            正解ラベル付きのデータから学習します。
+            入力 $x$ に対する正解 $y$ が与えられており、$x \to y$ の対応関係を学習することが目的です。
           </p>
           <div style="margin-bottom:0.6rem;">
             <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.3rem;">代表的なアルゴリズム</p>
             <ul style="font-size:0.78rem; color:#2D5E4A; line-height:1.8; padding-left:1rem; list-style:disc;">
-              <li><strong>線形回帰</strong>（連続値の予測）</li>
+              <li>線形回帰（連続値の予測）</li>
               <li>ロジスティック回帰（2値分類）</li>
               <li>決定木・ランダムフォレスト</li>
-              <li>ニューラルネットワーク・LLM</li>
+              <li>ニューラルネットワーク（NN）・LLM</li>
             </ul>
           </div>
           <div>
@@ -277,8 +277,8 @@
             <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-sub);">教師なし学習</h3>
           </div>
           <p style="font-size:0.8rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
-            <strong style="color:var(--text-sub);">正解ラベルなしのデータ</strong> から構造・パターンを発見する。
-            データの中に潜む規則性を自力で見つけることが目的。
+            正解ラベルなしのデータから構造・パターンを発見します。
+            データの中に潜む規則性を、正解なしで見つけることが目的です。
           </p>
           <div style="margin-bottom:0.6rem;">
             <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.3rem;">代表的なアルゴリズム（参考）</p>
@@ -302,8 +302,8 @@
       <div class="card" style="border-left:3px solid var(--green);">
         <p style="font-size:0.875rem; color:var(--text-sub); line-height:1.85;">
           <strong style="color:var(--text);">本章で扱うのは教師あり学習です。</strong>
-          その中でも <strong style="color:var(--text);">線形回帰</strong> は最もシンプルで基礎的なアルゴリズムであり、
-          ニューラルネットワークや LLM を理解するための出発点になります。
+          その中でも線形回帰は最もシンプルで基礎的なアルゴリズムであり、
+          NN や LLM を理解するための出発点になります。
           「パラメータとは何か」「学習とは何か」という概念を、
           線形回帰という<em>見通しの良い例</em>で掴んでいきましょう。
         </p>
@@ -322,7 +322,7 @@
 
       <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
         <p>
-          線形回帰は、入力 $x$ から出力 $y$ を予測する <strong style="color:var(--text);">最もシンプルな関数</strong> です。
+          線形回帰は、入力 $x$ から出力 $y$ を予測する最もシンプルな関数です。
           「線形（linear）」とは、入力と出力の関係が<em>直線</em>で表せることを意味します。
         </p>
         <p>
@@ -385,7 +385,8 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
           予測値の例: [0. 0. 0. 0. 0.]
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          パラメータが $w=0, b=0$ では何も予測できていません。次のセクションで「どれだけ外れているか」を計測します。
+          パラメータが $w=0, b=0$ のままでは、予測値がすべて 0 になり何も予測できていません。
+          次の Section 2 で、予測が「どれだけ外れているか」を数値で測ります。
         </p>
       </div>
     </section>
@@ -404,10 +405,10 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
         <p>
           予測値 $\hat{y}$ と正解値 $y$ の「ずれ」を1つの数値にまとめたものが
           <strong style="color:var(--text);">損失関数（loss function）</strong> です。
-          損失が大きい → 予測が外れている、損失が小さい → 予測が当たっている、という指標です。
+          損失が大きいほど予測は外れており、小さいほど予測は当たっていることを示します。
         </p>
         <p>
-          回帰問題でよく使われるのは <strong style="color:var(--text);">平均二乗誤差（MSE: Mean Squared Error）</strong> です。
+          回帰問題でよく使われるのは平均二乗誤差（MSE: Mean Squared Error）です。
           「ずれを二乗して平均をとる」だけのシンプルな計算です。
         </p>
       </div>
@@ -416,9 +417,9 @@ print(f"予測値の例: {y_pred[:5]}")   # すべて 0.0 — まったく予測
       <div class="note-amber" style="margin-bottom:1.5rem;">
         <p style="font-size:0.8rem; font-weight:700; color:var(--amber); margin-bottom:0.4rem;">なぜ「二乗」するのか？</p>
         <ul style="font-size:0.82rem; color:#5C4200; line-height:1.9; padding-left:1.1rem; list-style:disc;">
-          <li>ずれにはプラス・マイナスがある。単純に合計するとキャンセルしてしまう</li>
-          <li>二乗するとすべてプラスになり、「大きなずれ」をより強くペナルティにできる</li>
-          <li>二乗は微分しやすく、後の勾配降下法と相性が良い</li>
+          <li>ずれにはプラスとマイナスがあるので、単純に合計すると打ち消し合ってしまいます</li>
+          <li>二乗するとすべてプラスになり、大きなずれほど強いペナルティを与えられます</li>
+          <li>二乗は微分しやすいので、Section 3 の勾配降下法と相性が良くなります</li>
         </ul>
       </div>
 
@@ -463,11 +464,13 @@ loss_true = mse_loss(y, y_pred_true)
 print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だけ残る</code></pre>
         <div class="output-block">
           <div class="output-label">出力</div>
-          初期損失 (w=0, b=0):   109.45<br>
-          真のパラメータの損失:    3.87
+          初期損失 (w=0, b=0):   145.37<br>
+          真のパラメータの損失:    3.62
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          真のパラメータ近くでは損失が格段に小さくなります。「損失を最小化するパラメータを探す」ことが学習のゴールです。
+          真のパラメータ（$w=2, b=1$）では、損失が初期値（$w=0, b=0$）の 145.37 から 3.62 まで小さくなります。
+          ノイズがあるため、真のパラメータでも損失は 0 になりません。
+          「損失を最小化するパラメータを探す」ことが学習のゴールです。
         </p>
       </div>
 
@@ -475,9 +478,9 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
       <div class="card">
         <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">概念図：損失の「地形」</p>
         <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.75; margin-bottom:1rem;">
-          $w$ と $b$ の値を変えると損失 $L$ の値も変わります。(この時、$L$は$w$,$b$の関数と言う)<br>これを描くと
-          <strong style="color:var(--text);">お椀型の曲面</strong> になったとします。(曲線ではなく<strong style="color:var(--text);">曲面</strong>)<br>
-          このときのお椀の底（最小値）が「最もデータに合ったパラメータ」の位置と言えます。
+          $w$ と $b$ の値を変えると、損失 $L$ の値も変わります。このとき「$L$ は $w$ と $b$ の関数である」と言います。<br>$L$ をグラフに描いたものが
+          お椀型の曲面になったとします（曲線ではなく曲面です）。<br>
+          お椀の底（最小値）の位置が、「最もデータに合ったパラメータ」です。
         </p>
         <svg viewBox="0 0 440 200" style="width:100%; max-width:440px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
           <!-- 背景グリッド -->
@@ -507,7 +510,7 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
           </defs>
         </svg>
         <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">
-          学習 = 現在地から底（損失最小）に向かって少しずつ動く
+          学習とは、現在地から底（損失最小）に向かって少しずつ動くことです
         </p>
       </div>
     </section>
@@ -525,13 +528,13 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
       <div style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
         <p>
           損失関数のお椀の底を求めるには、
-          <strong style="color:var(--text);">「今いる場所の傾き（勾配）を計算して、坂を下る方向に少し移動する」</strong>
+          「今いる場所の傾き（勾配）を計算して、坂を下る方向に少し移動する」
           を繰り返します。この手続きが <strong style="color:var(--text);">勾配降下法（Gradient Descent）</strong> です。
         </p>
         <p>
           「どのくらいの歩幅で移動するか」を決める定数が
           <strong style="color:var(--text);">学習率（learning rate）</strong> $\alpha$ です。
-          大きすぎると底を飛び越え、小さすぎると収束が遅くなります。
+          学習率が大きすぎると底を飛び越え、小さすぎると収束が遅くなります。
         </p>
       </div>
 
@@ -562,7 +565,7 @@ print(f"真のパラメータの損失:    {loss_true:.2f}")   # ノイズ分だ
         </div>
         <div class="note-green" style="margin-top:0.75rem;">
           <p style="font-size:0.83rem; color:var(--green); line-height:1.75;">
-            これを何百・何千回繰り返すことで、パラメータが少しずつ「正解」に近づいていきます。
+            この更新を数百〜数千回繰り返すと、パラメータが少しずつ「正解」に近づいていきます。
             <strong>これが「学習」の正体です。</strong>
           </p>
         </div>
@@ -629,17 +632,34 @@ plt.savefig("loss_curve.png", dpi=120)
 plt.show()</code></pre>
         <div class="output-block">
           <div class="output-label">出力</div>
-          Epoch   0 | loss=109.4476 | w=0.5428 | b=0.1019<br>
-          Epoch  50 | loss=10.2831  | w=1.7283 | b=0.6512<br>
-          Epoch 100 | loss=4.5209   | w=1.9021 | b=0.8847<br>
-          Epoch 150 | loss=4.0382   | w=1.9512 | b=0.9511<br>
-          Epoch 200 | loss=3.9641   | w=1.9721 | b=0.9793<br>
-          Epoch 250 | loss=3.9527   | w=1.9812 | b=0.9914<br>
+          Epoch   0 | loss=145.3703 | w=1.3817 | b=0.2110<br>
+          Epoch  50 | loss=3.4073   | w=1.9798 | b=0.4886<br>
+          Epoch 100 | loss=3.3649   | w=1.9584 | b=0.6315<br>
+          Epoch 150 | loss=3.3394   | w=1.9418 | b=0.7426<br>
+          Epoch 200 | loss=3.3240   | w=1.9289 | b=0.8288<br>
+          Epoch 250 | loss=3.3147   | w=1.9189 | b=0.8958<br>
           <br>
-          最終結果: w=1.9868, b=0.9968  （真: w=2.0, b=1.0）
+          最終結果: w=1.9113, b=0.9469  （真: w=2.0, b=1.0）
         </div>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; padding-left:0.25rem;">
-          エポックが進むにつれ、損失が下がり、$w$ と $b$ が真の値（2.0, 1.0）に近づいていることが確認できます。
+          エポックが進むにつれて損失が下がり、300 エポック後には $w=1.91, b=0.95$ と真の値（2.0, 1.0）に近い値になります。
+          ただしノイズがあるため、このデータに最も合う値（$w \approx 1.88, b \approx 1.13$、損失 3.30）は真の値と少しずれます。
+          学習後の損失（約 3.31）が真のパラメータでの損失 3.62 より小さいのはこのためです。
+        </p>
+      </div>
+
+      <!-- 解説動画（chapter1/manim/scenes で生成） -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：直線と損失の地形を同時に見る（約 24 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_gradient_descent.jpg" aria-label="勾配降下法で、データに当てはめる直線と、損失の等高線上の (w, b) が同時に動くアニメーション"
+               style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
+          <source src="media/ch1_gradient_descent.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_gradient_descent.mp4">動画ファイル</a>を直接開いてください。
+        </video>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
+          コード例と同じデータと学習率（$\alpha = 0.01$、300 エポック）で描いています。
+          最初の数エポックで傾き $w$ がほぼ決まり、その後は細長い谷底に沿って切片 $b$ がゆっくり調整されます。
+          ★は損失が最小になる点（$w \approx 1.88, b \approx 1.13$）です。
         </p>
       </div>
 
@@ -656,27 +676,591 @@ plt.show()</code></pre>
           <tbody>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--text-sub);">0.001</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">収束は遅いが安定。エポック数を増やす必要がある</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">安定しますが収束が遅く、300 エポック後も $b \approx 0.42$ で途中です。エポック数を増やす必要があります</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--green-mid); font-weight:700;">0.01</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">バランスが良い（上記コードの設定）</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">安定して収束します（勾配降下法のコード例の設定）。300 エポック後は $w \approx 1.91, b \approx 0.95$ です</td>
             </tr>
             <tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--amber);">0.1</td>
-              <td style="padding:0.5rem 0; color:var(--text-sub);">速いが損失が振動することがある</td>
+              <td style="padding:0.5rem 1rem 0.5rem 0; font-family:monospace; color:var(--amber);">0.02</td>
+              <td style="padding:0.5rem 0; color:var(--text-sub);">収束は速いものの、$w$ が行き過ぎと戻りを繰り返しながら（振動しながら）収束します。300 エポック後は $w \approx 1.89, b \approx 1.09$ です</td>
             </tr>
             <tr>
-              <td style="padding:0.5rem 1rem 0.35rem 0; font-family:monospace; color:var(--red);">1.0 以上</td>
-              <td style="padding:0.5rem 0 0.35rem; color:var(--red);">発散する（損失が無限大に向かう）</td>
+              <td style="padding:0.5rem 1rem 0.35rem 0; font-family:monospace; color:var(--red);">0.03 以上</td>
+              <td style="padding:0.5rem 0 0.35rem; color:var(--red);">発散します（損失が無限大に向かいます）。50 エポック後の損失は、0.03 で約 8 万、0.1 で約 $10^{79}$ です</td>
             </tr>
           </tbody>
         </table>
         <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
           ハンズオンでは <code style="background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-size:0.78rem;">alpha</code>
           を変えながら損失曲線の形がどう変わるかを観察します。
+          発散し始める学習率はデータのスケールで変わります。$x$ の値が大きいほど勾配も大きくなるので、同じ学習率でも発散しやすくなります。
+          この表の値は、このページのデータ（$x$ は 0〜10）で実際に実行した結果です。このデータでは約 0.03 以上で発散します。
         </p>
       </div>
+    </section>
+
+    <!-- ━━━ 勾配降下法の試し場 ━━━ -->
+    <section id="gd-playground" aria-labelledby="gd-title">
+      <style>
+        #gd-playground .gd-sub { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:0.5rem; }
+        #gd-playground .gd-lr { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; font-size:0.8rem; color:var(--text); }
+        #gd-playground .gd-lr output { font-family:var(--font-mono, monospace); font-weight:700; color:var(--green-mid); font-size:0.82rem; }
+        #gd-playground input[type="range"] { width:100%; accent-color:var(--green); margin-top:0.2rem; }
+        #gd-playground .gd-presets { display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem; margin-top:0.4rem; font-size:0.72rem; color:var(--text-muted); }
+        #gd-playground .gd-chip { font-family:var(--font-mono, monospace); font-size:0.74rem; padding:0.05rem 0.55rem; border-radius:999px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-sub); cursor:pointer; }
+        #gd-playground .gd-chip:hover { background:var(--surface2); }
+        #gd-playground .gd-chip[aria-pressed="true"] { background:var(--green); border-color:var(--green); color:#FFFFFF; }
+        #gd-playground .gd-btns { display:flex; flex-wrap:wrap; gap:0.5rem; margin:1rem 0 0.75rem; }
+        #gd-playground .gd-btn { font-size:0.8rem; font-weight:700; border-radius:7px; padding:0.4rem 0.85rem; border:1.5px solid var(--green); cursor:pointer; transition:background 0.15s ease; }
+        #gd-playground .gd-btn-primary { background:var(--green); color:#FFFFFF; }
+        #gd-playground .gd-btn-primary:hover { background:var(--green-mid); }
+        #gd-playground .gd-btn-ghost { background:var(--surface); color:var(--green); }
+        #gd-playground .gd-btn-ghost:hover { background:var(--green-bg); }
+        #gd-playground .gd-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        #gd-playground .gd-btn:focus-visible, #gd-playground .gd-chip:focus-visible, #gd-playground input:focus-visible, #gd-playground canvas:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; }
+        #gd-playground .gd-metrics { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; margin-bottom:0.75rem; }
+        #gd-playground .gd-metric { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.45rem 0.7rem; min-width:0; }
+        #gd-playground .gd-metric span { display:block; font-size:0.66rem; font-weight:700; color:var(--text-muted); }
+        #gd-playground .gd-metric b { display:block; font-family:var(--font-mono, monospace); font-size:0.9rem; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        #gd-playground .gd-plots { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; }
+        #gd-playground canvas { display:block; width:100%; border:1px solid var(--border); border-radius:6px; background:var(--surface); }
+        #gd-playground #gd-contour { aspect-ratio:1 / 1; cursor:crosshair; touch-action:none; }
+        #gd-playground #gd-contour.is-3d { cursor:grab; }
+        #gd-playground #gd-contour.is-dragging { cursor:grabbing; }
+        #gd-playground .gd-plot-head { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.5rem; }
+        #gd-playground .gd-plot-head .gd-sub { margin-bottom:0; }
+        #gd-playground .gd-view { display:inline-flex; border:1px solid var(--border-strong); border-radius:6px; overflow:hidden; flex-shrink:0; }
+        #gd-playground .gd-view button { font-size:0.7rem; font-weight:700; padding:0.1rem 0.6rem; background:var(--surface); color:var(--text-sub); border:none; cursor:pointer; }
+        #gd-playground .gd-view button + button { border-left:1px solid var(--border-strong); }
+        #gd-playground .gd-view button[aria-pressed="true"] { background:var(--green); color:#FFFFFF; }
+        #gd-playground .gd-view button:focus-visible { outline:2px solid var(--green-mid); outline-offset:-2px; }
+        #gd-playground #gd-data { aspect-ratio:1 / 1; }
+        #gd-playground #gd-loss { height:130px; }
+        #gd-playground .gd-legend { display:flex; flex-wrap:wrap; gap:0.25rem 0.9rem; font-size:0.7rem; color:var(--text-sub); margin-top:0.35rem; }
+        #gd-playground .gd-legend i { display:inline-block; width:0.9rem; height:0; vertical-align:middle; margin-right:0.3rem; border-top:2px solid; }
+        #gd-playground .gd-status { font-size:0.82rem; line-height:1.7; border-radius:0 8px 8px 0; padding:0.5rem 0.9rem; margin-bottom:1rem; }
+        #gd-playground .gd-status.is-run { background:var(--surface2); border-left:3px solid var(--border-strong); color:var(--text-sub); }
+        #gd-playground .gd-status.is-ok { background:var(--green-bg); border-left:3px solid var(--green-mid); color:var(--green); }
+        #gd-playground .gd-status.is-slow { background:var(--amber-bg); border-left:3px solid var(--amber-border); color:#5C4200; }
+        #gd-playground .gd-status.is-bad { background:var(--red-bg); border-left:3px solid #FCA5A5; color:var(--red); }
+        @media (max-width: 560px) {
+          #gd-playground .card { padding:1.1rem; }
+          #gd-playground .gd-plots { grid-template-columns:minmax(0, 1fr); }
+          #gd-playground .gd-metrics { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        }
+      </style>
+
+      <div class="card">
+        <p class="label" style="margin-bottom:0.25rem;">Playground</p>
+        <h2 id="gd-title" class="text-lg font-bold" style="color:var(--text); margin-bottom:0.6rem;">試してみましょう：<wbr>学習率で変わる「坂の下り方」</h2>
+        <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:1.25rem;">
+          コード例と同じ 50 点のデータ（<code>np.random.seed(42)</code>）で、勾配降下法を 1 エポックずつ実行します。
+          左の図は $(w, b)$ ごとの損失を色で表した地形で、色が濃いほど損失が小さく、★が谷底（損失の最小点）です。
+          学習率の表にある 0.001・0.01・0.02・0.03 を順に選び、軌跡の違いを比べてください。
+          地形をクリックすると、そこを開始点にしてやり直せます。
+          「3D」に切り替えると、損失を高さにした曲面の上を下っていく様子を、ドラッグで視点を回しながら見られます。
+        </p>
+
+        <!-- 学習率 -->
+        <label class="gd-lr" for="gd-lr-slider"><span>学習率 $\alpha$</span><output id="gd-lr-out" for="gd-lr-slider">0.0100</output></label>
+        <input type="range" id="gd-lr-slider" min="-4" max="-1.3" step="0.01" value="-2" aria-describedby="gd-lr-hint">
+        <div class="gd-presets" role="group" aria-label="学習率の表の値">
+          <span id="gd-lr-hint">表の値：</span>
+          <button type="button" class="gd-chip" data-lr="0.001" aria-pressed="false">0.001</button>
+          <button type="button" class="gd-chip" data-lr="0.01" aria-pressed="true">0.01</button>
+          <button type="button" class="gd-chip" data-lr="0.02" aria-pressed="false">0.02</button>
+          <button type="button" class="gd-chip" data-lr="0.03" aria-pressed="false">0.03</button>
+        </div>
+
+        <!-- 操作 -->
+        <div class="gd-btns">
+          <button type="button" id="gd-play" class="gd-btn gd-btn-primary">▶ 自動再生</button>
+          <button type="button" id="gd-step1" class="gd-btn gd-btn-ghost">+1 エポック</button>
+          <button type="button" id="gd-step10" class="gd-btn gd-btn-ghost">+10 エポック</button>
+          <button type="button" id="gd-reset" class="gd-btn gd-btn-ghost">↺ やり直す</button>
+          <button type="button" id="gd-origin" class="gd-btn gd-btn-ghost">開始点を (0, 0) に戻す</button>
+        </div>
+
+        <div class="gd-metrics">
+          <div class="gd-metric"><span>エポック</span><b id="gd-m-epoch">0 / 300</b></div>
+          <div class="gd-metric"><span>損失 (MSE)</span><b id="gd-m-loss">—</b></div>
+          <div class="gd-metric"><span>w ／ b</span><b id="gd-m-wb">—</b></div>
+          <div class="gd-metric"><span>∂L/∂w</span><b id="gd-m-dw">—</b></div>
+          <div class="gd-metric"><span>∂L/∂b</span><b id="gd-m-db">—</b></div>
+          <div class="gd-metric"><span>開始点 (w, b)</span><b id="gd-m-start">(0, 0)</b></div>
+        </div>
+        <p id="gd-status" class="gd-status is-run" aria-live="polite"></p>
+
+        <!-- 図 -->
+        <div class="gd-plots">
+          <div>
+            <div class="gd-plot-head">
+              <p class="gd-sub">損失の地形と $(w, b)$ の軌跡</p>
+              <div class="gd-view" role="group" aria-label="地形の表示方法">
+                <button type="button" data-view="2d" aria-pressed="true">2D</button>
+                <button type="button" data-view="3d" aria-pressed="false">3D</button>
+              </div>
+            </div>
+            <canvas id="gd-contour" tabindex="0" role="img" aria-label="w を横軸、b を縦軸にした損失の等高線図。クリックした位置が開始点になります"></canvas>
+            <div class="gd-legend" aria-hidden="true">
+              <span><i style="border-color:#D97706;"></i>軌跡</span>
+              <span>★ 損失の最小点（w ≈ 1.88, b ≈ 1.13）</span>
+              <span id="gd-3d-hint" hidden>3D の高さは損失（対数）、ドラッグで回転</span>
+            </div>
+          </div>
+          <div>
+            <p class="gd-sub">データと現在の直線</p>
+            <canvas id="gd-data" role="img" aria-label="50 点のデータと、現在の w と b で引いた直線"></canvas>
+            <div class="gd-legend" aria-hidden="true">
+              <span><i style="border-color:#D97706;"></i>現在の直線</span>
+              <span><i style="border-color:#A8A29E; border-top-style:dashed;"></i>損失が最小の直線</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <p class="gd-sub">損失の推移（縦軸は対数）</p>
+          <canvas id="gd-loss" role="img" aria-label="エポックごとの損失の推移"></canvas>
+        </div>
+
+        <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin-top:0.75rem;">
+          ※ 学習率や開始点を変えると、エポック 0 からやり直します。
+          地形は $b$ 方向にはなだらかで $w$ 方向には急な、細長い谷です。
+          学習率が大きいと急な $w$ 方向で谷を飛び越え、小さいとなだらかな $b$ 方向がなかなか進みません。
+        </p>
+      </div>
+
+      <script>
+      (function () {
+        // コード例と同じデータ: x = np.linspace(0, 10, 50), y = 2x + 1 + randn * 2（seed 42）
+        var Y = [1.993428, 1.131635, 3.111704, 5.270550, 2.164346, 2.572542, 6.607405, 5.392012, 3.326357, 5.758589,
+                 4.154797, 4.558336, 6.381884, 2.479562, 3.264450, 5.997874, 5.504950, 8.567270, 6.530891, 5.930495,
+                 12.094563, 9.119876, 10.114648, 7.538259, 9.707153, 11.425927, 9.310258, 12.771804, 11.227294, 12.253347,
+                 12.041485, 17.357618, 14.034230, 12.353966, 16.522641, 12.844027, 16.111605, 12.182701, 13.853832, 17.312090,
+                 18.803464, 18.077430, 17.911561, 17.948813, 16.002140, 17.927659, 18.854233, 22.297918, 21.279073, 17.473920];
+        var N = Y.length, X = Y.map(function (_, i) { return 10 * i / (N - 1); });
+        var MAX_EPOCH = 300, DIVERGE = 1e6;
+        var W_RANGE = [-0.5, 4.5], B_RANGE = [-4, 6];
+
+        // MSE(w, b) = w²·Sxx + 2wb·Sx + b² − 2w·Sxy − 2b·Sy + Syy（各 S は平均）
+        var Sx = 0, Sy = 0, Sxx = 0, Sxy = 0, Syy = 0;
+        for (var i = 0; i < N; i++) { Sx += X[i]; Sy += Y[i]; Sxx += X[i] * X[i]; Sxy += X[i] * Y[i]; Syy += Y[i] * Y[i]; }
+        Sx /= N; Sy /= N; Sxx /= N; Sxy /= N; Syy /= N;
+        function loss(w, b) { return w * w * Sxx + 2 * w * b * Sx + b * b - 2 * w * Sxy - 2 * b * Sy + Syy; }
+        function grad(w, b) {
+          // コード例の dw = -2/N Σ x(y − ŷ)、db = -2/N Σ (y − ŷ) と同じ値
+          return [2 * (w * Sxx + b * Sx - Sxy), 2 * (w * Sx + b - Sy)];
+        }
+        var WOPT = (Sxy - Sx * Sy) / (Sxx - Sx * Sx), BOPT = Sy - WOPT * Sx, LMIN = loss(WOPT, BOPT);
+
+        var el = function (id) { return document.getElementById(id); };
+        var lrEl = el('gd-lr-slider'), chips = Array.prototype.slice.call(document.querySelectorAll('#gd-playground .gd-chip'));
+        var cvC = el('gd-contour'), cvD = el('gd-data'), cvL = el('gd-loss');
+        var lr = 0.01, start = [0, 0], path, losses, timer = null, terrain = null;
+
+        // ── 状態 ───────────────────────────────
+        function cur() { return path[path.length - 1]; }
+        function epoch() { return path.length - 1; }
+        function diverged() { var l = losses[losses.length - 1]; return !isFinite(l) || l > DIVERGE; }
+        function finished() { return epoch() >= MAX_EPOCH || diverged(); }
+
+        function restart() {
+          stop();
+          path = [start.slice()];
+          losses = [loss(start[0], start[1])];
+          draw();
+        }
+        function step(n) {
+          for (var k = 0; k < n && !finished(); k++) {
+            var p = cur(), g = grad(p[0], p[1]);
+            var q = [p[0] - lr * g[0], p[1] - lr * g[1]];
+            path.push(q);
+            losses.push(loss(q[0], q[1]));
+          }
+          if (finished()) stop();
+          draw();
+        }
+        function play() {
+          if (timer) { stop(); return; }
+          if (finished()) restart();
+          timer = setInterval(function () { step(1); }, 30);
+          el('gd-play').textContent = '⏸ 停止';
+        }
+        function stop() {
+          if (timer) clearInterval(timer);
+          timer = null;
+          el('gd-play').textContent = '▶ 自動再生';
+        }
+
+        // ── 描画の共通処理 ─────────────────────────
+        function fit(cv) {
+          var r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+          var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+          if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+          var ctx = cv.getContext('2d');
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          return { ctx: ctx, w: r.width, h: r.height, dpr: dpr };
+        }
+        var PAD = { l: 34, r: 8, t: 8, b: 26 };
+        function axes(c, xr, yr, xl, yl, xt, yt) {
+          var ctx = c.ctx, pw = c.w - PAD.l - PAD.r, ph = c.h - PAD.t - PAD.b;
+          var sx = function (v) { return PAD.l + (v - xr[0]) / (xr[1] - xr[0]) * pw; };
+          var sy = function (v) { return PAD.t + (1 - (v - yr[0]) / (yr[1] - yr[0])) * ph; };
+          ctx.font = '10px system-ui, sans-serif';
+          ctx.fillStyle = '#A8A29E';
+          ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+          ctx.lineWidth = 1;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          xt.forEach(function (v) {
+            ctx.beginPath(); ctx.moveTo(sx(v), PAD.t); ctx.lineTo(sx(v), PAD.t + ph); ctx.stroke();
+            ctx.fillText(xt.fmt ? xt.fmt(v) : String(v), sx(v), PAD.t + ph + 3);
+          });
+          ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+          yt.forEach(function (v) {
+            ctx.beginPath(); ctx.moveTo(PAD.l, sy(v)); ctx.lineTo(PAD.l + pw, sy(v)); ctx.stroke();
+            ctx.fillText(yt.fmt ? yt.fmt(v) : String(v), PAD.l - 4, sy(v));
+          });
+          ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+          ctx.fillText(xl, PAD.l + pw, PAD.t + ph + 24);
+          ctx.save(); ctx.translate(10, PAD.t); ctx.rotate(-Math.PI / 2);
+          ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(yl, 0, 0); ctx.restore();
+          return { sx: sx, sy: sy, pw: pw, ph: ph };
+        }
+        function clip(c, a) { c.ctx.save(); c.ctx.beginPath(); c.ctx.rect(PAD.l, PAD.t, a.pw, a.ph); c.ctx.clip(); }
+
+        // 損失の地形: log(L − Lmin) を 14 段階に塗り分け、低いほど濃い緑にする（2D と 3D で共通）
+        var LIGHT = [247, 245, 240], DARK = [13, 74, 56], LEVELS = 14;
+        var L_MAX = Math.max(loss(W_RANGE[0], B_RANGE[0]), loss(W_RANGE[0], B_RANGE[1]), loss(W_RANGE[1], B_RANGE[0]), loss(W_RANGE[1], B_RANGE[1]));
+        var C_LO = Math.log(0.05), C_HI = Math.log(L_MAX - LMIN);
+        function terrainColor(w, b) {
+          var t = (Math.log(loss(w, b) - LMIN + 0.05) - C_LO) / (C_HI - C_LO);
+          var lv = Math.min(LEVELS - 1, Math.max(0, Math.floor(t * LEVELS)));
+          var s = Math.pow(1 - lv / (LEVELS - 1), 1.4);
+          return [LIGHT[0] + (DARK[0] - LIGHT[0]) * s, LIGHT[1] + (DARK[1] - LIGHT[1]) * s, LIGHT[2] + (DARK[2] - LIGHT[2]) * s];
+        }
+        function buildTerrain(c, a) {
+          var pw = Math.round(a.pw * c.dpr), ph = Math.round(a.ph * c.dpr);
+          var off = document.createElement('canvas'); off.width = pw; off.height = ph;
+          var octx = off.getContext('2d'), img = octx.createImageData(pw, ph), d = img.data;
+          for (var py = 0; py < ph; py++) {
+            var b = B_RANGE[1] - (py + 0.5) / ph * (B_RANGE[1] - B_RANGE[0]);
+            for (var px = 0; px < pw; px++) {
+              var col = terrainColor(W_RANGE[0] + (px + 0.5) / pw * (W_RANGE[1] - W_RANGE[0]), b), o = (py * pw + px) * 4;
+              d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
+            }
+          }
+          octx.putImageData(img, 0, 0);
+          return { img: off, w: c.w, h: c.h };
+        }
+
+        function star(ctx, x, y, r) {
+          ctx.beginPath();
+          for (var k = 0; k < 10; k++) {
+            var ang = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.45 : r;
+            ctx.lineTo(x + rr * Math.cos(ang), y + rr * Math.sin(ang));
+          }
+          ctx.closePath();
+          ctx.fillStyle = '#FFFFFF'; ctx.fill();
+          ctx.strokeStyle = '#1C1917'; ctx.lineWidth = 1.2; ctx.stroke();
+        }
+
+        // ── 3D 曲面 ─────────────────────────────
+        // 高さは log(1 + L − Lmin)。谷底付近は二次関数のまま滑らかで、遠くは対数で圧縮される
+        var view = '2d', yaw = -0.75, pitch = 0.62, GRID = 36, HEIGHT = 1.1;
+        var H_MAX = Math.log(1 + L_MAX - LMIN);
+        function height(w, b) { return Math.log(1 + loss(w, b) - LMIN) / H_MAX * HEIGHT; }
+        function inRange(w, b) { return w >= W_RANGE[0] && w <= W_RANGE[1] && b >= B_RANGE[0] && b <= B_RANGE[1]; }
+        var surface = (function () {
+          var pts = [], quads = [], i, j;
+          for (i = 0; i <= GRID; i++) {
+            pts.push([]);
+            for (j = 0; j <= GRID; j++) {
+              var w = W_RANGE[0] + i / GRID * (W_RANGE[1] - W_RANGE[0]), b = B_RANGE[0] + j / GRID * (B_RANGE[1] - B_RANGE[0]);
+              pts[i].push([w, b, height(w, b)]);
+            }
+          }
+          for (i = 0; i < GRID; i++) {
+            for (j = 0; j < GRID; j++) {
+              var wc = W_RANGE[0] + (i + 0.5) / GRID * (W_RANGE[1] - W_RANGE[0]), bc = B_RANGE[0] + (j + 0.5) / GRID * (B_RANGE[1] - B_RANGE[0]);
+              quads.push({ c: [pts[i][j], pts[i + 1][j], pts[i + 1][j + 1], pts[i][j + 1]], col: terrainColor(wc, bc) });
+            }
+          }
+          return quads;
+        })();
+        // (w, b, 高さ) を [-1, 1] の箱に正規化し、yaw（水平回転）と pitch（見下ろす角度）で正射影する
+        function project(w, b, h, c) {
+          var u = (w - W_RANGE[0]) / (W_RANGE[1] - W_RANGE[0]) * 2 - 1;
+          var v = (b - B_RANGE[0]) / (B_RANGE[1] - B_RANGE[0]) * 2 - 1;
+          var z = h - HEIGHT / 2;
+          var x = u * Math.cos(yaw) - v * Math.sin(yaw), d = u * Math.sin(yaw) + v * Math.cos(yaw);
+          var up = z * Math.cos(pitch) + d * Math.sin(pitch);
+          var scale = Math.min(c.w, c.h) / 2 / 1.8;
+          return { x: c.w / 2 + x * scale, y: c.h / 2 + 4 - up * scale, depth: d * Math.cos(pitch) - z * Math.sin(pitch) };
+        }
+        function draw3D(c) {
+          var ctx = c.ctx, k, P = function (w, b, h) { return project(w, b, h, c); };
+          // 床の枠と目盛り
+          var floor = [[W_RANGE[0], B_RANGE[0]], [W_RANGE[1], B_RANGE[0]], [W_RANGE[1], B_RANGE[1]], [W_RANGE[0], B_RANGE[1]]];
+          ctx.strokeStyle = '#C5BFB2'; ctx.lineWidth = 1; ctx.beginPath();
+          floor.forEach(function (f, n) { var q = P(f[0], f[1], 0); n ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); });
+          ctx.closePath(); ctx.stroke();
+          ctx.font = '10px system-ui, sans-serif'; ctx.fillStyle = '#A8A29E'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          // 手前側の辺に目盛りを付ける
+          var bEdge = P(W_RANGE[0], B_RANGE[0], 0).depth > P(W_RANGE[0], B_RANGE[1], 0).depth ? B_RANGE[1] : B_RANGE[0];
+          var wEdge = P(W_RANGE[0], B_RANGE[0], 0).depth > P(W_RANGE[1], B_RANGE[0], 0).depth ? W_RANGE[1] : W_RANGE[0];
+          var bOff = bEdge === B_RANGE[0] ? -0.9 : 0.9, wOff = wEdge === W_RANGE[0] ? -0.45 : 0.45;
+          [0, 1, 2, 3, 4].forEach(function (v) { var q = P(v, bEdge + bOff, 0); ctx.fillText(String(v), q.x, q.y); });
+          [-4, -2, 0, 2, 4, 6].forEach(function (v) { var q = P(wEdge + wOff, v, 0); ctx.fillText(String(v), q.x, q.y); });
+          ctx.fillStyle = '#57534E';
+          var qw = P(2, bEdge + bOff * 2, 0), qb = P(wEdge + wOff * 2, 1, 0);
+          ctx.fillText('w', qw.x, qw.y); ctx.fillText('b', qb.x, qb.y);
+          // 曲面（奥から順に塗る）。面の傾きで明るさを変え、立体感を出す
+          var quads = surface.map(function (q) {
+            var s = q.c.map(function (p) { return P(p[0], p[1], p[2]); });
+            return { s: s, col: q.col, q: q, depth: (s[0].depth + s[1].depth + s[2].depth + s[3].depth) / 4 };
+          });
+          quads.sort(function (a, b) { return b.depth - a.depth; });
+          var dw = (W_RANGE[1] - W_RANGE[0]) / 2, db = (B_RANGE[1] - B_RANGE[0]) / 2;
+          quads.forEach(function (o) {
+            var p = o.q.c;
+            var nx = -((p[1][2] - p[0][2]) / ((p[1][0] - p[0][0]) / dw)), ny = -((p[3][2] - p[0][2]) / ((p[3][1] - p[0][1]) / db));
+            var shade = 0.78 + 0.22 * Math.max(0, (nx * -0.4 + ny * -0.5 + 0.77) / Math.sqrt(nx * nx + ny * ny + 1));
+            var rgb = 'rgb(' + Math.round(o.col[0] * shade) + ',' + Math.round(o.col[1] * shade) + ',' + Math.round(o.col[2] * shade) + ')';
+            ctx.beginPath();
+            o.s.forEach(function (q, n) { n ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); });
+            ctx.closePath();
+            ctx.fillStyle = rgb; ctx.fill();
+            ctx.strokeStyle = 'rgba(28,25,23,0.12)'; ctx.lineWidth = 0.6; ctx.stroke();
+          });
+          // ★と軌跡は曲面より少し浮かせて描く
+          var lift = 0.012, so = P(WOPT, BOPT, height(WOPT, BOPT) + lift);
+          star(ctx, so.x, so.y, 7);
+          ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1.8; ctx.beginPath();
+          var prevIn = false;
+          for (k = 0; k < path.length; k++) {
+            var p = path[k], ok = inRange(p[0], p[1]);
+            if (ok) {
+              var q = P(p[0], p[1], height(p[0], p[1]) + lift);
+              prevIn ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y);
+            }
+            prevIn = ok;  // 範囲外に出た区間は線を切る
+          }
+          ctx.stroke();
+          ctx.fillStyle = '#D97706';
+          path.forEach(function (p, n) {
+            if ((n > 40 && n % 10) || !inRange(p[0], p[1])) return;
+            var q = P(p[0], p[1], height(p[0], p[1]) + lift);
+            ctx.beginPath(); ctx.arc(q.x, q.y, 2, 0, Math.PI * 2); ctx.fill();
+          });
+          var s0 = P(start[0], start[1], height(start[0], start[1]) + lift);
+          ctx.strokeStyle = '#1C1917'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(s0.x, s0.y, 4.5, 0, Math.PI * 2); ctx.stroke();
+          var pc = cur();
+          if (inRange(pc[0], pc[1])) {
+            var qc = P(pc[0], pc[1], height(pc[0], pc[1]) + lift);
+            ctx.fillStyle = '#D97706'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(qc.x, qc.y, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          } else {
+            ctx.fillStyle = '#991B1B'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            ctx.fillText('現在地は表示範囲の外です', 8, 8);
+          }
+        }
+
+        var contourAxes = null;
+        function drawContour() {
+          var c = fit(cvC);
+          if (view === '3d') {
+            c.ctx.clearRect(0, 0, c.w, c.h);
+            contourAxes = null;
+            draw3D(c);
+            return;
+          }
+          c.ctx.clearRect(0, 0, c.w, c.h);
+          var ticksW = [0, 1, 2, 3, 4], ticksB = [-4, -2, 0, 2, 4, 6];
+          var a = axes(c, W_RANGE, B_RANGE, 'w', 'b', ticksW, ticksB);
+          contourAxes = a;
+          if (!terrain || terrain.w !== c.w || terrain.h !== c.h) terrain = buildTerrain(c, a);
+          c.ctx.drawImage(terrain.img, PAD.l, PAD.t, a.pw, a.ph);
+          clip(c, a);
+          var ctx = c.ctx;
+          star(ctx, a.sx(WOPT), a.sy(BOPT), 7);
+          // 軌跡（画面外に飛ぶ点も描けるよう、極端な値は手前で打ち切る）
+          ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1.6; ctx.beginPath();
+          var shown = path.filter(function (p) { return Math.abs(p[0]) < 1e4 && Math.abs(p[1]) < 1e4; });
+          shown.forEach(function (p, k) { k ? ctx.lineTo(a.sx(p[0]), a.sy(p[1])) : ctx.moveTo(a.sx(p[0]), a.sy(p[1])); });
+          ctx.stroke();
+          ctx.fillStyle = '#D97706';
+          shown.forEach(function (p, k) {
+            if (k > 40 && k % 10) return;  // 序盤は全点、以降は 10 エポックごとに点を打つ
+            ctx.beginPath(); ctx.arc(a.sx(p[0]), a.sy(p[1]), 2, 0, Math.PI * 2); ctx.fill();
+          });
+          // 開始点と現在地
+          ctx.strokeStyle = '#1C1917'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(a.sx(start[0]), a.sy(start[1]), 4.5, 0, Math.PI * 2); ctx.stroke();
+          var p = cur();
+          if (Math.abs(p[0]) < 1e4 && Math.abs(p[1]) < 1e4) {
+            ctx.fillStyle = '#D97706'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(a.sx(p[0]), a.sy(p[1]), 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        function drawData() {
+          var c = fit(cvD), ctx = c.ctx;
+          ctx.clearRect(0, 0, c.w, c.h);
+          var a = axes(c, [0, 10], [-4, 26], 'x', 'y', [0, 2, 4, 6, 8, 10], [0, 5, 10, 15, 20, 25]);
+          clip(c, a);
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = '#A8A29E'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(a.sx(0), a.sy(BOPT)); ctx.lineTo(a.sx(10), a.sy(WOPT * 10 + BOPT)); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(26,107,82,0.7)';
+          for (var i = 0; i < N; i++) { ctx.beginPath(); ctx.arc(a.sx(X[i]), a.sy(Y[i]), 2.6, 0, Math.PI * 2); ctx.fill(); }
+          var p = cur();
+          if (isFinite(p[0]) && isFinite(p[1]) && Math.abs(p[0]) < 1e6 && Math.abs(p[1]) < 1e6) {
+            ctx.strokeStyle = '#D97706'; ctx.lineWidth = 2.2;
+            ctx.beginPath(); ctx.moveTo(a.sx(0), a.sy(p[1])); ctx.lineTo(a.sx(10), a.sy(p[0] * 10 + p[1])); ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        function drawLoss() {
+          var c = fit(cvL), ctx = c.ctx;
+          ctx.clearRect(0, 0, c.w, c.h);
+          var ly = losses.map(function (l) { return Math.log10(Math.min(isFinite(l) ? l : DIVERGE * 10, DIVERGE * 10)); });
+          var ymax = Math.max(3, Math.ceil(Math.max.apply(null, ly))), xmax = Math.max(50, epoch());
+          var yt = []; for (var v = 0; v <= ymax; v++) yt.push(v);
+          yt.fmt = function (v) { return v === 0 ? '1' : '1e' + v; };
+          var xt = []; var stepX = xmax > 150 ? 50 : 10; for (var e = 0; e <= xmax; e += stepX) xt.push(e);
+          var a = axes(c, [0, xmax], [0, ymax], 'エポック', '', xt, yt);
+          clip(c, a);
+          ctx.setLineDash([4, 4]); ctx.strokeStyle = '#1A6B52'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(PAD.l, a.sy(Math.log10(LMIN))); ctx.lineTo(PAD.l + a.pw, a.sy(Math.log10(LMIN))); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1.8; ctx.beginPath();
+          ly.forEach(function (v, k) { k ? ctx.lineTo(a.sx(k), a.sy(v)) : ctx.moveTo(a.sx(k), a.sy(v)); });
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // ── 数値と状態メッセージ ─────────────────────
+        function num(v, d) {
+          if (!isFinite(v)) return '∞';
+          return Math.abs(v) >= 1e5 ? v.toExponential(1) : v.toFixed(d);
+        }
+        function draw() {
+          drawContour(); drawData(); drawLoss();
+          var p = cur(), g = grad(p[0], p[1]), l = losses[losses.length - 1], e = epoch();
+          el('gd-m-epoch').textContent = e + ' / ' + MAX_EPOCH;
+          el('gd-m-loss').textContent = num(l, 3);
+          el('gd-m-wb').textContent = num(p[0], 3) + ' ／ ' + num(p[1], 3);
+          el('gd-m-dw').textContent = num(g[0], 3);
+          el('gd-m-db').textContent = num(g[1], 3);
+          el('gd-m-start').textContent = '(' + start[0].toFixed(2) + ', ' + start[1].toFixed(2) + ')';
+          el('gd-step1').disabled = el('gd-step10').disabled = finished();
+
+          var st = el('gd-status'), msg, cls;
+          var okAt = losses.findIndex(function (v) { return v < LMIN * 1.01; });
+          if (diverged()) {
+            cls = 'is-bad';
+            msg = 'エポック ' + e + ' で損失が 100 万を超えたので止めました（発散）。学習率が大きすぎて、急な w 方向で谷を飛び越えるたびに損失が増えています。';
+          } else if (okAt >= 0) {
+            cls = 'is-ok';
+            msg = 'エポック ' + okAt + ' で、損失が最小値 ' + LMIN.toFixed(2) + ' の 1% 以内に入りました。';
+          } else if (e >= MAX_EPOCH) {
+            cls = 'is-slow';
+            msg = MAX_EPOCH + ' エポック後も、損失は最小値 ' + LMIN.toFixed(2) + ' より ' + ((l / LMIN - 1) * 100).toFixed(0) + '% 大きいままです。なだらかな b 方向がまだ途中です。';
+          } else if (e === 0) {
+            cls = 'is-run';
+            msg = '「▶ 自動再生」か「+1 エポック」で学習を始めてください。';
+          } else {
+            cls = 'is-run';
+            msg = '学習中です。';
+          }
+          st.className = 'gd-status ' + cls;
+          if (st.textContent !== msg) st.textContent = msg;  // 同じ文言なら読み上げを繰り返さない
+        }
+
+        // ── 操作 ───────────────────────────────
+        function setLr(v, fromSlider) {
+          lr = v;
+          if (!fromSlider) lrEl.value = Math.log10(v);
+          el('gd-lr-out').textContent = v.toFixed(4);
+          chips.forEach(function (ch) { ch.setAttribute('aria-pressed', String(Math.abs(parseFloat(ch.dataset.lr) - v) < 1e-9)); });
+          restart();
+        }
+        lrEl.addEventListener('input', function () {
+          // スライダーは対数目盛り。表の値の近くでは表の値にそろえる
+          var v = Math.pow(10, parseFloat(lrEl.value));
+          [0.001, 0.01, 0.02, 0.03].forEach(function (s) { if (Math.abs(Math.log10(v / s)) < 0.012) v = s; });
+          setLr(v, true);
+        });
+        chips.forEach(function (ch) { ch.addEventListener('click', function () { setLr(parseFloat(ch.dataset.lr), false); }); });
+        el('gd-play').addEventListener('click', play);
+        el('gd-step1').addEventListener('click', function () { stop(); step(1); });
+        el('gd-step10').addEventListener('click', function () { stop(); step(10); });
+        el('gd-reset').addEventListener('click', restart);
+        el('gd-origin').addEventListener('click', function () { start = [0, 0]; restart(); });
+        var drag = null;
+        cvC.addEventListener('pointerdown', function (ev) {
+          if (view === '3d') {
+            drag = { x: ev.clientX, y: ev.clientY, yaw: yaw, pitch: pitch };
+            cvC.setPointerCapture(ev.pointerId);
+            cvC.classList.add('is-dragging');
+            return;
+          }
+          if (!contourAxes) return;
+          var r = cvC.getBoundingClientRect(), a = contourAxes;
+          var fx = (ev.clientX - r.left - PAD.l) / a.pw, fy = (ev.clientY - r.top - PAD.t) / a.ph;
+          if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+          start = [W_RANGE[0] + fx * (W_RANGE[1] - W_RANGE[0]), B_RANGE[1] - fy * (B_RANGE[1] - B_RANGE[0])];
+          restart();
+        });
+        cvC.addEventListener('pointermove', function (ev) {
+          if (!drag) return;
+          yaw = drag.yaw + (ev.clientX - drag.x) * 0.01;
+          pitch = Math.min(1.45, Math.max(0.12, drag.pitch + (ev.clientY - drag.y) * 0.01));
+          drawContour();
+        });
+        function endDrag() { drag = null; cvC.classList.remove('is-dragging'); }
+        cvC.addEventListener('pointerup', endDrag);
+        cvC.addEventListener('pointercancel', endDrag);
+        var viewBtns = Array.prototype.slice.call(document.querySelectorAll('#gd-playground .gd-view button'));
+        viewBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            view = btn.dataset.view;
+            viewBtns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
+            cvC.classList.toggle('is-3d', view === '3d');
+            el('gd-3d-hint').hidden = view !== '3d';
+            cvC.setAttribute('aria-label', view === '3d'
+              ? '損失を高さにした 3D 曲面と、(w, b) の軌跡。ドラッグか Shift と矢印キーで視点を回せます'
+              : 'w を横軸、b を縦軸にした損失の等高線図。クリックした位置が開始点になります');
+            drawContour();
+          });
+        });
+        // キーボードでは矢印キーで開始点を 0.25 ずつ動かす（3D では Shift + 矢印キーで視点を回す）
+        cvC.addEventListener('keydown', function (ev) {
+          var d = { ArrowLeft: [-0.25, 0], ArrowRight: [0.25, 0], ArrowUp: [0, 0.25], ArrowDown: [0, -0.25] }[ev.key];
+          if (!d) return;
+          ev.preventDefault();
+          if (view === '3d' && ev.shiftKey) {
+            yaw += d[0] * 0.6;
+            pitch = Math.min(1.45, Math.max(0.12, pitch + d[1] * 0.4));
+            drawContour();
+            return;
+          }
+          start = [Math.min(W_RANGE[1], Math.max(W_RANGE[0], start[0] + d[0])), Math.min(B_RANGE[1], Math.max(B_RANGE[0], start[1] + d[1]))];
+          restart();
+        });
+        var resizeTimer = null;
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(draw, 100);
+        });
+
+        setLr(0.01, false);
+      })();
+      </script>
     </section>
 
     <!-- ━━━ まとめ ━━━ -->
@@ -684,22 +1268,22 @@ plt.show()</code></pre>
       <h2 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:1rem; letter-spacing:0.02em;">このセクションのまとめ</h2>
       <ol style="font-size:0.875rem; color:#C8E6DA; line-height:2; padding-left:1.25rem; margin-bottom:1.25rem;">
         <li>
-          <strong>線形回帰</strong> は $\hat{y} = wx + b$ というパラメータ付きの関数。
-          学習とは $w, b$ を「データに合う値」に調整すること。
+          線形回帰は $\hat{y} = wx + b$ というパラメータ付きの関数です。
+          学習では、$w, b$ を「データに合う値」に調整します。
         </li>
         <li>
-          <strong>損失関数（MSE）</strong> は「予測がどれだけ外れているか」を1つの数値で表す指標。
-          これを最小化することが学習のゴール。
+          損失関数（MSE）は「予測がどれだけ外れているか」を1つの数値で表す指標です。
+          この損失を最小化することが学習のゴールになります。
         </li>
         <li>
-          <strong>勾配降下法</strong> は「損失の傾き（勾配）を計算して、坂を下る方向にパラメータを少し動かす」
-          という手続きの繰り返し。
+          勾配降下法は「損失の傾き（勾配）を計算して、坂を下る方向にパラメータを少し動かす」
+          という手続きの繰り返しです。
         </li>
       </ol>
       <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:1rem; font-size:0.85rem; color:#A7D4C0;">
-        <strong style="color:#FFFFFF;">次のステップ：</strong>
+        次のステップ：
         線形回帰では解けない問題（XOR・画像分類など）を見て、
-        なぜニューラルネットワークが必要になるのかを確認します。<br>
+        なぜ NN が必要になるのかを確認します。<br>
         <a href="supplement_neural_network.html" class="no-print">→ 補足資料：ニューラルネットワーク</a>
       </div>
     </section>
