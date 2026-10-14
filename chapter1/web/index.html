@@ -335,7 +335,7 @@
           </li>
           <li style="display:flex; align-items:flex-start; gap:0.75rem;">
             <span style="flex-shrink:0; width:1.25rem; height:1.25rem; border-radius:50%; background:var(--green); color:#FFFFFF; font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.15rem;">4</span>
-            <span style="font-size:0.875rem; color:var(--text-sub);">Self-Attention を 自分で実装できます（Q・K・V の役割／射影行列が必要な理由／因果マスク（Causal Mask））</span>
+            <span style="font-size:0.875rem; color:var(--text-sub);">Attention（ある言葉を理解するとき、ほかのどの言葉をどれくらい参考にするかを決める仕組み）を自分で実装できます（Q・K・V の役割／$W^Q$・$W^K$ が必要な理由／因果マスク（Causal Mask））</span>
           </li>
         </ol>
       </div>
@@ -501,9 +501,10 @@
             <span class="time-chip">講義 25分</span>
           </div>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.625rem;">
-            NN の構造的な限界（語順・長距離依存）を示し、Attention 機構がどう解決するかを説明します。
-            Self-Attention の直感である「どのトークンに注目するか」と、因果マスクが生む
-            「左から右にしか書けない」という性質を、図解で理解しましょう。
+            単語を数字の並び（ベクトル）に置き換える方法と、Attention の考え方を説明します。
+            Attention は、ある言葉を理解するとき、ほかのどの言葉をどれくらい参考にするかを決める仕組みです。
+            「太郎はリンゴを食べた。それは甘かった。」の「それ」が「リンゴ」を参考にする例で、計算の流れを追います。
+            後ろの単語を参考にしない「因果マスク」が、LLM が左から右へ 1 単語ずつ書く理由になっていることも図解で確かめましょう。
             Self-Attention と因果マスクはハンズオン③ Part 2〜3 で実装し、Transformer ブロックの組み立ては付録 C で扱います。
           </p>
           <div class="no-print" style="display:flex; flex-wrap:wrap; gap:0.5rem;">

@@ -387,9 +387,10 @@
       <div class="note-green">
         <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">因果マスク（Causal Mask）</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          Decoder-only モデルは Self-Attention の計算で、「未来のトークンを参照しない」よう
-          上三角行列でマスクします。この因果マスクにより、1 回の順伝播で全ポジションの損失を同時に計算でき、
-          学習効率が上がります。
+          Decoder-only モデルは Attention の計算で、各トークンが自分より後ろのトークンを参考にする割合を 0% にします。
+          これを因果マスクと呼びます。
+          因果マスクがあるので、1 回の計算で文中のすべての位置について「次のトークン」の予測と答え合わせを同時に行え、
+          学習の効率が上がります。
         </p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.5rem;">
           マスクを外した場合、モデルは「次のトークン」をそのまま覗き見できます。

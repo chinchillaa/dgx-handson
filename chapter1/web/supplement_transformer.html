@@ -160,6 +160,52 @@
       .no-print { display: none; }
       a { color: inherit; text-decoration: none; }
     }
+    /* ── 高校生向けの説明部品 ── */
+    .lead { font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.75rem; }
+    .lead ul.terms, .lead ol.steps { margin:0; }
+    ul.terms { list-style:disc; padding-left:1.25rem; font-size:0.86rem; line-height:1.8; display:flex; flex-direction:column; gap:0.3rem; margin:0.4rem 0; }
+    ol.steps { list-style:decimal; padding-left:1.4rem; font-size:0.88rem; line-height:1.8; display:flex; flex-direction:column; gap:0.3rem; }
+    .card-cap { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:1rem; }
+    .cap { font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; line-height:1.7; }
+    .note-title { font-size:0.83rem; font-weight:700; margin-bottom:0.3rem; }
+    .sub-h { font-size:0.98rem; font-weight:700; color:var(--text); margin:2.25rem 0 0.75rem; padding-left:0.6rem; border-left:3px solid var(--green-mid); }
+    .two-col { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; align-items:start; }
+    table.simple { width:100%; border-collapse:collapse; font-size:0.83rem; }
+    table.simple th, table.simple td { padding:0.55rem 0.6rem; border-bottom:1px solid var(--border); vertical-align:top; text-align:left; line-height:1.7; }
+    table.simple tr:last-child th, table.simple tr:last-child td { border-bottom:none; }
+    table.simple th { color:var(--green-mid); font-weight:700; white-space:nowrap; width:1%; }
+    table.simple td { color:var(--text-sub); }
+    .table-wrap { overflow-x:auto; margin-bottom:1rem; }
+    table.calc { width:100%; border-collapse:collapse; font-size:0.8rem; }
+    table.calc th, table.calc td { padding:0.4rem 0.55rem; border-bottom:1px solid var(--border); text-align:left; color:var(--text-sub); }
+    table.calc thead th { font-size:0.72rem; color:var(--text-muted); font-weight:700; }
+    table.calc tbody th { font-weight:700; color:var(--text); white-space:nowrap; }
+    table.calc tr.hl th, table.calc tr.hl td { background:var(--green-bg); color:var(--green); }
+    .step-label { font-size:0.8rem; font-weight:700; color:var(--green-mid); margin:0.75rem 0 0.4rem; }
+    .ratio-table { display:flex; flex-direction:column; gap:3px; }
+    .rt-row { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:3px; text-align:center; }
+    .rt-row span { font-size:0.74rem; padding:0.35rem 0; border-radius:4px; background:var(--surface2); color:var(--text-sub); white-space:nowrap; overflow:hidden; }
+    .rt-row:first-child span { background:transparent; font-weight:700; color:var(--text); }
+    .rt-row span.hl { background:var(--green); color:#FFFFFF; font-weight:700; }
+    .rt-row:first-child span.hl { background:transparent; color:var(--green); }
+    details.more { border:1px solid var(--border); border-radius:8px; background:var(--surface); margin-top:1rem; }
+    details.more > summary { cursor:pointer; padding:0.7rem 1rem; font-size:0.83rem; font-weight:700; color:var(--green-mid); list-style:none; }
+    details.more > summary::-webkit-details-marker { display:none; }
+    details.more > summary::before { content:"＋"; display:inline-block; width:1.3rem; color:var(--green-mid); }
+    details.more[open] > summary::before { content:"−"; }
+    details.more > summary:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; border-radius:8px; }
+    .more-body { padding:0 1rem 1rem 2.3rem; font-size:0.82rem; color:var(--text-sub); line-height:1.8; display:flex; flex-direction:column; gap:0.6rem; }
+    .more-body code { background:var(--surface2); padding:1px 5px; border-radius:3px; font-size:0.78rem; }
+    @media (max-width: 560px) {
+      .two-col { grid-template-columns:minmax(0, 1fr); }
+      .more-body { padding-left:1rem; }
+      .rt-row span { font-size:0.66rem; }
+      table.simple th { white-space:normal; width:6.5rem; }
+    }
+    .summary-block code { overflow-wrap:anywhere; }
+    @media print { details.more > .more-body { display:flex; } }
+    /* 幅の狭い画面では、長い数式だけを横スクロールさせる */
+    .katex-display { overflow-x:auto; overflow-y:hidden; padding:0.15rem 0; }
   </style>
   <!-- 共通テーマ（フォント + デザインシステム）※ページ内 <style> より後に読み込む -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,7 +223,7 @@
         <span>›</span>
         <span>補足資料</span>
       </div>
-      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+      <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:0.5rem 1rem;">
         <div>
           <p class="label mb-1">Section 1-3 Supplement</p>
           <h1 class="text-2xl font-bold" style="color:var(--text);">Transformer</h1>
@@ -197,19 +243,16 @@
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:0.75rem;">読み始める前に</p>
       <h2 style="font-size:1.2rem; font-weight:800; color:#FFFFFF; line-height:1.55; margin-bottom:1rem;">
         LLM がしているのは、<br>
-        <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を統計的に予測すること</span>だけです。
+        <span style="text-decoration:underline; text-decoration-color:#7DD3B8; text-underline-offset:4px;">次に来る単語（トークン）を予測すること</span>だけです。
       </h2>
       <p style="font-size:0.86rem; color:#C8E6DA; line-height:1.9;">
-        LLM は膨大なテキストを読んで、「この文脈の次に来やすい単語は何か」を学びます。
-        そして予測し、選び、また予測するという処理を 1 トークンずつ繰り返しているだけです。<br><br>
-        <strong>そしてこの本質は、モデルがどれだけ新しく複雑になっても変わりません。</strong>
-        パラメータが数千億個になっても、思考の過程を書き出す推論モデルでも、
-        画像や音声を扱うマルチモーダルモデルでも、中核にあるのは同じ次トークン予測です。
-        変わったのは予測の精度と、扱えるトークンの種類だけです。<br><br>
-        LLM が人間のように考えて見えるのは、
-        <em>この単純な仕組みを途方もない量のデータで鍛え上げた結果</em>です。
-        どこかで別の何かが起きているわけではありません。
-        このページで扱う Attention も Transformer も、この予測を上手くやるための仕組みにすぎません。
+        LLM は大量の文章を読んで、「この続きに来やすい単語は何か」を学びます。
+        文章を書くときは、次の単語を予測して 1 つ選び、それを付け足してまた予測する、という作業を繰り返しています。<br><br>
+        <strong>この仕組みは、モデルがどれだけ大きく新しくなっても変わりません。</strong>
+        パラメータが数千億個のモデルも、考える過程を書き出すモデルも、画像や音声を扱うモデルも、中心にあるのは同じ「次の単語の予測」です。<br><br>
+        LLM が人間のように考えているように見えるのは、
+        <em>この単純な仕組みを、ものすごい量の文章で鍛えた結果</em>です。
+        このページで学ぶ Attention や Transformer は、この予測を上手に行うための仕組みです。
       </p>
     </div>
 
@@ -217,51 +260,86 @@
     <div class="note-green">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--green-mid); margin-bottom:0.5rem;">このページで理解すること</p>
       <ol style="font-size:0.85rem; color:var(--green); line-height:1.9; padding-left:1.25rem;">
-        <li>自然言語をベクトルに変換すると、数学的な操作ができるようになる仕組みを掴みます</li>
-        <li>自己注意機構（Self-Attention）が「あいまい検索できる辞書」であることを掴みます</li>
-        <li>なぜ $W^Q, W^K, W^V$ という射影行列が必要なのかを掴みます</li>
-        <li>因果マスクが「LLM は左から右にしか書けない」という性質を生むことを掴みます</li>
-        <li>Transformer の全体構造と、LLM へのつながりを掴みます</li>
+        <li>単語を数字の並び（ベクトル）に置き換えると、計算で意味を扱えるようになること</li>
+        <li>Attention が「ある言葉を理解するとき、ほかのどの言葉をどれくらい参考にするか」を決める仕組みであること</li>
+        <li>Attention の数式の各記号が何を表しているか</li>
+        <li>因果マスク（Causal Mask）が、未来の単語を参考にしないための仕組みであること</li>
+        <li>Transformer と LLM の全体像</li>
       </ol>
       <p style="font-size:0.75rem; color:var(--green-mid); margin-top:0.6rem;">
-        数式の細部より<em>「なぜこうなっているか」という直感</em>を優先してください。
+        使う数学は、高校で習うベクトルの内積までです。
+        「もっと詳しく」の欄は発展の内容なので、最初は読み飛ばしてかまいません。
       </p>
     </div>
 
-    <!-- ━━━ 前置き：言語を数値に変換する ━━━ -->
+    <!-- ━━━ Section 0：言葉を数字に置き換える ━━━ -->
     <section>
       <div class="section-rule">
         <div class="num">0</div>
         <div class="titles">
           <p class="label">前置き</p>
-          <h2 class="text-lg font-bold" style="color:var(--text);">自然言語を「数値」に変換する</h2>
+          <h2 class="text-lg font-bold" style="color:var(--text);">言葉を「数字の並び」に置き換える</h2>
         </div>
       </div>
 
-      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        これまで扱ってきた線形回帰や MNIST 分類は、入力がはじめから「数値」でした。
-        しかし単語や文章といった自然言語は、そのままでは数学的に操作できません。
-        <strong style="color:var(--text);">AI が言語を扱うためのカギは、言語を数値ベクトルに変換すること</strong>です。
-      </p>
+      <div class="lead">
+        <p>
+          <strong>埋め込み（Embedding）</strong>は、単語を数字の並びに置き換える処理です。
+          コンピュータは文字のままでは計算できないので、AI が言葉を扱うには、まず言葉を数字にする必要があります。
+        </p>
+        <p>埋め込みを学ぶと、次の 2 つの用語が登場します。</p>
+        <ul class="terms">
+          <li><strong>トークン</strong>：文章を区切った、AI が扱う単位です。おおむね単語や、単語の一部にあたります。</li>
+          <li><strong>ベクトル</strong>：数字の並びのことです。たとえば (0.12, −0.84, 0.33) は 3 つの数字が並んだベクトルです。</li>
+        </ul>
+      </div>
 
-      <!-- 埋め込みの概念 -->
+      <!-- トークン化 → 埋め込みの流れ -->
       <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">単語埋め込み（Word Embedding）の考え方</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+        <p class="card-cap">文章が数字になるまでの流れ</p>
+        <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; row-gap:0.75rem;">
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">文章</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「リンゴを食べた」</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--amber); font-weight:600;">トークンに区切る</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「リンゴ」「を」「食べた」</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <div style="text-align:center; min-width:6rem;">
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">番号にする</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[3021, 12, 845]</div>
+          </div>
+          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
+          <div style="text-align:center; min-width:6.5rem;">
+            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--green); font-weight:600;">ベクトルにする</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[0.12, −0.84, …] × 3</div>
+          </div>
+        </div>
+        <p class="cap">
+          番号は説明のための例です。
+          番号をベクトルにするときは、「番号ごとにベクトルを書いた大きな表」から、その番号の行を取り出します。
+          ハンズオン③で使う Llama-3.2-1B では、1 つのトークンが 2048 個の数字の並びになります。
+        </p>
+      </div>
+
+      <!-- 意味空間 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">意味の近い単語は、近い場所に置かれる</p>
+        <div class="two-col">
           <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
             <p style="margin-bottom:0.75rem;">
-              各単語を 高次元の実数ベクトル に対応させます。
-              ベクトルの各次元は「その単語の意味的な特性」を暗黙的に表現します。
-            </p>
-            <p style="margin-bottom:0.75rem;">
-              例えば 512 次元のベクトルなら、単語は 512 個の実数の組として表現されます。
-              <em>意味が近い単語は、ベクトル空間上でも近い位置に来る</em>ように学習されます。
+              ベクトルは、地図の上の位置（座標）だと考えることができます。
+              AI は大量の文章から学ぶうちに、意味の近い単語ほど近い場所に置くようになります。
             </p>
             <p>
-              ベクトルになると、足し算・引き算・内積といった数学的操作が直接適用できます。
+              右の図は、2 つの数字だけで描いたイメージです。
+              「王様」と「女王」、「男性」と「女性」は、それぞれ横に同じだけずれた位置にあります。
+              この横のずれが「性別」の違いを表しています。
             </p>
           </div>
-          <!-- 意味空間のSVG図 -->
           <svg viewBox="0 0 200 200" style="width:100%; max-width:200px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
             <!-- 背景グリッド -->
             <line x1="20" y1="180" x2="190" y2="180" stroke="var(--border)" stroke-width="1"/>
@@ -294,75 +372,46 @@
 
       <!-- 有名な式 -->
       <div class="card-math" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">ベクトル演算で意味の類推ができる</p>
+        <p class="card-cap">ベクトルの足し算・引き算で、意味を計算できる</p>
         <div style="text-align:center; margin-bottom:1rem;">
           $$\vec{v}(\text{王様}) - \vec{v}(\text{男性}) + \vec{v}(\text{女性}) \approx \vec{v}(\text{女王})$$
         </div>
         <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-          これは「王様ベクトルから男性的な方向を引き、女性的な方向を加えると、女王ベクトルに近づく」ことを意味します。
-          <strong style="color:var(--text);">意味の計算が、ベクトルの足し算・引き算として実現できる</strong>のです。
-          これはベクトル化によってはじめて可能になる操作です。
+          $\vec{v}(\text{王様})$ は「王様」のベクトルです。
+          王様から「男性」を引いて「女性」を足すと、女王のすぐ近くの位置になります。
+          言葉を数字にしたことで、<strong style="color:var(--text);">意味の関係を足し算・引き算で扱えるようになった</strong>わけです。
         </p>
       </div>
 
       <!-- 解説動画（chapter1/manim/scenes で生成） -->
       <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：単語ベクトルの足し算・引き算で意味を計算する（約 30 秒）</p>
+        <p class="card-cap">解説動画：単語ベクトルの足し算・引き算で意味を計算する（約 30 秒）</p>
         <video controls preload="metadata" playsinline poster="media/ch1_embedding.jpg" aria-label="王様・女王・男性・女性を 2 次元の平面に置き、王様のベクトルから男性を引いて女性を足すと女王の近くに着地するまでのアニメーション"
                style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
           <source src="media/ch1_embedding.mp4" type="video/mp4">
           お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_embedding.mp4">動画ファイル</a>を直接開いてください。
         </video>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
-          4 単語の位置は上の図と同じで、2 次元に描いたイメージです。
+        <p class="cap">
+          4 単語の位置は上の図と同じです。
           王様から男性を引いて女性を足すと、着地点が女王のすぐ近くに来ます。
-          引いて足した分は、「男性→女性」と同じ「性別」方向の矢印になります。
         </p>
       </div>
 
-      <!-- トークン化 → 埋め込みの流れ -->
-      <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">テキストが数値になるまでの流れ</p>
-        <!-- パイプライン図 -->
-        <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; row-gap:0.75rem;">
-          <!-- ステップ1 -->
-          <div style="text-align:center; min-width:6rem;">
-            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">テキスト</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「猫が好き」</div>
-          </div>
-          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
-          <!-- ステップ2 -->
-          <div style="text-align:center; min-width:6rem;">
-            <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--amber); font-weight:600;">トークン化</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">「猫」「が」「好き」</div>
-          </div>
-          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
-          <!-- ステップ3 -->
-          <div style="text-align:center; min-width:6rem;">
-            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">トークンID</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[2847, 14, 391]</div>
-          </div>
-          <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
-          <!-- ステップ4 -->
-          <div style="text-align:center; min-width:6.5rem;">
-            <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--green); font-weight:600;">埋め込み</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem;">[0.12, −0.84, …]×3</div>
-          </div>
+      <details class="more">
+        <summary>もっと詳しく：埋め込みの表と、ベクトルにする理由</summary>
+        <div class="more-body">
+          <p>
+            埋め込みの正体は、「語彙の数 × 次元数」の大きな表（行列）です。
+            トークンの番号を行の番号として使い、その行のベクトルを取り出します。
+            この表の中身も、ほかのパラメータと一緒に学習で決まります。
+          </p>
+          <p>
+            ニューラルネットワーク（NN）の計算は、すべて「行列の掛け算＋活性化関数」です。
+            テキストをベクトルにすると、言語の処理にも NN の計算をそのまま使えます。
+            Transformer はこのベクトルの列を受け取り、各ベクトルを文脈に合わせて作り変えていきます。
+          </p>
         </div>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:1rem; line-height:1.7;">
-          埋め込み（Embedding）は 大きな行列の参照 です。語彙サイズ × 次元数 の行列を学習し、
-          トークンIDを行インデックスとして対応するベクトルを取り出します。
-        </p>
-      </div>
-
-      <div class="note-amber">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜベクトル化が重要なのか</p>
-        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          ニューラルネットワーク（NN）の演算はすべて「行列の掛け算＋活性化関数」です。
-          テキストを実数ベクトルに変換すると、<strong>言語処理にも NN の標準的な演算をそのまま適用できる</strong>ようになります。
-          Transformer はこのベクトル列を入力として受け取り、各ベクトルを文脈に応じて変換していく構造です。
-        </p>
-      </div>
+      </details>
     </section>
 
     <!-- ━━━ Section 1：RNN の限界 ━━━ -->
@@ -371,19 +420,21 @@
         <div class="num">1</div>
         <div class="titles">
           <p class="label">Section 1</p>
-          <h2 class="text-lg font-bold" style="color:var(--text);">Transformer 以前の問題：RNN の限界</h2>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Attention が生まれる前：RNN の弱点</h2>
         </div>
       </div>
 
-      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        埋め込みでテキストをベクトル列にしても、
-        <strong style="color:var(--text);">文脈（前後の関係）をどうやって捉えるか</strong>という課題が残ります。
-        Transformer 以前は RNN（再帰型NN）がその役割を担っていましたが、根本的な限界がありました。
-      </p>
+      <div class="lead">
+        <p>
+          単語をベクトルにしても、まだ「単語どうしの関係（文脈）」は分かりません。
+          Attention が登場する前は、<strong>RNN（再帰型ニューラルネットワーク）</strong>が文脈を扱っていました。
+          RNN は、単語を先頭から 1 つずつ順番に読み、それまでの内容を 1 つのメモにまとめて次へ渡す仕組みです。
+          このメモを<strong>隠れ状態</strong>と呼び、図の $h_1, h_2, \dots$ がそれにあたります。
+        </p>
+      </div>
 
       <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">RNN の処理イメージ</p>
-        <!-- RNN 図 -->
+        <p class="card-cap">RNN の読み方：メモを順番に渡していく</p>
         <svg viewBox="0 0 480 110" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
           <!-- トークン -->
           <g font-size="10" fill="var(--text-sub)" text-anchor="middle">
@@ -430,174 +481,38 @@
         </svg>
       </div>
 
-      <!-- RNN の問題点 -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
-        <div class="note-red" style="grid-column:1 / -1;">
-          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題⓪ 固定次元ボトルネック（Attention 誕生の直接の動機）</p>
-          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
-            当時主流だった Encoder-Decoder モデルは、入力文全体の意味を
-            <strong>固定次元のベクトル 1 本</strong>に押し込んでから翻訳を始めます。
-            文が 5 単語でも 50 単語でも、情報を通す管の太さ（ベクトルの次元数）は同じです。
-            そのため、詰め込める情報量には上限があります。<br>
-            実際、文が長くなるほど翻訳精度が下がることが報告されています
-            （Cho et al., 2014／Bahdanau et al., 2014）。
-            「管を太くするのではなく、<em>必要なときに元の文を見に行けばよい</em>」という発想から生まれたのが Attention です。
+      <div class="lead">
+        <p>RNN には、伝言ゲームと同じ 2 つの弱点がありました。</p>
+      </div>
+      <div class="two-col" style="margin-bottom:1.25rem;">
+        <div class="note-red">
+          <p class="note-title" style="color:var(--red);">弱点① 前のほうを忘れる</p>
+          <p style="font-size:0.8rem; color:#7F1D1D; line-height:1.7;">
+            メモは何度も書き直されるので、文の最初の情報は、最後に届くころには薄れています。
+            「私は……（長い文）……食べた」の「私」と「食べた」を結びつけるのが苦手です。
           </p>
         </div>
         <div class="note-red">
-          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題① 長距離依存の忘れ</p>
-          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
-            入力を 1 語ずつ逐次処理するため、文の先頭の情報は末尾に到達するまでに薄れます。
-            学習のときも、誤差の勾配が何ステップもさかのぼるうちに小さくなる（勾配消失）ため、離れた語どうしの関係を学びにくくなります。
-            「<em>私は…（長い文）…食べた</em>」の「私」と「食べた」の関係を捉えにくくなります。
-          </p>
-        </div>
-        <div class="note-red">
-          <p style="font-size:0.78rem; font-weight:700; color:var(--red); margin-bottom:0.4rem;">問題② 並列化できない</p>
-          <p style="font-size:0.78rem; color:#7F1D1D; line-height:1.7;">
-            $h_t$ は $h_{t-1}$ に依存するため、各ステップは順番に計算しなければなりません。
-            GPU の並列演算能力を活かせず、長い文では処理が遅くなります。
+          <p class="note-title" style="color:var(--red);">弱点② 順番待ちで速くできない</p>
+          <p style="font-size:0.8rem; color:#7F1D1D; line-height:1.7;">
+            $h_2$ を作るには $h_1$ が必要なので、1 単語ずつ順番に計算するしかありません。
+            同時にたくさん計算するのが得意な GPU を活かせず、長い文ほど時間がかかります。
           </p>
         </div>
       </div>
 
-      <!-- 解説動画（chapter1/manim/scenes で生成） -->
-      <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：RNN の逐次処理と Self-Attention の一括処理（約 24 秒）</p>
-        <video controls preload="metadata" playsinline poster="media/ch1_rnn_vs_attention.jpg" aria-label="私・は・昨日・食べた・寿司 の 5 トークンで、RNN が隠れ状態を順番に渡して「私」の情報が薄れていく様子と、Self-Attention が「食べた」から全トークンへ一度につなぐ様子を比べるアニメーション"
-               style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
-          <source src="media/ch1_rnn_vs_attention.mp4" type="video/mp4">
-          お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_rnn_vs_attention.mp4">動画ファイル</a>を直接開いてください。
-        </video>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
-          上段の RNN は、隠れ状態を $h_1$ から $h_5$ まで 1 ステップずつ順番に計算します。
-          「私」の情報が薄れていく割合はイメージで、実測値ではありません。
-          下段の Self-Attention は、「食べた」から 5 トークンへの注目度（Section 2 の図と同じ値）を一度に計算します。
-        </p>
-      </div>
-
-      <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Transformer が解決したこと</p>
+      <div class="note-green" style="margin-bottom:1.25rem;">
+        <p class="note-title" style="color:var(--green);">Attention の解決策：全部の単語を直接見る</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          Transformer は RNN を使わず、<strong>「注意機構（Attention）」だけで文脈を捉えます。</strong>
-          全トークン間の関係を一度に計算するので、①長距離依存を直接扱えるようになり、②並列計算もできるようになります。
+          Attention は、メモを順番に渡しません。
+          各単語が、文の中のすべての単語を<strong>直接、一度に</strong>見に行きます。
+          そのため、遠くの単語も忘れず、全部の単語の計算を同時に進められます。
+          下の図は、「食べた」が各単語をどれくらい参考にするかを表したイメージです。
         </p>
       </div>
 
-      <div class="note-amber" style="margin-top:1.25rem;">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">コラム：Attention の原点は「翻訳の単語対応」だった</p>
-        <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
-          Attention が最初に提案されたのは 2014 年、Transformer より 3 年前の
-          機械翻訳の論文です（Bahdanau, Cho, Bengio）。着想は素朴で、
-          <strong>翻訳には単語同士の対応があるのだから、それを明示的にモデルに持たせよう</strong>というものでした。<br>
-          「あなたはアイリスですか」を "Are you Iris?" に訳すなら、<code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">you</code>←「あなた」、
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">Iris</code>←「アイリス」、
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">?</code>←「か」という対応です。
-          出力する単語ごとに、入力のどこを見るべきかを重みで表したわけです。<br>
-          面白いことに、この原論文のタイトルや主な用語は "align"（対応づけ）で、
-          "attention" は本文で仕組みを説明する箇所（"a mechanism of attention in the decoder"）に登場する程度です。
-          仕組みは主に「soft alignment（やわらかい対応づけ）」「soft search」と呼ばれています。
-          この呼び名のほうが、実は仕組みを正確に表しています。<br>
-          <span style="font-size:0.78rem;">Bahdanau et al., <em>Neural machine translation by jointly learning to align and translate</em> (arXiv:1409.0473)</span>
-        </p>
-      </div>
-    </section>
-
-    <!-- ━━━ Section 2：Self-Attention ━━━ -->
-    <section>
-      <div class="section-rule">
-        <div class="num">2</div>
-        <div class="titles">
-          <p class="label">Section 2</p>
-          <h2 class="text-lg font-bold" style="color:var(--text);">自己注意機構（Self-Attention）</h2>
-        </div>
-      </div>
-
-      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        Self-Attention は「<strong style="color:var(--text);">あるトークンが、文中の他のどのトークンと強く関連しているか</strong>」を数値で計算する仕組みです。
-        たとえば英語の "bank" は、"go to the bank to deposit money" なら「銀行」、"sit on the river bank" なら「土手」を指します。
-        どちらの意味かは文脈で決まります。
-        Self-Attention はこの文脈依存の意味を埋め込みに反映させます。
-      </p>
-
-      <!-- Q/K/V の直感 -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Query・Key・Value の直感</p>
-        <div style="font-size:0.85rem; color:var(--text-sub); line-height:1.85;">
-          <p style="margin-bottom:0.75rem;">
-            各トークンのベクトルから、3種類の異なるベクトルを生成します。
-          </p>
-          <table style="width:100%; font-size:0.83rem; border-collapse:collapse; margin-bottom:0.75rem;">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border);">
-                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700; width:5rem;">記号</th>
-                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">名前</th>
-                <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">役割のたとえ</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">Q</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text);">Query（質問）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">自分は何を探しているか（辞書に打ち込む検索語）</td>
-              </tr>
-              <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">K</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text);">Key（検索キー）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">自分は何者だと名乗るか（辞書のキー）</td>
-              </tr>
-              <tr>
-                <td style="padding:0.4rem 0.75rem; font-family:monospace; color:var(--green-mid); font-weight:700;">V</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text);">Value（値）</td>
-                <td style="padding:0.4rem 0.75rem; color:var(--text-sub);">注目された結果、実際に渡す情報（辞書の値）</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75;">
-            Query と Key の内積がそのトークン間の「関連度スコア」になります。
-            スコアを softmax で確率分布に変換し、Value の加重和を取ることで
-            <em>文脈を反映した新しい表現ベクトル</em>が得られます。
-          </p>
-        </div>
-      </div>
-
-      <!-- 辞書の比喩 -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Attention は「あいまい検索できる辞書」である</p>
-        <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.85; margin-bottom:1rem;">
-          Key と Value という名前でピンと来た人もいるはずです。
-          これは Python の辞書（<code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">dict</code>）そのものです。
-          ただし 1 箇所だけ違います。
-        </p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
-          <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.875rem 1rem;">
-            <p style="font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:0.5rem;">普通の辞書</p>
-            <p style="font-family:'SF Mono',Menlo,monospace; font-size:0.76rem; color:var(--text); line-height:1.7; margin-bottom:0.5rem;">d = {k1: v1, k2: v2, k3: v3}<br>d[q]</p>
-            <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.65;">
-              q と完全に一致するキーを探し、その値だけを返します。
-              一致しなければエラーになります。
-            </p>
-          </div>
-          <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.875rem 1rem;">
-            <p style="font-size:0.72rem; font-weight:700; color:var(--green-mid); margin-bottom:0.5rem;">Attention</p>
-            <p style="font-family:'SF Mono',Menlo,monospace; font-size:0.76rem; color:var(--green); line-height:1.7; margin-bottom:0.5rem;">attention(q, K, V)</p>
-            <p style="font-size:0.78rem; color:#1C4A35; line-height:1.65;">
-              q に似ているキーほど強い重みをつけ、
-              全部の値を重み付きで混ぜて返します。
-            </p>
-          </div>
-        </div>
-        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8;">
-          $q$ が $k_2$ にそっくりなら、返ってくるのはほぼ $v_2$ です。
-          $k_1$ と $k_2$ の両方に似ていれば、$v_1$ と $v_2$ が半分ずつ混ざって返ってきます。<br>
-          Attention は、<strong style="color:var(--text);">「完全一致の辞書」を「あいまい検索できる辞書」に緩めたもの</strong>です。
-          原論文が Attention を「soft search」と呼んだのは、まさにこの意味です。
-        </p>
-      </div>
-
-      <!-- 計算ステップの可視化 -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">「食べた」トークンが他のトークンに注目するようす</p>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">「食べた」が各単語を参考にする割合（イメージ）</p>
         <svg viewBox="0 0 460 160" style="width:100%; display:block;" xmlns="http://www.w3.org/2000/svg">
           <!-- トークンラベル（上段） -->
           <g font-size="10" text-anchor="middle">
@@ -653,252 +568,482 @@
             <text x="411" y="155" fill="var(--green-mid)" font-weight="600">寿司</text>
           </g>
         </svg>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; line-height:1.7;">
-          「食べた」は目的語の「寿司（0.45）」と「昨日（0.28）」に強く注目し、「は（0.05）」や自分自身（0.07）にはあまり注目しません。
-          5 つの重み（私 0.15・は 0.05・昨日 0.28・食べた 0.07・寿司 0.45）を足すと 1.00 になります。
-          この重みで Value を加重平均することで、<em>「何を・いつ食べたか」という文脈が埋め込まれた</em>新しいベクトルが得られます。
+        <p class="cap">
+          「食べた」は、何を食べたかを表す「寿司」（0.45）と、いつ食べたかを表す「昨日」（0.28）を多く参考にします。
+          5 つの割合を足すと 1.00（100%）になります。
+          数値は説明のためのイメージです。
         </p>
-        <div class="note-green" style="margin-top:1rem;">
-          <p style="font-size:0.8rem; color:#1C4A35; line-height:1.75;">
-            ハンズオン③ Part 2 では、この図をコードで再現します。
-            「ネコ・が・サカナ・食べた」の 4 トークンからなる小さな例を作ります。
-            そして $W^Q, W^K$ を手で設計し、「食べた」が「サカナ」に 0.99 注目する様子を実際に計算します。
+      </div>
+
+      <!-- 解説動画（chapter1/manim/scenes で生成） -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">解説動画：RNN の順番読みと Attention の一括読み（約 24 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_rnn_vs_attention.jpg" aria-label="私・は・昨日・食べた・寿司 の 5 トークンで、RNN が隠れ状態を順番に渡して「私」の情報が薄れていく様子と、Self-Attention が「食べた」から全トークンへ一度につなぐ様子を比べるアニメーション"
+               style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
+          <source src="media/ch1_rnn_vs_attention.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_rnn_vs_attention.mp4">動画ファイル</a>を直接開いてください。
+        </video>
+        <p class="cap">
+          上の段の RNN は、メモを $h_1$ から $h_5$ まで順番に作ります。
+          「私」の情報が薄れていく割合はイメージです。
+          下の段の Attention は、「食べた」から 5 つの単語への割合（上の図と同じ値）を一度に計算します。
+        </p>
+      </div>
+
+      <details class="more">
+        <summary>もっと詳しく：Attention が生まれた経緯</summary>
+        <div class="more-body">
+          <p>
+            <strong>固定次元のボトルネック</strong>：当時の翻訳モデル（Encoder-Decoder）は、入力文全体の意味を決まった長さのベクトル 1 本に押し込んでから翻訳を始めていました。
+            文が 5 単語でも 50 単語でも入れ物の大きさは同じなので、長い文ほど情報があふれ、翻訳の精度が下がることが報告されています（Cho et al., 2014／Bahdanau et al., 2014）。
+            「入れ物を大きくするのではなく、必要なときに元の文を見に行けばよい」という発想から生まれたのが Attention です。
           </p>
+          <p>
+            <strong>勾配消失</strong>：RNN は学習のときも、誤差の情報（勾配）を何ステップもさかのぼって伝えます。
+            さかのぼるうちに勾配が小さくなるため、離れた単語どうしの関係を学びにくくなります。
+          </p>
+          <p>
+            <strong>原点は「翻訳の単語対応」</strong>：Attention が最初に提案されたのは、Transformer より 3 年前の 2014 年の機械翻訳の論文です（Bahdanau, Cho, Bengio）。
+            「あなたはアイリスですか」を "Are you Iris?" に訳すなら、you ←「あなた」、Iris ←「アイリス」、? ←「か」という対応があります。
+            出力する単語ごとに、入力のどこを見るべきかを重みで表したのが始まりです。
+            この論文のタイトルや主な用語は "align"（対応づけ）で、仕組みは主に「soft alignment（やわらかい対応づけ）」「soft search」と呼ばれています。
+            "attention" という言葉は、本文で仕組みを説明する箇所（"a mechanism of attention in the decoder"）に出てくる程度です。<br>
+            <span style="font-size:0.76rem;">Bahdanau et al., <em>Neural machine translation by jointly learning to align and translate</em> (arXiv:1409.0473)</span>
+          </p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ━━━ Section 2：Attention ━━━ -->
+    <section>
+      <div class="section-rule">
+        <div class="num">2</div>
+        <div class="titles">
+          <p class="label">Section 2</p>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Attention：ほかのどの言葉を、どれくらい参考にするか</h2>
         </div>
       </div>
 
-      <!-- 数式 -->
+      <!-- 2-1 定義 -->
+      <div class="lead">
+        <p>
+          <strong style="color:var(--text);">Attention は、ある言葉の意味を理解するとき、ほかのどの言葉を、どれくらい参考にするかを決める仕組みです。</strong>
+        </p>
+        <p>
+          人間も、同じ言葉を前後の言葉から理解しています。
+          たとえば「はし」は、「<u>はし</u>を渡る」なら「渡る」を参考にして「橋」だと分かり、「<u>はし</u>で食べる」なら「食べる」を参考にして「箸」だと分かります。
+          Attention は、この「参考にする」を計算で行います。
+        </p>
+      </div>
+
+      <!-- 2-2 用語 -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <p class="card-cap">Attention について学ぶと登場する 2 つの用語</p>
+        <table class="simple">
+          <tbody>
+            <tr>
+              <th scope="row">Self-Attention</th>
+              <td>同じ文章の中にある、単語どうしの関係を調べる仕組みです。LLM で使う Attention は、基本的にこれです。</td>
+            </tr>
+            <tr>
+              <th scope="row">Multi-Head Attention</th>
+              <td>複数の Attention を同時に使い、違う観点から単語どうしの関係を調べる仕組みです。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2-3 具体例 -->
+      <h3 class="sub-h">具体的には：割合を決めて、情報を混ぜる</h3>
+      <div class="lead">
+        <p>
+          具体的には、Attention は単語ごとに次の 2 つを行います。
+        </p>
+        <ol class="steps">
+          <li>ほかの各単語を何 % 参考にするかを、合計が 100% になるように決めます。</li>
+          <li>その割合に応じて、ほかの単語の情報を混ぜ合わせ、自分の情報に取り込みます。</li>
+        </ol>
+        <p>
+          例として、「太郎はリンゴを食べた。それは甘かった。」の「<strong style="color:var(--text);">それ</strong>」を見てみます。
+          「それ」の意味を理解するには、何を指しているかを知る必要があります。
+          そこで「それ」は、前にある単語のうち「リンゴ」をほぼ 100% 参考にします。
+          その結果、「それ」は「リンゴのことだ」という情報を持つようになります。
+        </p>
+      </div>
+
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">「それ」が各単語を参考にする割合</p>
+        <div class="ratio-table" role="table" aria-label="「それ」が各単語を参考にする割合">
+          <div class="rt-row" role="row">
+            <span role="columnheader">太郎</span><span role="columnheader">は</span><span role="columnheader" class="hl">リンゴ</span><span role="columnheader">を</span><span role="columnheader">食べた</span><span role="columnheader">。</span><span role="columnheader">それ</span>
+          </div>
+          <div class="rt-row" role="row">
+            <span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell" class="hl">99%</span><span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell">0.2%</span>
+          </div>
+        </div>
+        <p class="cap">
+          この割合は、あとの「数式」の節で実際に計算して求めます。
+          「それ」より後ろの「は・甘かった・。」は参考にしていません。理由は、この節の最後の「因果マスク」で説明します。
+        </p>
+      </div>
+
+      <div class="note-green" style="margin-bottom:1.5rem;">
+        <p class="note-title" style="color:var(--green);">Multi-Head Attention の例：観点ごとに参考にする単語が変わる</p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          1 つの Attention が調べられるのは、1 つの観点だけです。
+          そこで、観点の違う Attention（ヘッド）を複数並べます。
+          たとえば「それ」について、次のように役割を分けられます。
+        </p>
+        <ul class="terms" style="color:#1C4A35;">
+          <li>「何を指しているか」を調べるヘッドは、「リンゴ」を参考にします。</li>
+          <li>「誰の話か」を調べるヘッドは、「太郎」を参考にします。</li>
+        </ul>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
+          各ヘッドの結果をまとめると、「それ」は「太郎が食べたリンゴ」という情報を持てます。
+        </p>
+        <p style="font-size:0.78rem; color:var(--green-mid); line-height:1.7; margin-top:0.5rem;">
+          ※ 各ヘッドの役割は説明用の例です。
+          実際のモデルでは、各ヘッドが何を受け持つかは学習で決まり、その役割が人間に分かる形ではっきり分かれているとは限りません。
+        </p>
+      </div>
+
+      <!-- 2-4 数式 -->
+      <h3 class="sub-h">Attention を数式で表すと</h3>
+      <div class="lead">
+        <p>
+          Attention を数式で表すと、次のようになります。
+          ここから先は、数字が並んだ表を<strong>行列</strong>と呼びます。
+        </p>
+      </div>
       <div class="card-math" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Attention の計算式</p>
         <div style="text-align:center; margin-bottom:1.25rem;">
           $$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
         </div>
         <table class="var-table" style="width:100%;">
           <tr>
-            <td>$Q, K, V$</td>
-            <td>入力行列 $X$ に学習済み重み行列 $W^Q, W^K, W^V$ を掛けて生成</td>
+            <td>$Q$（Query）</td>
+            <td>各単語の「<strong>探しているもの</strong>」を表す数字です。例：「それ」は食べ物（物）を探しています。</td>
+          </tr>
+          <tr>
+            <td>$K$（Key）</td>
+            <td>各単語の「<strong>自分が何者か</strong>」を表す数字です。例：「リンゴ」は食べ物だと示しています。</td>
+          </tr>
+          <tr>
+            <td>$V$（Value）</td>
+            <td>参考にされたときに<strong>相手へ渡す情報</strong>です。</td>
           </tr>
           <tr>
             <td>$QK^\top$</td>
-            <td>全トークン間の「関連度スコア」行列（$n \times n$）</td>
+            <td>「探しているもの」と「何者か」の<strong>合い具合</strong>です。$Q$ と $K$ の内積で計算します（$K^\top$ は $K$ の行と列を入れ替えたもので、全部の組み合わせの内積をまとめて計算するための書き方です）。</td>
           </tr>
           <tr>
-            <td>$\sqrt{d_k}$</td>
-            <td>次元数の平方根でスコアをスケーリング。次元が増えるとベクトルは長くなるため、割らないと次元が高いだけでスコアが大きくなります。その結果、softmax の出力が 1 箇所に集中し、学習が進まなくなります</td>
+            <td>$d_k$</td>
+            <td>$Q$ と $K$ の数字の個数です。</td>
+          </tr>
+          <tr>
+            <td>$\sqrt{d_k}$ で割る</td>
+            <td>合い具合が大きくなりすぎないように小さくします。数字の個数が多いほど内積は大きくなりやすく、そのままだと 1 つの単語だけに割合が集中しすぎて、学習がうまく進まなくなるためです。</td>
           </tr>
           <tr>
             <td>softmax</td>
-            <td>スコアを確率分布（合計1）に変換</td>
+            <td>合い具合を、<strong>合計 100% の割合</strong>に直す計算です。合い具合が大きい単語ほど、大きな割合をもらいます。</td>
           </tr>
           <tr>
             <td>$(\cdots)V$</td>
-            <td>確率重みで Value を加重平均し、文脈を反映した新しい表現を得る</td>
+            <td>その割合で $V$ を混ぜ合わせます（割合を掛けて足し合わせます）。</td>
           </tr>
         </table>
       </div>
 
-      <div class="note-green" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">この式で一番大事なのは「内積 ＝ 類似度」</p>
+      <div class="note-green" style="margin-bottom:1.25rem;">
+        <p class="note-title" style="color:var(--green);">この式でいちばん大事なのは「内積 ＝ 合い具合」</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          ここが腑に落ちれば、残りはこの考え方の応用として読めます。
-          2 つのベクトルが同じ向きなら内積は大きい正の値、直交していればほぼ 0、
-          逆向きなら負の値になります。
-          ハンズオン③ Part 1 で単語埋め込みのコサイン類似度を計算したのと、やっていることは同じです。<br>
-          つまり $QK^\top$ は、<strong>「どのクエリが、どのキーに似ているか」を全ペア分並べた表</strong>です。
+          高校で習うベクトルの内積は、2 つのベクトルの向きがそろっているほど大きな値になります。
+          直角なら 0、逆向きならマイナスです。
+          たとえば $(0, 3)$ と $(0, 3)$ の内積は $0 \times 0 + 3 \times 3 = 9$、$(0, 3)$ と $(3, 0)$ の内積は $0 \times 3 + 3 \times 0 = 0$ です。
+          Attention は、この性質を使って「探しているもの」と「何者か」が合っているかを測ります。
         </p>
       </div>
 
-      <!-- なぜ W を掛けるのか -->
-      <h3 style="font-size:0.95rem; font-weight:700; color:var(--text); margin:2rem 0 0.75rem;">なぜ $W^Q, W^K, W^V$ を掛けるのか——「ねじってから、ぶつける」</h3>
-      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        Self-Attention では、Q も K も V も同じ入力 $X$ から作ります。
-        それなら、わざわざ変換せずに $X$ をそのまま Q と K にすればよいと思うかもしれません。
-        しかし実際に試すと、はっきり失敗します。
-      </p>
+      <!-- 計算例 -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">計算してみましょう：「それ」が「リンゴ」を 99% 参考にするまで</p>
+        <p style="font-size:0.84rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.75rem;">
+          説明のため、$Q$ と $K$ を「人か」「食べ物か」の 2 つの数字だけで表します（$d_k = 2$）。
+          本物のモデルでは数字は数十〜数百個あり、値は学習で決まります。
+        </p>
 
-      <div class="note-red" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--red); margin-bottom:0.3rem;">$Q = K = X$ のままだとどうなるか</p>
-        <p style="font-size:0.83rem; color:#7A1F1F; line-height:1.75;">
-          内積は類似度なので、自分と自分の内積は大きくなりがちです（ベクトルの長さが揃っていれば必ず最大になります）。<br>
-          その結果、どのトークンも「自分自身」に注目が偏ります。
-          <em>自分ばかり見て、文脈をほとんど取り込まない機構</em>になってしまいます。<br>
-          ハンズオン③ Part 2-2 で実際に計算すると、「食べた」は目的語の「サカナ」（0.22）よりも
-          <strong>自分自身（0.35）を見てしまいます</strong>。これでは文脈をうまく捉えられません。
+        <p class="step-label">ステップ 1：「探しているもの」と「何者か」を数字で表す</p>
+        <div class="table-wrap">
+          <table class="calc">
+            <thead><tr><th></th><th>人か</th><th>食べ物か</th><th>説明</th></tr></thead>
+            <tbody>
+              <tr class="hl"><th scope="row">それ の $Q$</th><td>0</td><td>3</td><td>食べ物を探している</td></tr>
+              <tr><th scope="row">太郎 の $K$</th><td>3</td><td>0</td><td>人である</td></tr>
+              <tr><th scope="row">リンゴ の $K$</th><td>0</td><td>3</td><td>食べ物である</td></tr>
+              <tr><th scope="row">ほかの $K$</th><td>0</td><td>0</td><td>は・を・食べた・。・それ</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="step-label">ステップ 2：内積で合い具合を測り、$\sqrt{2} \approx 1.41$ で割る</p>
+        <div class="table-wrap">
+          <table class="calc">
+            <thead><tr><th></th><th>内積</th><th>÷ 1.41</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">太郎</th><td>$0 \times 3 + 3 \times 0 = 0$</td><td>0</td></tr>
+              <tr class="hl"><th scope="row">リンゴ</th><td>$0 \times 0 + 3 \times 3 = 9$</td><td>6.36</td></tr>
+              <tr><th scope="row">ほかの 5 単語</th><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="step-label">ステップ 3：softmax で割合に直す</p>
+        <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
+          softmax は、各値 $x$ を $e^x$（$e \approx 2.718$）に変えてから、全体の合計で割ります。
+          $e^x$ は $x$ が大きいほど急に大きくなるので、合い具合の大きい単語に割合が集まります。
+        </p>
+        <div class="table-wrap">
+          <table class="calc">
+            <thead><tr><th></th><th>$e^x$</th><th>割合（合計 586.5 で割る）</th></tr></thead>
+            <tbody>
+              <tr class="hl"><th scope="row">リンゴ</th><td>$e^{6.36} \approx 580.5$</td><td>$580.5 \div 586.5 \approx 0.99$（99%）</td></tr>
+              <tr><th scope="row">ほかの 6 単語</th><td>$e^{0} = 1$（6 つ）</td><td>$1 \div 586.5 \approx 0.002$（0.2%）ずつ</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="step-label">ステップ 4：割合に応じて $V$ を混ぜる</p>
+        <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75;">
+          $V$ も「人か」「食べ物か」の 2 つの数字とし、太郎の $V$ を $(1, 0)$、リンゴの $V$ を $(0, 1)$、ほかを $(0, 0)$ とします。
+          割合を掛けて足すと、「それ」の新しい情報は $0.002 \times (1, 0) + 0.99 \times (0, 1) \approx (0.00, 0.99)$ になります。
+          「それ」に、リンゴの「食べ物である」という情報がほぼそのまま入りました。
         </p>
       </div>
 
-      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        そこで <strong style="color:var(--text);">$W^Q$ と $W^K$ で別々の方向に「ねじって」から内積を取ります。</strong>
-        角度を変えてからぶつけるので、自分自身との内積が最大とは限らなくなります。
-        これが射影行列を使う理由です。
-      </p>
-
-      <div class="card" style="margin-bottom:1.5rem;">
-        <table style="width:100%; font-size:0.83rem; border-collapse:collapse;">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border);">
-              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700; width:6rem;">行列</th>
-              <th style="text-align:left; padding:0.4rem 0.75rem; color:var(--text-muted); font-weight:700;">決めていること</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^Q$</td>
-              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">自分は何を探しに行くか</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^K$</td>
-              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">自分のどの側面を看板として掲げるか</td>
-            </tr>
-            <tr>
-              <td style="padding:0.5rem 0.75rem; color:var(--green-mid); font-weight:700;">$W^V$</td>
-              <td style="padding:0.5rem 0.75rem; color:var(--text-sub);">注目された結果、何を渡すか</td>
-            </tr>
-          </tbody>
-        </table>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.875rem; line-height:1.7;">
-          ハンズオン③ Part 2-3 では、この 3 つの行列を手で設計し、
-          「食べた」が「サカナ」に 0.99 注目する状態を作り出します。
-          同じ $X$ と同じ式のままでも、ねじり方を与えるだけで「自分ばかり見る機構」が「動詞が目的語を見つける機構」に変わります。
+      <div class="note-amber" style="margin-bottom:1.25rem;">
+        <p class="note-title" style="color:var(--amber);">Q・K・V はどこから来るのか</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          $Q$・$K$・$V$ は、どれも各単語のベクトル $X$（Section 0 の埋め込み）から作ります。
+          $X$ に、学習で決まる 3 つの行列 $W^Q$・$W^K$・$W^V$ をそれぞれ掛けて、$Q = XW^Q$、$K = XW^K$、$V = XW^V$ とします。
+          同じ単語のベクトルから、「探すとき用」「名乗るとき用」「渡すとき用」の 3 種類の数字を作り分けるイメージです。
+          Multi-Head Attention では、この 3 つの行列の組をヘッドの数だけ持ちます。
         </p>
       </div>
+
+      <details class="more">
+        <summary>もっと詳しく：なぜ $W^Q$・$W^K$ が必要なのか</summary>
+        <div class="more-body">
+          <p>
+            $Q$ も $K$ も同じ $X$ から作るなら、$W$ を掛けずに $Q = K = X$ でよいと思うかもしれません。
+            しかし、そうすると各単語は自分自身を最も参考にしてしまいます。
+            内積は向きがそろうほど大きくなるので、自分と自分の内積がいちばん大きくなりやすいからです。
+          </p>
+          <p>
+            ハンズオン③ Part 2-2 では「ネコ・が・サカナ・食べた」で実際に計算します。
+            $Q = K = X$ のままだと、「食べた」は目的語の「サカナ」（0.22）より自分自身（0.35）を多く参考にします。
+            $W^Q$・$W^K$ で「探すとき用」と「名乗るとき用」に作り分けると、「食べた」は「サカナ」を 0.99 参考にするようになります（Part 2-3）。
+          </p>
+          <table class="simple" style="margin-top:0.5rem;">
+            <tbody>
+              <tr><th scope="row">$W^Q$</th><td>自分は何を探しに行くか</td></tr>
+              <tr><th scope="row">$W^K$</th><td>自分のどの面を名札として見せるか</td></tr>
+              <tr><th scope="row">$W^V$</th><td>参考にされたとき、何を渡すか</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="more">
+        <summary>もっと詳しく：Attention は「あいまい検索できる辞書」</summary>
+        <div class="more-body">
+          <p>
+            Key と Value という名前は、プログラミングの辞書（Python の <code>dict</code>）から来ています。
+            普通の辞書 <code>d[q]</code> は、<code>q</code> と完全に一致するキーを探し、その値だけを返します。一致しなければエラーです。
+          </p>
+          <p>
+            Attention は、<code>q</code> に似ているキーほど大きな割合をつけ、全部の値を割合に応じて混ぜて返します。
+            $q$ が $k_2$ にそっくりなら返ってくるのはほぼ $v_2$、$k_1$ と $k_2$ の両方に似ていれば $v_1$ と $v_2$ が半分ずつ混ざります。
+            つまり Attention は、完全一致の辞書を「あいまい検索できる辞書」に緩めたものです。
+            Attention の原論文が仕組みを「soft search」と呼んだのは、この意味です。
+          </p>
+        </div>
+      </details>
+
+      <details class="more">
+        <summary>もっと詳しく：本物のモデルの Multi-Head Attention</summary>
+        <div class="more-body">
+          <p>
+            ハンズオン③で使う Llama-3.2-1B は、1 層あたり 32 ヘッドで、それが 16 層あります。
+            モデル全体では 512 枚の「参考にする割合の表」を計算しています。
+          </p>
+          <p>
+            計算量を増やさないため、実装ではヘッドごとに大きな行列を別々に持ちません。
+            単語のベクトルの 2048 個の数字を 32 等分し、1 ヘッドあたり 64 個を担当させます。
+            ヘッドを 2 つ手で作って違いを見る実験と、この分割の実装は、ハンズオン③の付録 B にあります。
+          </p>
+        </div>
+      </details>
 
       <!-- 解説動画（chapter1/manim/scenes で生成） -->
-      <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：Self-Attention の計算を 1 ステップずつ追う（約 37 秒）</p>
-        <video controls preload="metadata" playsinline poster="media/ch1_self_attention.jpg" aria-label="ネコ・が・サカナ・食べた の 4 トークンで、Q と K の内積から注目度を求め、Value の加重和を取るまでのアニメーション"
+      <div class="card" style="margin:1.25rem 0;">
+        <p class="card-cap">解説動画：Attention の計算を 1 ステップずつ追う（約 48 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_self_attention.jpg" aria-label="太郎・は・リンゴ・を・食べた・。・それ の 7 単語で、「それ」の Q と各単語の K の内積から合い具合を求め、softmax で参考にする割合に直し、V を混ぜるまでのアニメーション。最後に「何を指すか」と「誰の話か」の 2 つのヘッドを比べる"
                style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
           <source src="media/ch1_self_attention.mp4" type="video/mp4">
           お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_self_attention.mp4">動画ファイル</a>を直接開いてください。
         </video>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
-          ハンズオン③ Part 2 と同じ値で計算しています。
-          重み行列なしでは「食べた」が自分自身（0.35）を一番見てしまいます。
-          $W^Q, W^K$ で変換すると「サカナ」に 0.99 注目し、出力に「食べ物性」が取り込まれます。
+        <p class="cap">
+          上の計算例を、同じ値で動かして見せます。
+          合い具合はリンゴが 9（÷√2 で 6.36）、ほかは 0 で、softmax で割合に直すとリンゴが 0.99 になります。
+          最後に、「何を指すか」のヘッド（リンゴを参考にする）と「誰の話か」のヘッド（太郎を参考にする）を並べます。
+          ハンズオン③ Part 2 では、同じ計算を「ネコがサカナを食べた」でコードにします。
         </p>
       </div>
 
-      <!-- マルチヘッド -->
-      <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">Multi-Head Attention</p>
-        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          $W^Q$ と $W^K$ は「$X$ をどうねじってからぶつけるか」を決めていました。
-          ねじり方を変えれば、測れる関係も変わります。
-          そこで Self-Attention を複数の「ヘッド」で並列に実行します。
-          各ヘッドは異なる $W^Q, W^K, W^V$ を持ち、異なる「注目パターン」を同時に学習できます。<br>
-          一言でいえば、<strong>Multi-Head Attention とは「同じ文の類似度を、いろんな角度から測る」こと</strong>です。
-          一方のヘッドが「構文的な依存」を、別のヘッドが「意味的な類似性」を捉えるといった役割分担が生まれます。
+      <!-- 2-5 因果マスク -->
+      <h3 class="sub-h">文章を生成するときの約束：因果マスク（Causal Mask）</h3>
+      <div class="lead">
+        <p>
+          文章を生成するときは、まだ生成していない未来の単語を参考にしないようにする <strong style="color:var(--text);">Causal Mask（因果マスク）</strong>という仕組みも使います。
         </p>
-        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.6rem;">
-          ハンズオン③で使う Llama-3.2-1B は 1 層あたり 32 ヘッド、
-          それが <strong>16 層</strong>あるので、モデル全体で <strong>512 枚</strong>の注目度マップを計算しています。
-          計算量を増やさないため、実装上はヘッドごとに別の行列を持ちません。
-          $d_{model} = 2048$ を 32 分割し、1 ヘッドあたり 64 次元を担当させます。
-          ヘッドを 2 つ手で作って違いを見る実験と、$d_{model}$ を分割する実装は、
-          ハンズオン③の付録 B にあります。
+        <p>
+          <strong style="color:var(--text);">Causal Mask は、各単語が自分より前の単語（と自分自身）だけを参考にできるように、後ろの単語を参考にする割合を 0% にする仕組みです。</strong>
+        </p>
+        <p>
+          理由は、LLM の学習が「次の単語を当てる」練習だからです。
+          後ろの単語が見えると、答えを見ながら答えを当てることになり、練習になりません。
+          文章を書くときも、まだ書いていない単語は存在しないので、前の単語だけで次を決める必要があります。
+        </p>
+        <p>
+          例文で確かめます。
+          「それ」は「リンゴ」より後ろにあるので、因果マスクをかけても「リンゴ」を参考にできます。
+          一方、文の最初の「太郎」は、後ろの「リンゴ」も「甘かった」も参考にできず、自分自身しか見られません。
         </p>
       </div>
-
-      <!-- 因果マスク -->
-      <h3 style="font-size:0.95rem; font-weight:700; color:var(--text); margin:2rem 0 0.75rem;">因果マスク（Causal Mask）——未来を見せない</h3>
-      <p style="font-size:0.88rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.25rem;">
-        ここまでの Self-Attention には、LLM として使ううえで致命的な問題があります。
-        <strong style="color:var(--text);">各トークンが未来のトークンまで見られてしまう</strong>ことです。
-        LLM の学習は「次のトークンを当てる」練習なので、これでは答えを見ながら答える練習になってしまいます。
-      </p>
 
       <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">因果マスク：自分より後ろは見えない</p>
-        <svg viewBox="0 0 420 190" style="width:100%; max-width:420px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
-          <!-- 列ラベル -->
+        <p class="card-cap">因果マスク：自分より後ろは見えない</p>
+        <svg viewBox="0 0 414 252" style="width:100%; max-width:474px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="7 単語の因果マスクの表。各行は自分と前の単語だけに○が付き、後ろの単語には×が付いて、○が左下の三角形に並ぶ">
+          <text x="250.0" y="9" font-size="8" text-anchor="middle" fill="var(--text-muted)">参考にされる側</text>
           <g font-size="9" text-anchor="middle" fill="var(--text-muted)">
-            <text x="150" y="24">ネコ</text>
-            <text x="200" y="24">が</text>
-            <text x="250" y="24">サカナ</text>
-            <text x="300" y="24">食べた</text>
+            <text x="116.0" y="24">太郎</text>
+            <text x="160.0" y="24">は</text>
+            <text x="204.0" y="24">リンゴ</text>
+            <text x="248.0" y="24">を</text>
+            <text x="292.0" y="24">食べた</text>
+            <text x="336.0" y="24">。</text>
+            <text x="380.0" y="24">それ</text>
           </g>
-          <text x="225" y="10" font-size="8" text-anchor="middle" fill="var(--text-muted)">見られる側</text>
-          <!-- 行ラベル -->
+          <text x="10" y="128.0" font-size="8" fill="var(--text-muted)" transform="rotate(-90,10,128.0)" text-anchor="middle">参考にする側</text>
           <g font-size="9" text-anchor="end" fill="var(--text-muted)">
-            <text x="120" y="48">ネコ</text>
-            <text x="120" y="83">が</text>
-            <text x="120" y="118">サカナ</text>
-            <text x="120" y="153">食べた</text>
+            <text x="90" y="45.0">太郎</text>
+            <text x="90" y="73.0">は</text>
+            <text x="90" y="101.0">リンゴ</text>
+            <text x="90" y="129.0">を</text>
+            <text x="90" y="157.0">食べた</text>
+            <text x="90" y="185.0">。</text>
+            <text x="90" y="213.0">それ</text>
           </g>
-          <text x="40" y="105" font-size="8" fill="var(--text-muted)">見る側</text>
-          <!-- セル 4x4 -->
-          <g>
-            <!-- row0 -->
-            <rect x="128" y="32" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="178" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <rect x="228" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <rect x="278" y="32" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <!-- row1 -->
-            <rect x="128" y="67" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="178" y="67" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="228" y="67" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <rect x="278" y="67" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <!-- row2 -->
-            <rect x="128" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="178" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="228" y="102" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="278" y="102" width="44" height="30" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/>
-            <!-- row3 -->
-            <rect x="128" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="178" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="228" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
-            <rect x="278" y="137" width="44" height="30" rx="3" fill="var(--green)" opacity="0.85"/>
+          <g font-size="10" text-anchor="middle" font-weight="700">
+            <rect x="96" y="30" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="45.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="160.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="184" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="204.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="228" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="248.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="272" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="292.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="316" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="336.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="360" y="30" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="45.5" fill="var(--red)">×</text>
+            <rect x="96" y="58" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="73.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="58" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="73.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="58" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="204.0" y="73.5" fill="var(--red)">×</text>
+            <rect x="228" y="58" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="248.0" y="73.5" fill="var(--red)">×</text>
+            <rect x="272" y="58" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="292.0" y="73.5" fill="var(--red)">×</text>
+            <rect x="316" y="58" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="336.0" y="73.5" fill="var(--red)">×</text>
+            <rect x="360" y="58" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="73.5" fill="var(--red)">×</text>
+            <rect x="96" y="86" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="101.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="86" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="101.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="86" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="204.0" y="101.5" fill="#FFFFFF">○</text>
+            <rect x="228" y="86" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="248.0" y="101.5" fill="var(--red)">×</text>
+            <rect x="272" y="86" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="292.0" y="101.5" fill="var(--red)">×</text>
+            <rect x="316" y="86" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="336.0" y="101.5" fill="var(--red)">×</text>
+            <rect x="360" y="86" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="101.5" fill="var(--red)">×</text>
+            <rect x="96" y="114" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="129.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="114" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="129.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="114" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="204.0" y="129.5" fill="#FFFFFF">○</text>
+            <rect x="228" y="114" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="248.0" y="129.5" fill="#FFFFFF">○</text>
+            <rect x="272" y="114" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="292.0" y="129.5" fill="var(--red)">×</text>
+            <rect x="316" y="114" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="336.0" y="129.5" fill="var(--red)">×</text>
+            <rect x="360" y="114" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="129.5" fill="var(--red)">×</text>
+            <rect x="96" y="142" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="157.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="142" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="157.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="142" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="204.0" y="157.5" fill="#FFFFFF">○</text>
+            <rect x="228" y="142" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="248.0" y="157.5" fill="#FFFFFF">○</text>
+            <rect x="272" y="142" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="292.0" y="157.5" fill="#FFFFFF">○</text>
+            <rect x="316" y="142" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="336.0" y="157.5" fill="var(--red)">×</text>
+            <rect x="360" y="142" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="157.5" fill="var(--red)">×</text>
+            <rect x="96" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="204.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="228" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="248.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="272" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="292.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="316" y="170" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="336.0" y="185.5" fill="#FFFFFF">○</text>
+            <rect x="360" y="170" width="40" height="24" rx="3" fill="var(--red-bg)" stroke="#FCA5A5"/><text x="380.0" y="185.5" fill="var(--red)">×</text>
+            <rect x="96" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="116.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="140" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="160.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="184" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="204.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="228" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="248.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="272" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="292.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="316" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="336.0" y="213.5" fill="#FFFFFF">○</text>
+            <rect x="360" y="198" width="40" height="24" rx="3" fill="var(--green)" opacity="0.85"/><text x="380.0" y="213.5" fill="#FFFFFF">○</text>
           </g>
-          <!-- ○× -->
-          <g font-size="11" text-anchor="middle" font-weight="700">
-            <text x="150" y="52" fill="#FFFFFF">○</text>
-            <text x="200" y="52" fill="var(--red)">×</text><text x="250" y="52" fill="var(--red)">×</text><text x="300" y="52" fill="var(--red)">×</text>
-            <text x="150" y="87" fill="#FFFFFF">○</text><text x="200" y="87" fill="#FFFFFF">○</text>
-            <text x="250" y="87" fill="var(--red)">×</text><text x="300" y="87" fill="var(--red)">×</text>
-            <text x="150" y="122" fill="#FFFFFF">○</text><text x="200" y="122" fill="#FFFFFF">○</text><text x="250" y="122" fill="#FFFFFF">○</text>
-            <text x="300" y="122" fill="var(--red)">×</text>
-            <text x="150" y="157" fill="#FFFFFF">○</text><text x="200" y="157" fill="#FFFFFF">○</text><text x="250" y="157" fill="#FFFFFF">○</text><text x="300" y="157" fill="#FFFFFF">○</text>
-          </g>
-          <text x="225" y="183" font-size="8.5" text-anchor="middle" fill="var(--text-muted)">下三角だけが残る＝過去（と自分）しか見られない</text>
+          <text x="250.0" y="244" font-size="8.5" text-anchor="middle" fill="var(--text-muted)">○が左下の三角形に並ぶ＝前の単語（と自分）しか参考にできない</text>
         </svg>
+        <p class="cap">
+          行が「参考にする側」、列が「参考にされる側」です。
+          ○の単語だけを参考にでき、×の割合は 0% になります。
+          ○が左下の三角形に並ぶので、この表は三角形の形になります。
+        </p>
       </div>
 
       <div class="card-math" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">実装は「softmax の前に $-\infty$ を入れる」だけ</p>
-        <div style="text-align:center; margin-bottom:1rem;">
-          $$\text{scores}_{ij} = \begin{cases} \dfrac{q_i \cdot k_j}{\sqrt{d_k}} & (j \le i) \\[6pt] -\infty & (j > i) \end{cases}$$
+        <p class="card-cap">計算では「softmax の前に $-\infty$ を入れる」</p>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+          後ろの単語との合い具合を、softmax に入れる前に $-\infty$（マイナス無限大）に置き換えます。
+          $e^{-\infty} = 0$ なので、softmax で割合に直したとき、その単語の割合がちょうど 0% になります。
+        </p>
+        <div style="text-align:center; margin-bottom:0.75rem;">
+          $$\text{合い具合}_{ij} = \begin{cases} \dfrac{q_i \cdot k_j}{\sqrt{d_k}} & (j \le i\text{：自分より前か自分}) \\[6pt] -\infty & (j > i\text{：自分より後ろ}) \end{cases}$$
         </div>
-        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.75;">
-          $e^{-\infty} = 0$ なので、softmax を通した後の注目度がちょうど 0 になります。
+        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.7;">
+          $i$ は参考にする側の単語の位置、$j$ は参考にされる側の単語の位置です。
           PyTorch では <code style="background:var(--surface2); padding:1px 5px; border-radius:3px;">scores.masked_fill(~mask, float('-inf'))</code> の 1 行で書けます。
         </p>
       </div>
 
       <div class="note-amber" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">これが「LLM は左から右にしか書けない」ことの正体</p>
+        <p class="note-title" style="color:var(--amber);">LLM が左から右へ 1 単語ずつ書く理由</p>
         <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
-          生成時に 1 トークンずつしか進めないのも、文頭のトークンが文脈をほとんど持てないのも、
-          すべてこの三角形の構造から来ています。
-          ハンズオン③ Part 3 でこのマスクを実装し、注目度マップが三角形になる様子を確認します。
+          生成のときに 1 単語ずつしか進めないのも、文の最初の単語がほとんど文脈を持てないのも、この三角形の形から来ています。
+          ハンズオン③ Part 3 で因果マスクを実装し、割合の表が三角形になる様子を確かめます。
         </p>
       </div>
 
       <!-- 解説動画（chapter1/manim/scenes で生成） -->
       <div class="card" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.75rem;">解説動画：因果マスクで未来への注目を 0 にする（約 32 秒）</p>
-        <video controls preload="metadata" playsinline poster="media/ch1_causal_mask.jpg" aria-label="ネコ・が・サカナ・食べた の 4 トークンで、スコアの上三角を −∞ にしてから softmax を取り、生成時に注目度の三角形が 1 行ずつ伸びるまでのアニメーション"
+        <p class="card-cap">解説動画：因果マスクで後ろの単語への割合を 0 にする（約 43 秒）</p>
+        <video controls preload="metadata" playsinline poster="media/ch1_causal_mask.jpg" aria-label="太郎・は・リンゴ・を・食べた・。・それ の 7 単語で、合い具合の表の上三角を −∞ にしてから softmax を取り、参考にする割合の表が三角形になり、生成時に 1 行ずつ伸びるまでのアニメーション"
                style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
           <source src="media/ch1_causal_mask.mp4" type="video/mp4">
           お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_causal_mask.mp4">動画ファイル</a>を直接開いてください。
         </video>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.6rem; line-height:1.7;">
-          ハンズオン③ Part 3 と同じ値で、上三角を $-\infty$ にしてから softmax を取ります。
-          「が」の行は、マスクなしでは 4 トークンに 0.25 ずつ、マスクありでは過去の 2 トークンに 0.50 ずつ注目します。
-          生成時は行が 1 本ずつ増え、新しい行は自分と前のトークンしか見られません。
+        <p class="cap">
+          上の計算例と同じ 7 単語で、後ろの単語の合い具合を $-\infty$ にしてから softmax を取ります。
+          「は」は、マスクなしでは 7 単語を約 0.14 ずつ参考にしますが、マスクありでは前の「太郎」と自分を 0.50 ずつ参考にします。
+          文の最初の「太郎」は自分自身しか参考にできず、「それ」はマスクがあっても前にある「リンゴ」を 0.99 参考にできます。
+          生成が進むと表の行が 1 本ずつ増え、新しい行は自分と前の単語しか参考にできません。
         </p>
       </div>
 
-      <!-- ━━━ Self-Attention の試し場 ━━━ -->
       <section id="attn-playground" aria-labelledby="attn-title" style="margin-bottom:1.25rem;">
         <style>
           #attn-playground .at-sub { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:0.5rem; }
@@ -912,7 +1057,11 @@
           #attn-playground .at-range label { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; font-size:0.8rem; color:var(--text); }
           #attn-playground .at-range output { font-family:var(--font-mono, monospace); font-weight:700; color:var(--green-mid); font-size:0.8rem; }
           #attn-playground input[type="range"] { width:100%; accent-color:var(--green); margin-top:0.2rem; }
-          #attn-playground .at-qk { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; margin-bottom:1rem; }
+          #attn-playground .at-qk { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:1rem; margin-bottom:1rem; }
+          #attn-playground .at-qk thead th { white-space:normal; overflow:visible; line-height:1.3; vertical-align:bottom; }
+          #attn-playground td.at-ro { color:var(--text-sub); background:var(--surface2); }
+          #attn-playground thead th:first-child { width:3.6rem; }
+          #attn-playground .at-range label span { white-space:nowrap; }
           #attn-playground table { border-collapse:separate; border-spacing:3px; width:100%; table-layout:fixed; }
           #attn-playground th { font-size:0.7rem; font-weight:700; color:var(--text-muted); text-align:center; padding:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
           #attn-playground th[scope="row"] { text-align:right; padding-right:0.3rem; color:var(--text-sub); width:3.6rem; }
@@ -928,10 +1077,10 @@
           #attn-playground tr.is-sel td:not(.at-sum) { outline:2px solid #D97706; outline-offset:-2px; }
           #attn-playground .at-rowbtn { all:unset; cursor:pointer; display:block; width:100%; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
           #attn-playground .at-rowbtn:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; border-radius:3px; }
-          #attn-playground .at-mats { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; }
+          #attn-playground .at-mats { display:grid; grid-template-columns:minmax(0, 1fr); gap:1.1rem; }
           #attn-playground .at-out { margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem; }
           #attn-playground .at-terms { font-family:var(--font-mono, monospace); font-size:0.74rem; color:var(--text-sub); line-height:1.8; overflow-wrap:anywhere; margin-bottom:0.6rem; }
-          #attn-playground .at-bar { display:grid; grid-template-columns:4.2rem minmax(0, 1fr) 2.6rem; align-items:center; gap:0.5rem; padding:0.15rem 0; font-size:0.78rem; }
+          #attn-playground .at-bar { display:grid; grid-template-columns:6rem minmax(0, 1fr) 2.6rem; align-items:center; gap:0.5rem; padding:0.15rem 0; font-size:0.78rem; }
           #attn-playground .at-track { height:0.9rem; background:var(--surface2); border-radius:3px; overflow:hidden; }
           #attn-playground .at-fill { height:100%; background:#D97706; border-radius:0 3px 3px 0; transition:width 0.2s ease; }
           #attn-playground .at-bar b { font-family:var(--font-mono, monospace); font-size:0.76rem; text-align:right; }
@@ -940,64 +1089,75 @@
           @media (max-width: 560px) {
             #attn-playground .card { padding:1.1rem; }
             #attn-playground .at-controls, #attn-playground .at-qk, #attn-playground .at-mats { grid-template-columns:minmax(0, 1fr); }
+            #attn-playground .at-mats table { border-spacing:2px; }
+            #attn-playground .at-mats th { font-size:0.58rem; }
+            #attn-playground .at-mats td { font-size:0.54rem; letter-spacing:-0.02em; padding:0.3rem 0; }
+            #attn-playground .at-mats thead th:first-child, #attn-playground .at-mats th[scope="row"] { width:2.6rem; padding-right:0.15rem; }
           }
         </style>
 
         <div class="card">
           <p class="label" style="margin-bottom:0.25rem;">Playground</p>
-          <h3 id="attn-title" class="text-lg font-bold" style="color:var(--text); margin-bottom:0.6rem;">試してみましょう：<wbr>Self-Attention 計算機</h3>
+          <h3 id="attn-title" class="text-lg font-bold" style="color:var(--text); margin-bottom:0.6rem;">試してみましょう：<wbr>Attention 計算機</h3>
           <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:1rem;">
-            解説動画と同じ「ネコ・が・サカナ・食べた」の 4 トークンで、$\text{softmax}(QK^\top/\sqrt{d_k})V$ を計算します。
-            初期値はハンズオン③ Part 2-3 と同じ $Q = XW^Q,\ K = XW^K$ で、$V = X$（$W^V$ は単位行列）です。
-            $Q$ と $K$ の数値は書き換えられます。
-            スケーリング、倍率、因果マスクを切り替えて、注目度の行列がどう変わるかを確かめてください。
+            上の計算を、「太郎はリンゴを食べた。それは」の 7 つの単語すべてについて一度に行います。
+            初期値は上の計算例と同じです。
+            $Q$（探しているもの）と $K$（自分が何者か）の数字を書き換えたり、ヘッドを切り替えたりして、参考にする割合の表がどう変わるかを確かめてください。
+            ハンズオン③では、「ネコがサカナを食べた」の例で同じ計算をコードで実装します。
           </p>
 
-          <!-- 設定 -->
-          <div class="at-presets" role="group" aria-label="Q と K の初期値">
-            <span>Q・K の値：</span>
-            <button type="button" class="at-chip" data-preset="w" aria-pressed="true">$W^Q, W^K$ で変換（d<sub>k</sub> = 2）</button>
-            <button type="button" class="at-chip" data-preset="naive" aria-pressed="false">重み行列なし Q = K = X（d<sub>k</sub> = 4）</button>
+          <!-- ヘッド -->
+          <div class="at-presets" role="group" aria-label="ヘッドの切り替え">
+            <span>ヘッド：</span>
+            <button type="button" class="at-chip" data-preset="what" aria-pressed="true">「何を指すか」ヘッド</button>
+            <button type="button" class="at-chip" data-preset="who" aria-pressed="false">「誰の話か」ヘッド</button>
           </div>
+          <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin:-0.5rem 0 0.9rem;">
+            ※ ヘッドの役割は説明用の例です。実際のモデルでは学習で決まり、人に分かる形ではっきり分かれているとは限りません。
+          </p>
           <div class="at-controls">
             <label class="at-toggle" for="attn-scale"><input type="checkbox" id="attn-scale" checked><span>$\sqrt{d_k}$ で割る</span></label>
-            <label class="at-toggle" for="attn-mask"><input type="checkbox" id="attn-mask"><span>因果マスク</span></label>
+            <label class="at-toggle" for="attn-mask"><input type="checkbox" id="attn-mask" checked><span>因果マスク</span></label>
             <div class="at-range">
-              <label for="attn-mult"><span>スコアに掛ける倍率</span><output id="attn-mult-out" for="attn-mult">×1.00</output></label>
+              <label for="attn-mult"><span>合い具合に掛ける倍率</span><output id="attn-mult-out" for="attn-mult">×1.00</output></label>
               <input type="range" id="attn-mult" min="-2" max="2" step="0.05" value="0" aria-describedby="attn-mult-hint">
             </div>
           </div>
           <p id="attn-mult-hint" style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin:-0.5rem 0 1rem;">
-            倍率は Temperature の逆数にあたります。大きくすると注目が 1 か所に集中し、小さくすると均等に近づきます。
+            倍率は Temperature の逆数にあたります。大きくすると割合が 1 つの単語に集中し、小さくすると均等に近づきます。
           </p>
 
-          <!-- Q と K -->
+          <!-- Q・K・V -->
           <div class="at-qk">
             <div>
-              <p class="at-sub">Q（何を探すか）</p>
+              <p class="at-sub">Q（探しているもの）</p>
               <table id="attn-q" aria-label="Q の値"></table>
             </div>
             <div>
-              <p class="at-sub">K（自分は何者か）</p>
+              <p class="at-sub">K（自分が何者か）</p>
               <table id="attn-k" aria-label="K の値"></table>
+            </div>
+            <div>
+              <p class="at-sub">V（相手へ渡す情報）</p>
+              <table id="attn-v" aria-label="V の値"></table>
             </div>
           </div>
 
           <p id="attn-status" class="at-status" aria-live="polite"></p>
 
-          <!-- スコアと重み -->
+          <!-- 合い具合と割合 -->
           <div class="at-mats">
             <div>
-              <p class="at-sub" id="attn-score-title">スコア</p>
+              <p class="at-sub" id="attn-score-title">合い具合</p>
               <table id="attn-scores" aria-labelledby="attn-score-title"></table>
             </div>
             <div>
-              <p class="at-sub" id="attn-weight-title">注目度（softmax 後）と行の合計</p>
+              <p class="at-sub" id="attn-weight-title">参考にする割合（softmax 後）と行の合計</p>
               <table id="attn-weights" aria-labelledby="attn-weight-title"></table>
             </div>
           </div>
           <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin-top:0.4rem;">
-            行が「見る側」（クエリ）、列が「見られる側」（キー）です。行の名前をクリックすると、下でその行の出力の作られ方を表示します。
+            行が「参考にする側」、列が「参考にされる側」です。行の名前をクリックすると、その単語が受け取る情報の計算を下に表示します。
           </p>
 
           <!-- 出力 -->
@@ -1010,42 +1170,42 @@
 
         <script>
         (function () {
-          var TOKENS = ['ネコ', 'が', 'サカナ', '食べた'];
-          var FEATURES = ['名詞性', '動詞性', '生き物性', '食べ物性'];
-          // ハンズオン③ Part 2 と同じ入力。V = X（W^V は単位行列）
-          var X = [[1.0, 0.0, 1.0, 0.0], [0.2, 0.0, 0.0, 0.0], [1.0, 0.0, 0.5, 1.0], [0.0, 1.0, 0.0, 0.0]];
-          var WQ = [[0, 0], [0, 3], [3, 0], [0, 0]], WK = [[0, 0], [0, 0], [3, 0], [0, 3]];
-          var QCOLS_W = ['生き物を探す', '食べ物を探す'], KCOLS_W = ['生き物です', '食べ物です'];
-          var n = TOKENS.length;
+          var TOKENS = ['太郎', 'は', 'リンゴ', 'を', '食べた', '。', 'それ'];
+          var QCOLS = ['人を探す', '食べ物を探す'], KCOLS = ['人である', '食べ物である'];
+          // 本文の計算例と同じ値。行の順は TOKENS と同じ
+          var K0 = [[3, 0], [0, 0], [0, 3], [0, 0], [0, 0], [0, 0], [0, 0]];
+          var V = [[1, 0], [0, 0], [0, 1], [0, 0], [0, 0], [0, 0], [0, 0]];
+          var HEADS = {
+            what: [[0, 0], [0, 0], [0, 0], [0, 0], [0, 3], [0, 0], [0, 3]],  // 食べた・それ が食べ物を探す
+            who:  [[0, 0], [0, 0], [0, 0], [0, 0], [3, 0], [0, 0], [3, 0]]   // 食べた・それ が人を探す
+          };
+          var n = TOKENS.length, SORE = 6;
           var el = function (id) { return document.getElementById(id); };
-          function matmul(A, B) {
-            return A.map(function (row) {
-              return B[0].map(function (_, j) { return row.reduce(function (s, a, k) { return s + a * B[k][j]; }, 0); });
-            });
-          }
           function clone(M) { return M.map(function (r) { return r.slice(); }); }
 
-          var Q, K, qCols, kCols, sel = 3;
+          var Q, K, sel = SORE;
           function preset(name) {
-            if (name === 'naive') { Q = clone(X); K = clone(X); qCols = FEATURES; kCols = FEATURES; }
-            else { Q = matmul(X, WQ); K = matmul(X, WK); qCols = QCOLS_W; kCols = KCOLS_W; }
+            Q = clone(HEADS[name]); K = clone(K0);
             document.querySelectorAll('#attn-playground .at-chip').forEach(function (c) {
               c.setAttribute('aria-pressed', String(c.dataset.preset === name));
             });
-            buildInputs('attn-q', Q, qCols, 'Q');
-            buildInputs('attn-k', K, kCols, 'K');
+            buildInputs('attn-q', Q, QCOLS, 'Q', true);
+            buildInputs('attn-k', K, KCOLS, 'K', true);
+            buildInputs('attn-v', V, KCOLS, 'V', false);
             render();
           }
 
-          function buildInputs(id, M, cols, name) {
+          function buildInputs(id, M, cols, name, editable) {
             var t = el(id), h = '<thead><tr><th></th>';
             cols.forEach(function (c) { h += '<th scope="col" title="' + c + '">' + c + '</th>'; });
             h += '</tr></thead><tbody>';
             M.forEach(function (row, i) {
               h += '<tr><th scope="row">' + TOKENS[i] + '</th>';
               row.forEach(function (v, j) {
-                h += '<td class="at-in"><input class="at-num" type="number" step="0.5" value="' + (+v.toFixed(3)) +
-                  '" data-i="' + i + '" data-j="' + j + '" aria-label="' + name + ' ' + TOKENS[i] + ' ' + cols[j] + '"></td>';
+                h += editable
+                  ? '<td class="at-in"><input class="at-num" type="number" step="0.5" value="' + (+v.toFixed(3)) +
+                    '" data-i="' + i + '" data-j="' + j + '" aria-label="' + name + ' ' + TOKENS[i] + ' ' + cols[j] + '"></td>'
+                  : '<td class="at-ro">' + v + '</td>';
               });
               h += '</tr>';
             });
@@ -1060,16 +1220,15 @@
             });
           }
 
-          // 計算の順序はページの式と同じ: QKᵀ → √d_k で割る（→ 倍率）→ マスク → softmax → 重み × V
+          // 計算の順序はページの式と同じ: QKᵀ → √d_k で割る（→ 倍率）→ マスク → softmax → 割合 × V
           function compute() {
-            var dk = Q[0].length, useScale = el('attn-scale').checked, mask = el('attn-mask').checked;
+            var dk = 2, useScale = el('attn-scale').checked, mask = el('attn-mask').checked;
             var mult = Math.pow(2, parseFloat(el('attn-mult').value));
-            var S = [], W = [];
+            var S = [], W = [], O = [];
             for (var i = 0; i < n; i++) {
               S.push([]);
               for (var j = 0; j < n; j++) {
-                var dot = 0;
-                for (var k = 0; k < dk; k++) dot += Q[i][k] * K[j][k];
+                var dot = Q[i][0] * K[j][0] + Q[i][1] * K[j][1];
                 var s = (useScale ? dot / Math.sqrt(dk) : dot) * mult;
                 S[i].push(mask && j > i ? -Infinity : s);
               }
@@ -1077,8 +1236,8 @@
               var e = S[i].map(function (v) { return v === -Infinity ? 0 : Math.exp(v - m); });
               var z = e.reduce(function (a, b) { return a + b; }, 0);
               W.push(e.map(function (v) { return v / z; }));
+              O.push([0, 1].map(function (k) { return W[i].reduce(function (a, w, j) { return a + w * V[j][k]; }, 0); }));
             }
-            var O = matmul(W, X);
             return { S: S, W: W, O: O, dk: dk, useScale: useScale, mult: mult, mask: mask };
           }
 
@@ -1100,10 +1259,9 @@
                 '<button type="button" class="at-rowbtn" data-row="' + i + '" aria-pressed="' + (i === sel) + '">' + TOKENS[i] + '</button></th>';
               row.forEach(function (v) {
                 if (v === -Infinity) h += '<td class="at-masked" aria-label="マイナス無限大">−∞</td>';
-                else if (isWeight) h += '<td style="' + heat(v, max) + '">' + v.toFixed(2) + '</td>';
-                else h += '<td style="' + heat(Math.max(0, v), max) + '">' + v.toFixed(2) + '</td>';
+                else h += '<td style="' + heat(Math.max(0, v), max) + '">' + v.toFixed(isWeight ? 3 : 2) + '</td>';
               });
-              if (isWeight) h += '<td class="at-sum">' + row.reduce(function (a, b) { return a + b; }, 0).toFixed(2) + '</td>';
+              if (isWeight) h += '<td class="at-sum">' + row.reduce(function (a, b) { return a + b; }, 0).toFixed(3) + '</td>';
               h += '</tr>';
             });
             return h + '</tbody>';
@@ -1112,7 +1270,7 @@
           function render() {
             var r = compute();
             el('attn-mult-out').textContent = '×' + r.mult.toFixed(2);
-            el('attn-score-title').textContent = 'スコア ' + (r.useScale ? 'QKᵀ / √' + r.dk : 'QKᵀ（割らない）') +
+            el('attn-score-title').textContent = '合い具合 ' + (r.useScale ? 'QKᵀ / √' + r.dk : 'QKᵀ（割らない）') +
               (Math.abs(r.mult - 1) > 1e-9 ? ' × ' + r.mult.toFixed(2) : '') + (r.mask ? '（マスク後）' : '');
             el('attn-scores').innerHTML = matrixHTML(r.S, false);
             el('attn-weights').innerHTML = matrixHTML(r.W, true);
@@ -1120,13 +1278,13 @@
               b.addEventListener('click', function () { sel = +b.dataset.row; render(); });
             });
 
-            // 選んだ行の出力 = Σ_j 重み_j × V_j
-            var w = r.W[sel], terms = [];
-            w.forEach(function (v, j) { if (v > 0) terms.push(v.toFixed(2) + ' × V(' + TOKENS[j] + ')'); });
-            el('attn-out-title').textContent = '「' + TOKENS[sel] + '」の出力 ＝ 注目度で V を加重和';
-            el('attn-terms').textContent = '= ' + terms.join(' + ');
+            // 選んだ行が受け取る情報 = Σ_j 割合_j × V_j（0.0005 未満の項は省く）
+            var w = r.W[sel], terms = [], rest = 0;
+            w.forEach(function (v, j) { if (v >= 0.0005) terms.push(v.toFixed(3) + ' × V(' + TOKENS[j] + ')'); else if (v > 0) rest++; });
+            el('attn-out-title').textContent = '「' + TOKENS[sel] + '」が受け取る情報 ＝ 参考にする割合で V を混ぜたもの';
+            el('attn-terms').textContent = '= ' + terms.join(' + ') + (rest ? ' + …（ほか ' + rest + ' 単語は 0.0005 未満）' : '');
             var o = r.O[sel], h = '';
-            FEATURES.forEach(function (f, k) {
+            KCOLS.forEach(function (f, k) {
               h += '<div class="at-bar"><span>' + f + '</span><span class="at-track" aria-hidden="true"><span class="at-fill" style="display:block; width:' +
                 (Math.max(0, Math.min(1, o[k])) * 100) + '%;"></span></span><b>' + o[k].toFixed(2) + '</b></div>';
             });
@@ -1134,9 +1292,10 @@
 
             var top = 0;
             w.forEach(function (v, j) { if (v > w[top]) top = j; });
-            var msg = '「' + TOKENS[sel] + '」がいちばん注目しているのは「' + TOKENS[top] + '」（' + w[top].toFixed(2) + '）です。';
-            if (w[top] > 0.9) msg += 'ほぼ 1 か所に集中しています。';
-            else if (Math.max.apply(null, w) - Math.min.apply(null, w.filter(function (v, j) { return !(r.mask && j > sel); })) < 0.05) msg += '見られるトークンにほぼ均等に注目しています。';
+            var seen = w.filter(function (v, j) { return !(r.mask && j > sel); });
+            var msg = '「' + TOKENS[sel] + '」がいちばん参考にしているのは「' + TOKENS[top] + '」（' + w[top].toFixed(2) + '）です。';
+            if (w[top] > 0.9) msg += 'ほぼ 1 つの単語に集中しています。';
+            else if (Math.max.apply(null, seen) - Math.min.apply(null, seen) < 0.05) msg += '参考にできる単語を、ほぼ均等に参考にしています。';
             if (el('attn-status').textContent !== msg) el('attn-status').textContent = msg;
           }
 
@@ -1144,24 +1303,27 @@
             c.addEventListener('click', function () { preset(c.dataset.preset); });
           });
           ['attn-scale', 'attn-mask', 'attn-mult'].forEach(function (id) { el(id).addEventListener('input', render); });
-          preset('w');
+          preset('what');
         })();
         </script>
       </section>
 
-      <!-- Attention Sink -->
-      <div class="note-red">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--red); margin-bottom:0.3rem;">注意：Attention Sink（注目の吸い込み口）</p>
-        <p style="font-size:0.83rem; color:#7A1F1F; line-height:1.75;">
-          実際のモデルの注目度マップを見ると、文頭トークンだけが異常に明るいことに気づきます。
-          softmax は合計を必ず 1 にするため、「特に見るべき相手がいない」ヘッドも
-          どこかに注目を割り振らざるを得ません。その捨て場所として、モデルは文頭トークンを使います。
-          この現象を <strong>Attention Sink</strong> と呼びます。これはバグではなく、softmax の性質から生じる現象です。
-          Llama-3.2-1B では最終トークンから見た注目のうち平均 約 72% が文頭に吸い込まれています
-          （ハンズオン③の付録ノートブック <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code> の付録 D で実測します）。
-          注目度マップを読むときは、文頭への注目を「無視」の意味と解釈してください。
-        </p>
-      </div>
+      <details class="more">
+        <summary>もっと詳しく：Attention Sink（文頭への注目の集中）</summary>
+        <div class="more-body">
+          <p>
+            本物のモデルの割合の表を見ると、文の最初のトークンだけが、ほかより目立って大きいことがあります。
+            softmax は合計を必ず 100% にするので、「特に参考にしたい相手がいない」ヘッドも、どこかに割合を配らなければなりません。
+            その置き場所として、モデルは文の最初のトークンを使います。
+            この現象を <strong>Attention Sink</strong> と呼びます。バグではなく、softmax の性質から生じる現象です。
+          </p>
+          <p>
+            Llama-3.2-1B では、最後のトークンから見た割合の平均 約 72% が文頭に集まっています。
+            ハンズオン③の付録ノートブック <code>ch1_03_appendix_deep_dive.ipynb</code> の付録 D で実測します。
+            割合の表を読むときは、文頭への大きな割合を「特に参考にしていない」という意味に読んでください。
+          </p>
+        </div>
+      </details>
     </section>
 
     <!-- ━━━ Section 3：Transformer ブロック ━━━ -->
@@ -1170,18 +1332,24 @@
         <div class="num">3</div>
         <div class="titles">
           <p class="label">Section 3</p>
-          <h2 class="text-lg font-bold" style="color:var(--text);">Transformer ブロックの全体構造</h2>
+          <h2 class="text-lg font-bold" style="color:var(--text);">Transformer ブロック：Attention を中心にした 1 セット</h2>
         </div>
       </div>
 
-      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        Transformer は Self-Attention を中核とした「ブロック」を積み重ねた構造です。
-        各ブロックは同じ構造を持ち、LLM ではこれを数十〜百層以上重ねます。
-      </p>
+      <div class="lead">
+        <p>
+          <strong style="color:var(--text);">Transformer ブロックは、Attention と、そのほかの部品を組み合わせた処理の 1 セットです。</strong>
+          LLM は、このブロックを何十段も積み重ねてできています。
+          ハンズオン③の Llama-3.2-1B は 16 段です。
+        </p>
+        <p>
+          ブロックの入口と出口で単語ベクトルの形が変わらないので、何段でも積み重ねられます。
+          段を重ねるたびに、各単語のベクトルに文脈の情報が少しずつ書き足されていきます。
+        </p>
+      </div>
 
-      <!-- ブロック構造図 -->
       <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1.25rem;">Transformer ブロックの内部</p>
+        <p class="card-cap">Transformer ブロックの中身</p>
         <svg viewBox="0 0 340 380" style="width:100%; max-width:340px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">
           <!-- 入力 -->
           <text x="170" y="18" font-size="10" fill="var(--text-muted)" text-anchor="middle">入力（埋め込み＋位置情報）</text>
@@ -1236,80 +1404,64 @@
           <polygon points="170,354 166,348 174,348" fill="var(--border-strong)"/>
           <text x="170" y="368" font-size="10" fill="var(--text-muted)" text-anchor="middle">出力（文脈を反映したベクトル列）</text>
         </svg>
-        <div class="note-amber" style="margin-top:1rem;">
-          <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">正規化の位置：Post-Norm と Pre-Norm</p>
-          <p style="font-size:0.83rem; color:#5C4400; line-height:1.75;">
-            2017 年の原論文は、サブレイヤーを通してから正規化する <strong>Post-Norm</strong>
-            （$\text{Norm}(x + \text{Attention}(x))$）でした。
-            しかし層を深く積むと学習が不安定になることが分かり、現在の LLM はほぼすべて
-            <strong>Pre-Norm</strong>（$x + \text{Attention}(\text{Norm}(x))$）を採用しています。
-            Pre-Norm は、<em>正規化してからサブレイヤーに入れ、その結果を元の $x$ に足す</em>方式です。
-            ブロック内部の図と、ハンズオン③の付録 C で組み立てるコードは、どちらもこの Pre-Norm 方式です。
-            残差の通り道に正規化が挟まらないため、勾配がまっすぐ下層まで届きます。
-          </p>
-        </div>
       </div>
 
-      <!-- 各コンポーネントの説明 -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
-        <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">残差接続（Residual Connection）</p>
-          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            入力をそのまま出力に足します（$x + \text{sublayer}(x)$）。
-            層が深くなっても勾配が消えにくくなり、安定した学習を可能にします。
-          </p>
-        </div>
-        <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">位置エンコーディング / RoPE</p>
-          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            Self-Attention は順序を考慮しない（「猫が魚を食べた」と「魚が猫を食べた」を区別できない）ため、
-            位置情報を別途与える必要があります。
-            原論文では sin/cos を埋め込みに<em>加算</em>しました。
-            一方 Llama では RoPE（回転位置埋め込み）を使い、
-            Attention の計算の中で Q・K を位置に応じて「回転」させて位置を表現します。
-          </p>
-        </div>
-        <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Layer Normalization / RMSNorm</p>
-          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            各層の入出力のスケールを揃え、学習を安定させます。
-            バッチ正規化と異なり、各トークンの特徴次元方向で正規化するため、可変長の入力でも動作します。
-            Llama では RMSNormを使います。
-            RMSNorm は平均を引く処理を省いた簡略版で、計算が軽いぶん高速です。
-          </p>
-        </div>
-        <div class="card">
-          <p style="font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Feed-Forward Network（FFN）</p>
-          <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7;">
-            2層の線形変換（中間次元は通常 $4 \times d_{model}$。Llama-3.2-1B なら $2048 \to 8192 \to 2048$）を
-            各トークンに<em>独立して</em>適用します。
-            Attention が「どのトークンに注目するか」を決める一方、FFN が「何を記憶・変換するか」を担います。
-            活性化関数は ReLU/GeLU が一般的ですが、Llama は SwiGLU（SiLU + ゲート機構）を使い、
-            線形層が 3 枚になります。
-            なお <strong style="color:var(--text);">パラメータの大半を占めるのは Attention ではなく FFN</strong> です
-            （ハンズオン③の付録 C-1 で内訳を実測します）。
-          </p>
-        </div>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">ブロックに登場する部品</p>
+        <table class="simple">
+          <tbody>
+            <tr><th scope="row">Multi-Head Attention</th><td>ほかの単語を参考にして、文脈の情報を取り込みます（Section 2 の内容です）。</td></tr>
+            <tr><th scope="row">FFN（Feed-Forward Network）</th><td>各単語が、取り込んだ情報を自分だけで加工します。Attention が「どの単語を参考にするか」を受け持つのに対し、FFN は「受け取った情報をどう作り変えるか」を受け持ちます。</td></tr>
+            <tr><th scope="row">残差接続</th><td>部品の出力を、入力に足し合わせます（$x + \text{Attention}(x)$）。元の情報を残したまま、変更分だけを書き足せるので、段を深く重ねても学習が安定します。</td></tr>
+            <tr><th scope="row">正規化</th><td>ベクトルの数字の大きさをそろえます。段を重ねても数字が大きくなりすぎたり小さくなりすぎたりしないので、学習が安定します。</td></tr>
+            <tr><th scope="row">位置の情報</th><td>Attention は、そのままでは単語の順番が分かりません（「ネコがサカナを食べた」と「サカナがネコを食べた」を区別できません）。そこで、各単語が文の何番目にあるかを別に教えます。</td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="note-green">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">ハンズオン③ Part 4／付録 C：本物と照合し、自分で組む</p>
+      <details class="more">
+        <summary>もっと詳しく：Llama で使われている部品の種類</summary>
+        <div class="more-body">
+          <p>
+            <strong>正規化の位置（Post-Norm と Pre-Norm）</strong>：2017 年の原論文は、部品を通した後に正規化する Post-Norm（$\text{Norm}(x + \text{Attention}(x))$）でした。
+            しかし段を深く積むと学習が不安定になることが分かり、現在の LLM はほぼすべて Pre-Norm（$x + \text{Attention}(\text{Norm}(x))$）を使います。
+            Pre-Norm は、正規化してから部品に入れ、その結果を元の $x$ に足す方式です。
+            残差の通り道に正規化が挟まらないので、学習の信号（勾配）がまっすぐ下の段まで届きます。
+            上の図と、ハンズオン③の付録 C で組み立てるコードは、どちらも Pre-Norm です。
+          </p>
+          <p>
+            <strong>RMSNorm</strong>：Llama は正規化に RMSNorm を使います。
+            よく使われる Layer Normalization から「平均を引く」処理を省いた簡略版で、計算が軽いぶん速く動きます。
+            Layer Normalization は、バッチ正規化と違って各トークンのベクトルの中で正規化するので、文の長さが変わっても使えます。
+          </p>
+          <p>
+            <strong>FFN の大きさと SwiGLU</strong>：FFN は 2 層の線形変換で、途中の次元は通常 4 倍に広げます（Llama-3.2-1B なら 2048 → 8192 → 2048）。
+            活性化関数は ReLU や GeLU が一般的ですが、Llama は SwiGLU（SiLU とゲートの仕組みの組み合わせ）を使うので、線形層が 3 枚になります。
+            モデルのパラメータの大半を占めるのは、Attention ではなく FFN です（ハンズオン③の付録 C-1 で内訳を数えます）。
+          </p>
+          <p>
+            <strong>位置の情報（RoPE）</strong>：原論文は、sin と cos で作った位置のベクトルを埋め込みに足していました。
+            Llama は RoPE（回転位置埋め込み）を使い、Attention の計算の中で $Q$ と $K$ を位置に応じて「回転」させて位置を表します。
+          </p>
+        </div>
+      </details>
+
+      <div class="note-green" style="margin-top:1.25rem;">
+        <p class="note-title" style="color:var(--green);">ハンズオン③ Part 4／付録 C：本物と見比べ、自分で組み立てる</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          本編 Part 4 では、本物の Llama の 1 層を
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> で表示し、
-          Part 2 で自分が書いた $W^Q, W^K, W^V$ が
+          Part 4 では、本物の Llama の 1 段を
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">print()</code> で表示します。
+          Part 2 で自分が書いた $W^Q$・$W^K$・$W^V$ が、
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">q_proj</code> /
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">k_proj</code> /
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">v_proj</code> として
-          <em>名前まで対応した形</em>で入っていることを確認します。
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code> や
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">v_proj</code>
+          という名前でそのまま入っていることを確かめます。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">o_proj</code>、
           <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">input_layernorm</code>、
-          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">mlp</code> は、
-          本編では「まだ作っていない部品」として眺めるだけです。
-          さらに付録 C では、ブロック内部の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を
-          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> として
-          正味 50 行ほどで自分で組み立てます。
-          自作したものと本物の違いは、規模と「学習済みかどうか」だけです。
+          <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">mlp</code> は、本編では「まだ作っていない部品」として眺めるだけです。
+          付録 C では、上の図の部品（正規化 → Multi-Head Attention → 残差 → 正規化 → FFN → 残差）を、
+          PyTorch の <code style="background:#FFFFFF; padding:1px 5px; border-radius:3px;">nn.Module</code> で 50 行ほどで組み立てます。
+          自分で作ったものと本物の違いは、大きさと「学習済みかどうか」だけです。
         </p>
       </div>
     </section>
@@ -1324,84 +1476,87 @@
         </div>
       </div>
 
-      <p style="font-size:0.9rem; color:var(--text-sub); line-height:1.85; margin-bottom:1.5rem;">
-        Transformer は 2017 年に論文「Attention Is All You Need」で提案されました。
-        その後、このアーキテクチャをどう使うかによって異なる LLM が生まれました。
-      </p>
+      <div class="lead">
+        <p>
+          <strong style="color:var(--text);">LLM（大規模言語モデル）は、Transformer ブロックを何十段も積み重ね、次の単語の確率を出すように学習したモデルです。</strong>
+          Transformer は 2017 年の論文「Attention Is All You Need」で提案されました。
+          その後、Transformer の使い方の違いから、2 種類のモデルが広まりました。
+        </p>
+      </div>
 
-      <!-- BERT / GPT の違い -->
       <div class="card" style="margin-bottom:1.5rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">Transformer の使われ方</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-          <!-- Encoder -->
+        <p class="card-cap">Transformer の 2 つの使い方</p>
+        <div class="two-col">
           <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:1rem;">
-            <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; letter-spacing:0.08em; text-transform:uppercase;">Encoder-only</p>
-            <p style="font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:0.3rem;">BERT</p>
+            <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; letter-spacing:0.08em;">文章を読んで理解する（Encoder-only）</p>
+            <p style="font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:0.3rem;">BERT など</p>
             <p style="font-size:0.78rem; color:var(--text-sub); line-height:1.7; margin-bottom:0.5rem;">
-              入力テキスト全体を双方向で読み込み、<em>文の意味表現</em>を出力するモデルです。
-              感情分析・質問応答・固有表現抽出などの分類タスクを得意とします。
+              文章全体を前からも後ろからも読み、文の意味を表すベクトルを出します。
+              因果マスクを使わないので、後ろの単語も参考にできます。
+              文章の感情を判定するなど、分類が得意です。
             </p>
-            <p style="font-size:0.7rem; color:var(--text-muted);">入力 → [Encoder × N] → 意味ベクトル</p>
+            <p style="font-size:0.7rem; color:var(--text-muted);">入力 → [ブロック × N] → 意味のベクトル</p>
           </div>
-          <!-- Decoder -->
           <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:1rem;">
-            <p style="font-size:0.75rem; font-weight:700; color:var(--green-mid); margin-bottom:0.4rem; letter-spacing:0.08em; text-transform:uppercase;">Decoder-only</p>
-            <p style="font-size:0.9rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">GPT / LLaMA / Claude</p>
+            <p style="font-size:0.75rem; font-weight:700; color:var(--green-mid); margin-bottom:0.4rem; letter-spacing:0.08em;">文章を書く（Decoder-only）</p>
+            <p style="font-size:0.9rem; font-weight:700; color:var(--green); margin-bottom:0.3rem;">GPT / Llama / Claude など</p>
             <p style="font-size:0.78rem; color:#1C4A35; line-height:1.7; margin-bottom:0.5rem;">
-              左から右へ 1 トークンずつ予測する<em>テキスト生成</em>モデルです。
-              因果マスクで、未来のトークンを参照しないように制限します。
+              左から右へ、次の単語を 1 つずつ予測して文章を書きます。
+              因果マスクで、まだ書いていない後ろの単語を参考にしないようにしています。
+              いま LLM と呼ばれているものの多くはこちらです。
             </p>
-            <p style="font-size:0.7rem; color:var(--green-mid);">入力 → [Decoder × N] → 次のトークン確率</p>
+            <p style="font-size:0.7rem; color:var(--green-mid);">入力 → [ブロック × N] → 次の単語の確率</p>
           </div>
         </div>
       </div>
 
-      <!-- LLM の基本的な仕組み -->
       <div class="card-math" style="margin-bottom:1.25rem;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">LLM（Decoder-only）が文章を生成する仕組み</p>
+        <p class="card-cap">LLM が次の単語を決める式</p>
         <div style="text-align:center; margin-bottom:1rem;">
-          $$P(\text{次のトークン} \mid \text{これまでのトークン列}) = \text{softmax}(W \cdot h_n)$$
+          $$P(\text{次の単語} \mid \text{これまでの単語}) = \text{softmax}(W \cdot h_n)$$
         </div>
-        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8;">
-          $h_n$ は最後の Transformer ブロックが出力した最終トークンの表現ベクトル、$W$ は語彙サイズ分の出力行列です。
-          <strong style="color:var(--text);">この予測を繰り返して、1 トークンずつ文章を生成します。</strong>
-          見かけ上は「理解して答えている」ように見えますが、本質は「次に来る確率の高いトークンを選び続ける」操作です。
+        <table class="var-table" style="width:100%;">
+          <tr><td>$P(A \mid B)$</td><td>B が分かっているときに A が起こる確率です。ここでは「これまでの単語」から見た「次の単語」の確率です。</td></tr>
+          <tr><td>$h_n$</td><td>最後のブロックが出力した、いちばん最後の単語のベクトルです。文全体の文脈が書き込まれています。</td></tr>
+          <tr><td>$W$</td><td>$h_n$ から、語彙のすべての単語の点数を作る行列です。</td></tr>
+          <tr><td>softmax</td><td>点数を、合計 100% の確率に直します（Section 2 と同じ計算です）。</td></tr>
+        </table>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8; margin-top:0.75rem;">
+          確率に従って次の単語を 1 つ選び、文の最後に付け足して、また同じ計算をします。
+          <strong style="color:var(--text);">これを繰り返して、1 単語ずつ文章を書いていきます。</strong>
         </p>
       </div>
 
-      <!-- スケーリング則 -->
       <div class="note-amber">
-        <p style="font-size:0.83rem; font-weight:700; color:var(--amber); margin-bottom:0.3rem;">なぜ LLM は賢いのか：スケーリング則</p>
+        <p class="note-title" style="color:var(--amber);">なぜ LLM は賢いのか：大きくするほど賢くなる</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          Transformer ブロックを深く・広くし、大量のテキストで次のトークンを予測し続けるだけで、
-          翻訳・推論・コーディングなど多様な能力が<em>創発的</em>に現れます。
-          GPT-4 のパラメータ数は非公開です（1 兆規模とする推定はあります）。
-          公開されているモデルでも、ハンズオン③の Llama-3.2-1B は約 12 億パラメータで、MNIST で使った約 20 万パラメータの約 6,000 倍です。
+          Transformer ブロックを深く・広くし、大量の文章で次の単語の予測を練習させるだけで、翻訳・推論・プログラミングなどの能力が現れてきます。
+          この「大きくするほど賢くなる」関係をスケーリング則と呼びます（補足資料「事前学習」で詳しく扱います）。
+          ハンズオン③の Llama-3.2-1B は約 12 億パラメータで、MNIST で使った約 20 万パラメータの約 6,000 倍です。
+          GPT-4 のパラメータ数は公開されていません（1 兆規模とする推定はあります）。
         </p>
       </div>
 
-      <!-- 事前学習 → 微調整のプレビュー -->
-      <div class="card" style="margin-bottom:0;">
-        <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:1rem;">第2章へのつなぎ：事前学習 → 微調整</p>
+      <div class="card" style="margin-top:1.25rem;">
+        <p class="card-cap">第2章へのつなぎ：事前学習 → 微調整</p>
         <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; row-gap:0.75rem;">
           <div style="text-align:center; min-width:7rem;">
             <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--text); font-weight:600;">事前学習</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">大量テキストで<br>次トークン予測</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">大量の文章で<br>次の単語を予測</div>
           </div>
           <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
           <div style="text-align:center; min-width:7rem;">
             <div style="background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--amber); font-weight:600;">ファインチューニング</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">タスク固有データで<br>特定能力を強化</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">目的に合うデータで<br>追加で学習</div>
           </div>
           <div style="color:var(--border-strong); font-size:1.2rem; padding:0 0.5rem;">→</div>
           <div style="text-align:center; min-width:7rem;">
             <div style="background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:0.5rem 0.75rem; font-size:0.8rem; color:var(--green); font-weight:600;">RLHF / DPO</div>
-            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">人間のフィードバックで<br>指示に従う能力を付与</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.5;">人の好みに合わせて<br>答え方を調整</div>
           </div>
         </div>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:1rem; line-height:1.7;">
-          第2章では、事前学習済みモデルを特定のタスクに合わせるファインチューニングと、
-          外部知識と組み合わせるRAG（検索拡張生成）を実装します。
+        <p class="cap">
+          第2章では、学習済みのモデルを目的に合わせるファインチューニングと、外部の資料を検索して答えに使う RAG（検索拡張生成）を実装します。
         </p>
       </div>
     </section>
@@ -1410,20 +1565,20 @@
     <div class="summary-block">
       <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#7DD3B8; margin-bottom:1rem;">まとめ</p>
       <ul style="font-size:0.875rem; line-height:2; list-style:none; padding:0; margin:0;">
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>言語をベクトルに変換する</strong>ことで、テキストにも NN の標準的な演算を適用できます</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Self-Attention は「あいまい検索できる辞書」</strong>です。内積で「似ている度合い」を測り、Value を重み付きで混ぜて返します</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span><strong>$W^Q, W^K, W^V$ は「ねじる」ためにあります</strong>。素の $X$ 同士だと、自分自身に注目が偏ります。Multi-Head はねじり方を複数持ち、いろいろな角度から類似度を測ります</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span><strong>因果マスク</strong>が未来のトークンへの注目を 0 にします。これが、LLM が左から右にしか書けない理由です</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">05</span><span>Transformer ブロックは <strong>Attention + FFN + 残差接続 + 正規化</strong> の組み合わせです。入力と出力の形が変わらないので、何段でも積めます</span></li>
-        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">06</span><span>LLM は Decoder-only Transformer を深く積み重ね、<strong>次トークン予測</strong>を繰り返すことで文章を生成します</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">01</span><span><strong>埋め込み</strong>は、単語を数字の並び（ベクトル）に置き換える処理です。意味の近い単語は、近い位置に置かれます</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">02</span><span><strong>Attention</strong> は、ある言葉を理解するとき、ほかのどの言葉をどれくらい参考にするかを決める仕組みです。「それ」は「リンゴ」を 99% 参考にして、「リンゴのことだ」と分かります</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">03</span><span>計算では、<strong>$Q$（探しているもの）と $K$（何者か）の内積</strong>で合い具合を測り、softmax で割合に直し、その割合で $V$（渡す情報）を混ぜます</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">04</span><span><strong>Multi-Head Attention</strong> は、観点の違う Attention を複数並べ、いろいろな角度から単語どうしの関係を調べます</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">05</span><span><strong>因果マスク</strong>は、後ろの単語を参考にする割合を 0% にします。これが、LLM が左から右へ 1 単語ずつ書く理由です</span></li>
+        <li style="display:flex; gap:0.6rem;"><span style="color:#7DD3B8; font-weight:700; flex-shrink:0;">06</span><span>LLM は、Attention を中心にした <strong>Transformer ブロック</strong>を何十段も積み、<strong>次の単語の予測</strong>を繰り返して文章を書きます</span></li>
       </ul>
       <p style="font-size:0.83rem; line-height:1.8; margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.18);">
         ここまでの内容は、すべて <a href="index.html">ハンズオン③</a>
         （<code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_llm_inference.ipynb</code>）の
-        Part 1〜5 で実際に手を動かして確かめます（約 30 分）。
-        Multi-Head の実装・Transformer ブロックの組み立て・Attention Sink の実測は、
+        Part 1〜5 で、実際に手を動かして確かめます（約 30 分）。
+        Multi-Head の実装、Transformer ブロックの組み立て、Attention Sink の実測は、
         同じフォルダの <code style="background:rgba(255,255,255,0.12); padding:1px 5px; border-radius:3px;">ch1_03_appendix_deep_dive.ipynb</code>（付録）で扱います。
-        <strong>読んで分かった気になる前に、手を動かしてください。</strong>
+        <strong>読んで分かった気になる前に、手を動かしてみてください。</strong>
       </p>
     </div>
 
