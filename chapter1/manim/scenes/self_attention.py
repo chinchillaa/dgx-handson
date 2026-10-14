@@ -15,7 +15,10 @@ TOKENS = ["太郎", "は", "リンゴ", "を", "食べた", "。", "それ"]
 COLS = ["人か", "食べ物か"]
 APPLE, TARO = 2, 0
 Q_SORE = np.array([0.0, 3.0])          # 「それ」は食べ物を探している
-Q_WHO = np.array([3.0, 0.0])           # 「誰の話か」を調べるヘッドの Q
+# Multi-Head の例：「食べた」の 2 つのヘッド（因果マスクに合わせ、食べたより前の 5 単語だけ）
+N_EAT = 5                              # 太郎・は・リンゴ・を・食べた
+Q_WHO = np.array([3.0, 0.0])           # 「誰が食べた？」のヘッド：人を探す
+Q_WHAT = np.array([0.0, 3.0])          # 「何を食べた？」のヘッド：食べ物を探す
 K = np.zeros((7, 2))
 K[TARO] = [3, 0]                       # 太郎は人である
 K[APPLE] = [0, 3]                      # リンゴは食べ物である
@@ -33,7 +36,8 @@ RAW = K @ Q_SORE                       # 内積（合い具合）: リンゴ 9�
 SCALED = RAW / math.sqrt(2)            # √2 で割る: リンゴ 6.36
 WEIGHTS = softmax(SCALED)              # 参考にする割合: リンゴ 0.99、ほか 0.002
 OUT = WEIGHTS @ V                      # 混ぜた結果: (0.00, 0.99)
-W_WHO = softmax(K @ Q_WHO / math.sqrt(2))
+W_WHO = softmax(K[:N_EAT] @ Q_WHO / math.sqrt(2))     # 太郎 0.99、ほか 0.002
+W_WHAT = softmax(K[:N_EAT] @ Q_WHAT / math.sqrt(2))   # リンゴ 0.99、ほか 0.002
 
 
 def ratio(v):
@@ -141,20 +145,21 @@ class SelfAttentionScene(Scene):
         self.play(*[FadeOut(m) for m in self.mobjects if m not in (head, cap)])
 
         # ── 5. Multi-Head：観点ごとに参考にする単語が変わる ──────────
-        h1 = matrix_grid([WEIGHTS], ["何を指すか"], TOKENS, fmt=ratio, cell=0.95, font_size=20, label_size=18)
-        h2 = matrix_grid([W_WHO], ["誰の話か"], fmt=ratio, cell=0.95, font_size=20, label_size=18)
-        q1 = jp("Q = (0, 3)", 20, TEXT_SUB).next_to(h1.grid, RIGHT, buff=0.3)
-        q2 = jp("Q = (3, 0)", 20, TEXT_SUB).next_to(h2.grid, RIGHT, buff=0.3)
+        h1 = matrix_grid([W_WHO], ["誰が食べた？"], TOKENS[:N_EAT], fmt=ratio, cell=1.05, font_size=20, label_size=18)
+        h2 = matrix_grid([W_WHAT], ["何を食べた？"], fmt=ratio, cell=1.05, font_size=20, label_size=18)
+        q1 = jp("「食べた」の Q = (3, 0)", 20, TEXT_SUB).next_to(h1.grid, RIGHT, buff=0.3)
+        q2 = jp("「食べた」の Q = (0, 3)", 20, TEXT_SUB).next_to(h2.grid, RIGHT, buff=0.3)
         heads = VGroup(VGroup(h1, q1), VGroup(h2, q2)).arrange(DOWN, buff=0.35, aligned_edge=RIGHT)
+        heads[1].shift(RIGHT * (h1.grid.get_left()[0] - h2.grid.get_left()[0]))  # 2 段の表の列をそろえる
         name = jp("Multi-Head Attention：観点の違うヘッドを並べる", 24, GREEN, "BOLD")
-        note = lines("※ ヘッドの役割は説明用の例です。実際の役割は学習で決まり、",
-                     "　 人に分かる形ではっきり分かれているとは限りません。", size=20, color=MUTED)
+        note = lines("※ 各ヘッドの役割は説明用の例です。実際には役割が人間に分かる形で",
+                     "　 明確に分かれているとは限りません。", size=20, color=MUTED)
         VGroup(name, heads, note).arrange(DOWN, buff=0.5).shift(UP * 0.25)
-        cap5 = caption("「何を指すか」のヘッドはリンゴを、「誰の話か」のヘッドは太郎を参考にします")
+        cap5 = caption("「誰が食べた？」のヘッドは太郎を、「何を食べた？」のヘッドはリンゴを参考にします")
         self.play(FadeIn(name), FadeIn(heads[0]), Transform(cap, cap5))
-        self.play(Create(cell_box(h1, 0, APPLE, GREEN_MID)))
+        self.play(Create(cell_box(h1, 0, TARO, GREEN_MID)))
         self.play(FadeIn(heads[1]))
-        self.play(Create(cell_box(h2, 0, TARO, GREEN_MID)))
+        self.play(Create(cell_box(h2, 0, APPLE, GREEN_MID)))
         self.wait(1)
         self.play(FadeIn(note))
         self.wait(3.5)

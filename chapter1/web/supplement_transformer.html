@@ -204,6 +204,40 @@
     }
     .summary-block code { overflow-wrap:anywhere; }
     @media print { details.more > .more-body { display:flex; } }
+    /* Section 2 の導入部品 */
+    .aq-choices { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .aq-choice { font-size:0.85rem; font-weight:600; padding:0.4rem 0.9rem; border-radius:999px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-sub); cursor:pointer; }
+    .aq-choice:hover { background:var(--surface2); }
+    .aq-choice:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; }
+    .aq-choice.is-ok { background:var(--green); border-color:var(--green); color:#FFFFFF; }
+    .aq-choice.is-ng { background:var(--red-bg); border-color:#FCA5A5; color:var(--red); }
+    .aq-result { font-size:0.84rem; font-weight:700; margin-top:0.75rem; min-height:1.2rem; }
+    .aq-result.is-ok { color:var(--green); }
+    .aq-result.is-ng { color:var(--red); }
+    .aw-bars { display:flex; flex-direction:column; gap:0.3rem; }
+    .aw-row { display:grid; grid-template-columns:3.5rem minmax(0, 1fr) 2.8rem; align-items:center; gap:0.5rem; font-size:0.8rem; color:var(--text-sub); }
+    .aw-row b { font-family:var(--font-mono, monospace); text-align:right; font-size:0.78rem; }
+    .aw-track { height:0.9rem; background:var(--surface2); border-radius:3px; overflow:hidden; }
+    .aw-fill { display:block; height:100%; background:var(--green-border); border-radius:0 3px 3px 0; }
+    .aw-row.hl { color:var(--green); font-weight:700; }
+    .aw-row.hl .aw-fill { background:var(--green); }
+    ol.steps.big { gap:0.6rem; font-size:0.86rem; color:var(--text-sub); }
+    .aw-sliders { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.9rem; }
+    .aw-sl { display:grid; grid-template-columns:3.5rem minmax(0, 1fr) 3rem; align-items:center; gap:0.6rem; font-size:0.82rem; color:var(--text); }
+    .aw-sl input { width:100%; accent-color:var(--green); }
+    .aw-sl output { font-family:var(--font-mono, monospace); font-weight:700; color:var(--green-mid); text-align:right; }
+    .gd-sub-like { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:0.4rem; }
+    .aw-stack { display:flex; height:1.4rem; border-radius:4px; overflow:hidden; background:var(--surface2); }
+    .aw-stack span { display:block; height:100%; transition:width 0.15s ease; }
+    .c-apple { background:#C2410C; } .c-taro { background:#1A6B52; } .c-eat { background:#A8A29E; }
+    .aw-legend { display:flex; gap:1rem; font-size:0.74rem; color:var(--text-sub); margin-top:0.35rem; }
+    .aw-legend i { display:inline-block; width:0.8rem; height:0.6rem; border-radius:2px; margin-right:0.3rem; vertical-align:middle; }
+    .aw-result { font-size:0.84rem; font-weight:700; color:var(--green); margin-top:0.6rem; min-height:1.2rem; }
+    .head-box { background:#FFFFFF; border:1px solid var(--green-border); border-radius:8px; padding:0.6rem 0.8rem; }
+    .head-box .head-name { font-size:0.78rem; font-weight:700; color:var(--green); margin-bottom:0.35rem; }
+    .head-box p { font-size:0.85rem; color:#1C4A35; }
+    .pill { display:inline-block; padding:0.05rem 0.55rem; border-radius:999px; background:var(--surface2); color:var(--text-sub); font-size:0.8rem; }
+    .pill.strong { background:var(--green); color:#FFFFFF; font-weight:700; }
     /* 幅の狭い画面では、長い数式だけを横スクロールさせる */
     .katex-display { overflow-x:auto; overflow-y:hidden; padding:0.15rem 0; }
   </style>
@@ -507,6 +541,14 @@
           Attention は、メモを順番に渡しません。
           各単語が、文の中のすべての単語を<strong>直接、一度に</strong>見に行きます。
           そのため、遠くの単語も忘れず、全部の単語の計算を同時に進められます。
+        </p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.5rem;">
+          たとえば「昨日、太郎が学校で<u>花子</u>に貸した本を、<u>彼女</u>は今日返した。」で、「彼女」が誰かを知るには、離れた場所にある「花子」の情報が必要です。
+          Attention なら、「彼女」から「花子」を直接参考にできます。
+          さらに、Attention を中心に作った Transformer では、学習のときに多くの単語を同時に（並列に）計算しやすくなりました。
+          この仕組みが、大規模言語モデルの発展を支える重要な技術になりました。
+        </p>
+        <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75; margin-top:0.5rem;">
           下の図は、「食べた」が各単語をどれくらい参考にするかを表したイメージです。
         </p>
       </div>
@@ -630,89 +672,223 @@
           <strong style="color:var(--text);">Attention は、ある言葉の意味を理解するとき、ほかのどの言葉を、どれくらい参考にするかを決める仕組みです。</strong>
         </p>
         <p>
-          人間も、同じ言葉を前後の言葉から理解しています。
-          たとえば「はし」は、「<u>はし</u>を渡る」なら「渡る」を参考にして「橋」だと分かり、「<u>はし</u>で食べる」なら「食べる」を参考にして「箸」だと分かります。
-          Attention は、この「参考にする」を計算で行います。
+          ChatGPT などの生成 AI を理解するうえで、とても重要な仕組みです。
+          数式も出てきますが、基本的な考え方はシンプルです。
+          まずは身近な例から見ていきます。
         </p>
       </div>
 
-      <!-- 2-2 用語 -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <p class="card-cap">Attention について学ぶと登場する 2 つの用語</p>
+      <!-- 2-2 なぜ必要か：クイズ -->
+      <h3 class="sub-h">なぜ Attention が必要なのか</h3>
+      <div class="card" id="attn-quiz" style="margin-bottom:1.25rem;">
+        <p class="card-cap">考えてみましょう</p>
+        <p style="font-size:0.95rem; color:var(--text); font-weight:700; margin-bottom:0.4rem;">太郎はリンゴを食べた。<u>それ</u>は甘かった。</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:0.75rem;">質問：「それ」は何を指しているでしょうか？</p>
+        <div class="aq-choices" role="group" aria-label="「それ」が指すものの選択肢">
+          <button type="button" class="aq-choice" data-ok="0">太郎</button>
+          <button type="button" class="aq-choice" data-ok="1">リンゴ</button>
+          <button type="button" class="aq-choice" data-ok="0">食べたという行動</button>
+        </div>
+        <p id="aq-result" class="aq-result" aria-live="polite"></p>
+      </div>
+      <div class="lead">
+        <p>
+          人間なら、ほとんど考えずに「リンゴ」だと分かります。
+          「甘い」という性質は、「太郎」や「食べた」という行動よりも、「リンゴ」と強く結びついているからです。
+        </p>
+        <p>
+          つまり私たちは、文章を読むとき、すべての言葉を同じ重さで扱っているわけではありません。
+          いま理解しようとしている言葉に対して、関係の深い言葉を重点的に参考にしています。
+          <strong style="color:var(--text);">Attention は、これに似た処理をコンピュータで行います。</strong>
+        </p>
+      </div>
+
+      <!-- 2-3 図で理解する -->
+      <h3 class="sub-h">図で見る：「それ」がほかの言葉をどれくらい参考にするか</h3>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <p class="card-cap">「それ」を理解するときに参考にする割合（仮の例）</p>
+        <div class="aw-bars" role="list" aria-label="「それ」が各単語を参考にする割合（仮の例）">
+          <div class="aw-row" role="listitem"><span>太郎</span><span class="aw-track"><span class="aw-fill" style="width:5%"></span></span><b>5%</b></div>
+          <div class="aw-row" role="listitem"><span>は</span><span class="aw-track"><span class="aw-fill" style="width:2%"></span></span><b>2%</b></div>
+          <div class="aw-row hl" role="listitem"><span>リンゴ</span><span class="aw-track"><span class="aw-fill" style="width:80%"></span></span><b>80%</b></div>
+          <div class="aw-row" role="listitem"><span>を</span><span class="aw-track"><span class="aw-fill" style="width:2%"></span></span><b>2%</b></div>
+          <div class="aw-row" role="listitem"><span>食べた</span><span class="aw-track"><span class="aw-fill" style="width:8%"></span></span><b>8%</b></div>
+          <div class="aw-row" role="listitem"><span>。</span><span class="aw-track"><span class="aw-fill" style="width:1%"></span></span><b>1%</b></div>
+          <div class="aw-row" role="listitem"><span>それ</span><span class="aw-track"><span class="aw-fill" style="width:2%"></span></span><b>2%</b></div>
+        </div>
+        <p class="cap">
+          数値は仕組みを説明するための仮の例です。実際のモデルがこの割合になるとは限りません。
+          合計は 100% です。
+        </p>
+      </div>
+      <div class="lead">
+        <p>
+          この図では、「それ」は「リンゴ」を 80% という大きな割合で参考にし、「太郎」は 5% しか参考にしていません。
+          Attention は、このような<strong style="color:var(--text);">参考にする割合</strong>（注目度や重みとも呼びます）を計算し、各単語の情報をその割合に応じて組み合わせる仕組みです。
+        </p>
+        <p>
+          大事なのは、<strong style="color:var(--text);">「いちばん重要な単語を 1 つ選ぶ」わけではない</strong>ことです。
+          複数の単語の情報を、それぞれ違う割合で取り込みます。
+        </p>
+      </div>
+
+      <!-- 2-4 Q・K・V -->
+      <h3 class="sub-h">Attention の中で使う 3 つの情報：Q・K・V</h3>
+      <div class="lead">
+        <p>Attention では、各単語が次の 3 つの情報を持ちます。</p>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <table class="simple">
+          <tbody>
+            <tr><th scope="row">Q（Query、クエリ）</th><td><strong>探しているもの</strong>です。いま理解しようとしている単語が、ほかの単語からどんな情報を得たいのかを表します。</td></tr>
+            <tr><th scope="row">K（Key、キー）</th><td><strong>自分が何者か</strong>です。各単語が、どんな探しものに合いそうかを表す目印です。</td></tr>
+            <tr><th scope="row">V（Value、バリュー）</th><td><strong>相手へ渡す情報</strong>です。参考にされたとき、割合に応じて集められ、組み合わされる中身です。</td></tr>
+          </tbody>
+        </table>
+        <div class="note-amber" style="margin-top:1rem;">
+          <p class="note-title" style="color:var(--amber);">図書館で本を探す場面にたとえると</p>
+          <ul class="terms" style="color:#5C4200; margin:0;">
+            <li><strong>Q</strong>：自分が探したい本の条件</li>
+            <li><strong>K</strong>：本に付けられた、検索用の特徴</li>
+            <li><strong>V</strong>：その本から得られる、実際の内容</li>
+          </ul>
+          <p style="font-size:0.82rem; color:#5C4200; line-height:1.75; margin-top:0.4rem;">
+            条件（Q）と特徴（K）を比べて、条件に合う本ほど多く読み、その内容（V）を集めるイメージです。
+          </p>
+        </div>
+        <p class="cap">
+          ただし、実際の AI の Q・K・V は、人間が書いた質問文や説明文ではありません。
+          単語の情報を変換した、<strong>数字の並び（ベクトル）</strong>です。
+        </p>
+      </div>
+
+      <!-- 2-5 3 ステップ -->
+      <h3 class="sub-h">Attention がしている 3 つのステップ</h3>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <ol class="steps big">
+          <li><strong>合い具合（関連度）を計算する</strong>：Q と各単語の K を比べ、どれくらい合っているかを数字にします。</li>
+          <li><strong>割合に直す</strong>：softmax（ソフトマックス）という計算で、参考にする割合の合計が 100% になるようにします。</li>
+          <li><strong>情報を割合に応じて合計する</strong>：各単語の V に割合を掛けて、足し合わせます。</li>
+        </ol>
+      </div>
+
+      <!-- 重みを動かすデモ -->
+      <div class="card" id="aw-demo" style="margin-bottom:1.25rem;">
+        <p class="label" style="margin-bottom:0.25rem;">Mini Demo</p>
+        <p style="font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">ステップ 3 を体験する：割合を動かしてみる</p>
+        <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.75rem;">
+          3 つのスライダーの値を、合計が 100% になるように直して使います。
+          割合を変えると、「それ」に集まる情報の内訳がどう変わるかを見てください。
+        </p>
+        <div class="aw-sliders">
+          <label class="aw-sl" for="aw-apple"><span>リンゴ</span><input type="range" id="aw-apple" min="0" max="100" value="80"><output id="aw-apple-out">80%</output></label>
+          <label class="aw-sl" for="aw-taro"><span>太郎</span><input type="range" id="aw-taro" min="0" max="100" value="16"><output id="aw-taro-out">16%</output></label>
+          <label class="aw-sl" for="aw-eat"><span>食べた</span><input type="range" id="aw-eat" min="0" max="100" value="4"><output id="aw-eat-out">4%</output></label>
+        </div>
+        <p class="gd-sub-like">「それ」に集まる情報の割合</p>
+        <div class="aw-stack" aria-hidden="true"><span id="aw-s-apple" class="c-apple"></span><span id="aw-s-taro" class="c-taro"></span><span id="aw-s-eat" class="c-eat"></span></div>
+        <div class="aw-legend" aria-hidden="true"><span><i class="c-apple"></i>リンゴ</span><span><i class="c-taro"></i>太郎</span><span><i class="c-eat"></i>食べた</span></div>
+        <p id="aw-result" class="aw-result" aria-live="polite"></p>
+        <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
+          <button type="button" id="aw-reset" class="aq-choice" style="font-size:0.75rem;">↺ リセット</button>
+        </div>
+        <p class="cap">
+          これは割合に応じた合計（ステップ 3）を理解するための、簡略化した模型です。
+          実際には V は数字の並び（ベクトル）で、割合もモデルがステップ 1・2 で計算します。
+          リンゴの割合を大きくするとリンゴの情報が、太郎の割合を大きくすると太郎の情報が、結果に強く反映されます。
+        </p>
+      </div>
+      <script>
+      (function () {
+        var ids = ['apple', 'taro', 'eat'], names = { apple: 'リンゴ', taro: '太郎', eat: '食べた' };
+        var init = { apple: 80, taro: 16, eat: 4 };
+        var el = function (id) { return document.getElementById(id); };
+        function render() {
+          var raw = ids.map(function (k) { return +el('aw-' + k).value; });
+          var sum = raw.reduce(function (a, b) { return a + b; }, 0);
+          var pct = raw.map(function (v) { return sum ? v / sum * 100 : 100 / 3; });
+          ids.forEach(function (k, i) {
+            el('aw-' + k + '-out').textContent = Math.round(pct[i]) + '%';
+            el('aw-s-' + k).style.width = pct[i] + '%';
+          });
+          var best = 0; pct.forEach(function (p, i) { if (p > pct[best]) best = i; });
+          var tie = pct.filter(function (p) { return Math.abs(p - pct[best]) < 0.5; }).length > 1;
+          el('aw-result').textContent = sum === 0
+            ? 'すべて 0 のときは、3 つを同じ割合（約 33%）で混ぜることにしています。'
+            : tie ? '複数の単語の情報を、同じくらいの割合で取り込んでいます。'
+                  : 'いちばん多く取り込む情報：' + names[ids[best]] + '（' + Math.round(pct[best]) + '%）';
+        }
+        ids.forEach(function (k) { el('aw-' + k).addEventListener('input', render); });
+        el('aw-reset').addEventListener('click', function () {
+          ids.forEach(function (k) { el('aw-' + k).value = init[k]; }); render();
+        });
+        render();
+
+        // クイズ
+        var res = el('aq-result');
+        document.querySelectorAll('#attn-quiz .aq-choice').forEach(function (b) {
+          b.addEventListener('click', function () {
+            document.querySelectorAll('#attn-quiz .aq-choice').forEach(function (x) { x.classList.remove('is-ok', 'is-ng'); });
+            var ok = b.dataset.ok === '1';
+            b.classList.add(ok ? 'is-ok' : 'is-ng');
+            res.className = 'aq-result ' + (ok ? 'is-ok' : 'is-ng');
+            res.textContent = ok ? '正解です。「それ」はリンゴを指しています。'
+                                 : 'もう一度考えてみましょう。「甘かった」のは、どれでしょうか。';
+          });
+        });
+      })();
+      </script>
+
+      <!-- 2-6 用語 -->
+      <h3 class="sub-h">Self-Attention と Multi-Head Attention</h3>
+      <div class="lead">
+        <p>Attention について学ぶと、次の 2 つの用語も登場します。</p>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem;">
         <table class="simple">
           <tbody>
             <tr>
               <th scope="row">Self-Attention</th>
-              <td>同じ文章の中にある、単語どうしの関係を調べる仕組みです。LLM で使う Attention は、基本的にこれです。</td>
+              <td>同じ文章の中にある、単語どうしの関係を調べる仕組みです。たとえば「太郎はリンゴを食べた」で、「食べた」が「太郎」や「リンゴ」とどう関係しているかを計算します。LLM で使う Attention は、基本的にこれです。</td>
             </tr>
             <tr>
               <th scope="row">Multi-Head Attention</th>
-              <td>複数の Attention を同時に使い、違う観点から単語どうしの関係を調べる仕組みです。</td>
+              <td>複数の Attention（ヘッド）を同時に使い、違う観点から単語どうしの関係を調べる仕組みです。</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- 2-3 具体例 -->
-      <h3 class="sub-h">具体的には：割合を決めて、情報を混ぜる</h3>
-      <div class="lead">
-        <p>
-          具体的には、Attention は単語ごとに次の 2 つを行います。
-        </p>
-        <ol class="steps">
-          <li>ほかの各単語を何 % 参考にするかを、合計が 100% になるように決めます。</li>
-          <li>その割合に応じて、ほかの単語の情報を混ぜ合わせ、自分の情報に取り込みます。</li>
-        </ol>
-        <p>
-          例として、「太郎はリンゴを食べた。それは甘かった。」の「<strong style="color:var(--text);">それ</strong>」を見てみます。
-          「それ」の意味を理解するには、何を指しているかを知る必要があります。
-          そこで「それ」は、前にある単語のうち「リンゴ」をほぼ 100% 参考にします。
-          その結果、「それ」は「リンゴのことだ」という情報を持つようになります。
-        </p>
-      </div>
-
-      <div class="card" style="margin-bottom:1.25rem;">
-        <p class="card-cap">「それ」が各単語を参考にする割合</p>
-        <div class="ratio-table" role="table" aria-label="「それ」が各単語を参考にする割合">
-          <div class="rt-row" role="row">
-            <span role="columnheader">太郎</span><span role="columnheader">は</span><span role="columnheader" class="hl">リンゴ</span><span role="columnheader">を</span><span role="columnheader">食べた</span><span role="columnheader">。</span><span role="columnheader">それ</span>
-          </div>
-          <div class="rt-row" role="row">
-            <span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell" class="hl">99%</span><span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell">0.2%</span><span role="cell">0.2%</span>
-          </div>
-        </div>
-        <p class="cap">
-          この割合は、あとの「数式」の節で実際に計算して求めます。
-          「それ」より後ろの「は・甘かった・。」は参考にしていません。理由は、この節の最後の「因果マスク」で説明します。
-        </p>
-      </div>
-
       <div class="note-green" style="margin-bottom:1.5rem;">
         <p class="note-title" style="color:var(--green);">Multi-Head Attention の例：観点ごとに参考にする単語が変わる</p>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          1 つの Attention が調べられるのは、1 つの観点だけです。
-          そこで、観点の違う Attention（ヘッド）を複数並べます。
-          たとえば「それ」について、次のように役割を分けられます。
+          同じ「太郎はリンゴを食べた」を読むときでも、「食べた」について次のような違う関係に注目できます。
         </p>
-        <ul class="terms" style="color:#1C4A35;">
-          <li>「何を指しているか」を調べるヘッドは、「リンゴ」を参考にします。</li>
-          <li>「誰の話か」を調べるヘッドは、「太郎」を参考にします。</li>
-        </ul>
+        <div class="two-col" style="margin:0.6rem 0;">
+          <div class="head-box">
+            <p class="head-name">Head 1：誰が食べた？</p>
+            <p><span class="pill">食べた</span> → <span class="pill strong">太郎</span></p>
+          </div>
+          <div class="head-box">
+            <p class="head-name">Head 2：何を食べた？</p>
+            <p><span class="pill">食べた</span> → <span class="pill strong">リンゴ</span></p>
+          </div>
+        </div>
         <p style="font-size:0.83rem; color:#1C4A35; line-height:1.75;">
-          各ヘッドの結果をまとめると、「それ」は「太郎が食べたリンゴ」という情報を持てます。
+          複数の観点から情報を集めることで、1 つの Attention だけでは捉えにくい関係も表しやすくなります。
         </p>
         <p style="font-size:0.78rem; color:var(--green-mid); line-height:1.7; margin-top:0.5rem;">
           ※ 各ヘッドの役割は説明用の例です。
-          実際のモデルでは、各ヘッドが何を受け持つかは学習で決まり、その役割が人間に分かる形ではっきり分かれているとは限りません。
+          実際には、役割が人間に分かる形で明確に分かれているとは限りません。
         </p>
       </div>
 
-      <!-- 2-4 数式 -->
+      <!-- 2-7 数式 -->
       <h3 class="sub-h">Attention を数式で表すと</h3>
       <div class="lead">
         <p>
-          Attention を数式で表すと、次のようになります。
-          ここから先は、数字が並んだ表を<strong>行列</strong>と呼びます。
+          ここまで理解できれば、代表的な数式も怖くありません。
+          一見難しそうですが、やっていることは上の 3 ステップそのものです。
         </p>
       </div>
       <div class="card-math" style="margin-bottom:1.25rem;">
@@ -721,38 +897,37 @@
         </div>
         <table class="var-table" style="width:100%;">
           <tr>
-            <td>$Q$（Query）</td>
-            <td>各単語の「<strong>探しているもの</strong>」を表す数字です。例：「それ」は食べ物（物）を探しています。</td>
-          </tr>
-          <tr>
-            <td>$K$（Key）</td>
-            <td>各単語の「<strong>自分が何者か</strong>」を表す数字です。例：「リンゴ」は食べ物だと示しています。</td>
-          </tr>
-          <tr>
-            <td>$V$（Value）</td>
-            <td>参考にされたときに<strong>相手へ渡す情報</strong>です。</td>
-          </tr>
-          <tr>
             <td>$QK^\top$</td>
-            <td>「探しているもの」と「何者か」の<strong>合い具合</strong>です。$Q$ と $K$ の内積で計算します（$K^\top$ は $K$ の行と列を入れ替えたもので、全部の組み合わせの内積をまとめて計算するための書き方です）。</td>
-          </tr>
-          <tr>
-            <td>$d_k$</td>
-            <td>$Q$ と $K$ の数字の個数です。</td>
+            <td><strong>ステップ 1</strong>：Q と K を比べて<strong>合い具合（関連度）</strong>を計算します。中身は内積です（$K^\top$ は $K$ の行と列を入れ替えたもので、全部の組み合わせの内積をまとめて計算するための書き方です）。</td>
           </tr>
           <tr>
             <td>$\sqrt{d_k}$ で割る</td>
-            <td>合い具合が大きくなりすぎないように小さくします。数字の個数が多いほど内積は大きくなりやすく、そのままだと 1 つの単語だけに割合が集中しすぎて、学習がうまく進まなくなるためです。</td>
+            <td>合い具合の数字が大きくなりすぎるのを抑えます。数字の個数が多いほど内積は大きくなりやすく、そのままだと 1 つの単語だけに割合が集中しすぎて、学習がうまく進まなくなるためです。</td>
           </tr>
           <tr>
             <td>softmax</td>
-            <td>合い具合を、<strong>合計 100% の割合</strong>に直す計算です。合い具合が大きい単語ほど、大きな割合をもらいます。</td>
+            <td><strong>ステップ 2</strong>：合い具合を、合計 100% の<strong>参考にする割合</strong>に直します。合い具合が大きい単語ほど、大きな割合をもらいます。</td>
           </tr>
           <tr>
-            <td>$(\cdots)V$</td>
-            <td>その割合で $V$ を混ぜ合わせます（割合を掛けて足し合わせます）。</td>
+            <td>最後に $V$ を掛ける</td>
+            <td><strong>ステップ 3</strong>：割合に応じて $V$ を混ぜ合わせ、情報を集めます（割合を掛けて足し合わせます）。</td>
+          </tr>
+          <tr>
+            <td>$d_k$</td>
+            <td>Key ベクトルの次元数、つまり $k$ に数字がいくつ並んでいるかです。</td>
           </tr>
         </table>
+      </div>
+
+      <div class="note-amber" style="margin-bottom:1.25rem;">
+        <p class="note-title" style="color:var(--amber);">小文字はベクトル、大文字は行列</p>
+        <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
+          1 つの単語の Q・K・V は、それぞれベクトル（数字の並び）です。このページでは小文字で $q_i$・$k_i$・$v_i$ と書きます（$i$ は何番目の単語か）。
+          数式の大文字 $Q$・$K$・$V$ は、全単語の $q_i$・$k_i$・$v_i$ を縦に積み重ねた<strong>行列</strong>（数字が並んだ表）です。
+          単語が $n$ 個なら、$Q$ と $K$ は $n$ 行 × $d_k$ 列になり、$QK^\top$ は $n \times n$ の表になります。
+          この表の $i$ 行 $j$ 列には、$i$ 番目の単語の $q_i$ と $j$ 番目の単語の $k_j$ の内積 $q_i \cdot k_j$ が入ります。
+          行列にまとめると、全部の組み合わせの内積を 1 回の掛け算で計算でき、GPU で速く計算できます。
+        </p>
       </div>
 
       <div class="note-green" style="margin-bottom:1.25rem;">
@@ -761,7 +936,7 @@
           高校で習うベクトルの内積は、2 つのベクトルの向きがそろっているほど大きな値になります。
           直角なら 0、逆向きならマイナスです。
           たとえば $(0, 3)$ と $(0, 3)$ の内積は $0 \times 0 + 3 \times 3 = 9$、$(0, 3)$ と $(3, 0)$ の内積は $0 \times 3 + 3 \times 0 = 0$ です。
-          Attention は、この性質を使って「探しているもの」と「何者か」が合っているかを測ります。
+          Attention は、この性質を使って「探しているもの」と「自分が何者か」が合っているかを測ります。
         </p>
       </div>
 
@@ -769,24 +944,26 @@
       <div class="card" style="margin-bottom:1.25rem;">
         <p class="card-cap">計算してみましょう：「それ」が「リンゴ」を 99% 参考にするまで</p>
         <p style="font-size:0.84rem; color:var(--text-sub); line-height:1.8; margin-bottom:0.75rem;">
-          説明のため、$Q$ と $K$ を「人か」「食べ物か」の 2 つの数字だけで表します（$d_k = 2$）。
+          上の 3 ステップを、実際の数字で計算します。
+          説明のため、各単語の $q$ と $k$ を「人か」「食べ物か」の 2 つの数字だけで表します（$d_k = 2$）。
           本物のモデルでは数字は数十〜数百個あり、値は学習で決まります。
+          この例は数字を極端にしてあるので、割合は「リンゴ」1 つにほぼ集中します（図の 80% より大きくなります）。
         </p>
 
-        <p class="step-label">ステップ 1：「探しているもの」と「何者か」を数字で表す</p>
+        <p class="step-label">準備：「探しているもの」と「自分が何者か」を数字で表す</p>
         <div class="table-wrap">
           <table class="calc">
             <thead><tr><th></th><th>人か</th><th>食べ物か</th><th>説明</th></tr></thead>
             <tbody>
-              <tr class="hl"><th scope="row">それ の $Q$</th><td>0</td><td>3</td><td>食べ物を探している</td></tr>
-              <tr><th scope="row">太郎 の $K$</th><td>3</td><td>0</td><td>人である</td></tr>
-              <tr><th scope="row">リンゴ の $K$</th><td>0</td><td>3</td><td>食べ物である</td></tr>
-              <tr><th scope="row">ほかの $K$</th><td>0</td><td>0</td><td>は・を・食べた・。・それ</td></tr>
+              <tr class="hl"><th scope="row">$q_{\text{それ}}$</th><td>0</td><td>3</td><td>食べ物を探している</td></tr>
+              <tr><th scope="row">$k_{\text{太郎}}$</th><td>3</td><td>0</td><td>人である</td></tr>
+              <tr><th scope="row">$k_{\text{リンゴ}}$</th><td>0</td><td>3</td><td>食べ物である</td></tr>
+              <tr><th scope="row">ほかの $k$</th><td>0</td><td>0</td><td>は・を・食べた・。・それ</td></tr>
             </tbody>
           </table>
         </div>
 
-        <p class="step-label">ステップ 2：内積で合い具合を測り、$\sqrt{2} \approx 1.41$ で割る</p>
+        <p class="step-label">ステップ 1：内積で合い具合を測り、$\sqrt{2} \approx 1.41$ で割る</p>
         <div class="table-wrap">
           <table class="calc">
             <thead><tr><th></th><th>内積</th><th>÷ 1.41</th></tr></thead>
@@ -798,7 +975,7 @@
           </table>
         </div>
 
-        <p class="step-label">ステップ 3：softmax で割合に直す</p>
+        <p class="step-label">ステップ 2：softmax で割合に直す</p>
         <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75; margin-bottom:0.5rem;">
           softmax は、各値 $x$ を $e^x$（$e \approx 2.718$）に変えてから、全体の合計で割ります。
           $e^x$ は $x$ が大きいほど急に大きくなるので、合い具合の大きい単語に割合が集まります。
@@ -813,9 +990,9 @@
           </table>
         </div>
 
-        <p class="step-label">ステップ 4：割合に応じて $V$ を混ぜる</p>
+        <p class="step-label">ステップ 3：割合に応じて $v$ を混ぜる</p>
         <p style="font-size:0.82rem; color:var(--text-sub); line-height:1.75;">
-          $V$ も「人か」「食べ物か」の 2 つの数字とし、太郎の $V$ を $(1, 0)$、リンゴの $V$ を $(0, 1)$、ほかを $(0, 0)$ とします。
+          $v$ も「人か」「食べ物か」の 2 つの数字とし、$v_{\text{太郎}} = (1, 0)$、$v_{\text{リンゴ}} = (0, 1)$、ほかを $(0, 0)$ とします。
           割合を掛けて足すと、「それ」の新しい情報は $0.002 \times (1, 0) + 0.99 \times (0, 1) \approx (0.00, 0.99)$ になります。
           「それ」に、リンゴの「食べ物である」という情報がほぼそのまま入りました。
         </p>
@@ -824,7 +1001,7 @@
       <div class="note-amber" style="margin-bottom:1.25rem;">
         <p class="note-title" style="color:var(--amber);">Q・K・V はどこから来るのか</p>
         <p style="font-size:0.83rem; color:#5C4200; line-height:1.75;">
-          $Q$・$K$・$V$ は、どれも各単語のベクトル $X$（Section 0 の埋め込み）から作ります。
+          $Q$・$K$・$V$ は、どれも各単語のベクトルを積んだ行列 $X$（Section 0 の埋め込み）から作ります。
           $X$ に、学習で決まる 3 つの行列 $W^Q$・$W^K$・$W^V$ をそれぞれ掛けて、$Q = XW^Q$、$K = XW^K$、$V = XW^V$ とします。
           同じ単語のベクトルから、「探すとき用」「名乗るとき用」「渡すとき用」の 3 種類の数字を作り分けるイメージです。
           Multi-Head Attention では、この 3 つの行列の組をヘッドの数だけ持ちます。
@@ -888,7 +1065,7 @@
       <!-- 解説動画（chapter1/manim/scenes で生成） -->
       <div class="card" style="margin:1.25rem 0;">
         <p class="card-cap">解説動画：Attention の計算を 1 ステップずつ追う（約 48 秒）</p>
-        <video controls preload="metadata" playsinline poster="media/ch1_self_attention.jpg" aria-label="太郎・は・リンゴ・を・食べた・。・それ の 7 単語で、「それ」の Q と各単語の K の内積から合い具合を求め、softmax で参考にする割合に直し、V を混ぜるまでのアニメーション。最後に「何を指すか」と「誰の話か」の 2 つのヘッドを比べる"
+        <video controls preload="metadata" playsinline poster="media/ch1_self_attention.jpg" aria-label="太郎・は・リンゴ・を・食べた・。・それ の 7 単語で、「それ」の Q と各単語の K の内積から合い具合を求め、softmax で参考にする割合に直し、V を混ぜるまでのアニメーション。最後に「食べた」の「誰が食べた？」と「何を食べた？」の 2 つのヘッドを比べる"
                style="width:100%; display:block; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
           <source src="media/ch1_self_attention.mp4" type="video/mp4">
           お使いのブラウザは動画の再生に対応していません。<a href="media/ch1_self_attention.mp4">動画ファイル</a>を直接開いてください。
@@ -896,7 +1073,7 @@
         <p class="cap">
           上の計算例を、同じ値で動かして見せます。
           合い具合はリンゴが 9（÷√2 で 6.36）、ほかは 0 で、softmax で割合に直すとリンゴが 0.99 になります。
-          最後に、「何を指すか」のヘッド（リンゴを参考にする）と「誰の話か」のヘッド（太郎を参考にする）を並べます。
+          最後に、「食べた」について「誰が食べた？」のヘッド（太郎を参考にする）と「何を食べた？」のヘッド（リンゴを参考にする）を並べます。
           ハンズオン③ Part 2 では、同じ計算を「ネコがサカナを食べた」でコードにします。
         </p>
       </div>
@@ -919,6 +1096,11 @@
           例文で確かめます。
           「それ」は「リンゴ」より後ろにあるので、因果マスクをかけても「リンゴ」を参考にできます。
           一方、文の最初の「太郎」は、後ろの「リンゴ」も「甘かった」も参考にできず、自分自身しか見られません。
+        </p>
+        <p>
+          この節の最初のクイズでは、人は後ろの「甘かった」も手がかりにして「それ ＝ リンゴ」と考えました。
+          文章を生成する LLM は、「それ」の時点ではまだ「甘かった」を参考にできません。
+          そのかわり、「甘かった」の位置まで来たときに、前にある「リンゴ」や「それ」を参考にして、「甘いのはリンゴ」という情報を取り込みます。
         </p>
       </div>
 
@@ -1103,14 +1285,15 @@
             上の計算を、「太郎はリンゴを食べた。それは」の 7 つの単語すべてについて一度に行います。
             初期値は上の計算例と同じです。
             $Q$（探しているもの）と $K$（自分が何者か）の数字を書き換えたり、ヘッドを切り替えたりして、参考にする割合の表がどう変わるかを確かめてください。
+            ヘッドを切り替えると「食べた」の行が選ばれ、「誰が食べた？」では太郎、「何を食べた？」ではリンゴを参考にする様子が見られます。
             ハンズオン③では、「ネコがサカナを食べた」の例で同じ計算をコードで実装します。
           </p>
 
           <!-- ヘッド -->
           <div class="at-presets" role="group" aria-label="ヘッドの切り替え">
             <span>ヘッド：</span>
-            <button type="button" class="at-chip" data-preset="what" aria-pressed="true">「何を指すか」ヘッド</button>
-            <button type="button" class="at-chip" data-preset="who" aria-pressed="false">「誰の話か」ヘッド</button>
+            <button type="button" class="at-chip" data-preset="what" aria-pressed="true">「何を食べた？」ヘッド</button>
+            <button type="button" class="at-chip" data-preset="who" aria-pressed="false">「誰が食べた？」ヘッド</button>
           </div>
           <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin:-0.5rem 0 0.9rem;">
             ※ ヘッドの役割は説明用の例です。実際のモデルでは学習で決まり、人に分かる形ではっきり分かれているとは限りません。
@@ -1176,8 +1359,8 @@
           var K0 = [[3, 0], [0, 0], [0, 3], [0, 0], [0, 0], [0, 0], [0, 0]];
           var V = [[1, 0], [0, 0], [0, 1], [0, 0], [0, 0], [0, 0], [0, 0]];
           var HEADS = {
-            what: [[0, 0], [0, 0], [0, 0], [0, 0], [0, 3], [0, 0], [0, 3]],  // 食べた・それ が食べ物を探す
-            who:  [[0, 0], [0, 0], [0, 0], [0, 0], [3, 0], [0, 0], [3, 0]]   // 食べた・それ が人を探す
+            what: [[0, 0], [0, 0], [0, 0], [0, 0], [0, 3], [0, 0], [0, 3]],  // 食べた・それ が食べ物を探す（本文の計算例と同じ）
+            who:  [[0, 0], [0, 0], [0, 0], [0, 0], [3, 0], [0, 0], [0, 3]]   // 食べた が人を探す（それ は変えない）
           };
           var n = TOKENS.length, SORE = 6;
           var el = function (id) { return document.getElementById(id); };
@@ -1300,13 +1483,25 @@
           }
 
           document.querySelectorAll('#attn-playground .at-chip').forEach(function (c) {
-            c.addEventListener('click', function () { preset(c.dataset.preset); });
+            c.addEventListener('click', function () { sel = 4; preset(c.dataset.preset); });  // ヘッドの違いが出る「食べた」の行を選ぶ
           });
           ['attn-scale', 'attn-mask', 'attn-mult'].forEach(function (id) { el(id).addEventListener('input', render); });
           preset('what');
         })();
         </script>
       </section>
+
+      <div class="summary-block" style="margin:1.5rem 0 1rem; padding:1.5rem 1.75rem;">
+        <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; color:#7DD3B8; margin-bottom:0.6rem;">これだけ覚えれば OK</p>
+        <p style="font-size:0.95rem; color:#FFFFFF; font-weight:700; line-height:1.7; margin-bottom:0.75rem;">
+          Attention は、「いまこの言葉を理解するために、ほかのどの言葉の情報を、どれくらい取り込むべきか」を計算する仕組みです。
+        </p>
+        <ul style="font-size:0.86rem; line-height:1.9; list-style:none; padding:0; margin:0; color:#C8E6DA;">
+          <li><strong>Q</strong>：何を探しているか</li>
+          <li><strong>K</strong>：自分が何者か（どんな探しものに合うか）</li>
+          <li><strong>V</strong>：実際に相手へ渡す情報</li>
+        </ul>
+      </div>
 
       <details class="more">
         <summary>もっと詳しく：Attention Sink（文頭への注目の集中）</summary>
@@ -1524,6 +1719,12 @@
         <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8; margin-top:0.75rem;">
           確率に従って次の単語を 1 つ選び、文の最後に付け足して、また同じ計算をします。
           <strong style="color:var(--text);">これを繰り返して、1 単語ずつ文章を書いていきます。</strong>
+        </p>
+        <p style="font-size:0.83rem; color:var(--text-sub); line-height:1.8; margin-top:0.6rem;">
+          たとえば「私は今朝、パンを」と入力すると、「食べた」「焼いた」「買った」など、いろいろな続きが候補になります。
+          Attention は、この予測に必要な文脈の情報を集める役割を担います。
+          ただし、<strong style="color:var(--text);">Attention だけで次の単語を決めているわけではありません</strong>。
+          Transformer ブロックには FFN などの情報を変換する部品もあり、それらを組み合わせて次の単語の確率を計算しています。
         </p>
       </div>
 
