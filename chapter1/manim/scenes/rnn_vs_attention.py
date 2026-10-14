@@ -1,7 +1,7 @@
-"""RNN の逐次処理と Self-Attention の一括処理を上下に並べて比べるアニメーション
+"""RNN の順番読みと Attention の一括読みを上下に並べて比べるアニメーション
 
-トークンと注目度は supplement_transformer.html の図と同じ
-（「私・は・昨日・食べた・寿司」、「食べた」の注目度 私 0.15・は 0.05・昨日 0.28・食べた 0.07・寿司 0.45）。
+単語と参考にする割合は supplement_transformer.html の図と同じ
+（「私・は・昨日・食べた・寿司」、「食べた」が参考にする割合 私 0.15・は 0.05・昨日 0.28・食べた 0.07・寿司 0.45）。
 RNN の隠れ状態に占める「私」の割合は、薄れていく様子を示すためのイメージで、実測値ではない。
 """
 import numpy as np
@@ -34,11 +34,11 @@ def share_bar(t):
 
 class RnnVsAttentionScene(Scene):
     def construct(self):
-        head = title("RNN は順番に、Self-Attention は一度に")
+        head = title("RNN は順番に、Attention は一度に")
         self.play(FadeIn(head))
 
         # ── 上段：RNN ───────────────────────────────
-        top_lbl = jp("RNN：1 語ずつ順番に処理する", 26, GREEN, "BOLD").move_to([-6.6, 2.7, 0], aligned_edge=LEFT)
+        top_lbl = jp("RNN：1 語ずつ順番に読む", 26, GREEN, "BOLD").move_to([-6.6, 2.7, 0], aligned_edge=LEFT)
         legend = VGroup(
             Square(0.22, stroke_width=0).set_fill(AMBER_BORDER, 1), jp("「私」の情報", 18, TEXT_SUB),
             Square(0.22, stroke_width=0).set_fill(GREEN_BORDER, 1), jp("ほかの語の情報（割合はイメージ）", 18, TEXT_SUB),
@@ -56,7 +56,7 @@ class RnnVsAttentionScene(Scene):
             ups.add(Arrow([x, 0.65, 0], b.get_bottom(), buff=0.04, color=MUTED, stroke_width=3,
                           max_tip_length_to_length_ratio=0.35))
         self.play(FadeIn(top_lbl), FadeIn(legend), FadeIn(boxes), FadeIn(hs), FadeIn(toks), FadeIn(ups))
-        cap = caption("h₂ は h₁ が、h₃ は h₂ ができるまで計算できない。1 ステップずつ進む")
+        cap = caption("h₂ は h₁ が、h₃ は h₂ ができるまで計算できません。1 ステップずつ進みます")
         self.play(FadeIn(cap))
         self.wait(0.5)
 
@@ -74,14 +74,14 @@ class RnnVsAttentionScene(Scene):
             self.wait(0.2)
         fade = DashedLine([XS[0] - 0.8, 2.15, 0], [XS[-1] + 0.8, 2.15, 0], color=AMBER_BORDER, stroke_width=3)
         fade.add_tip(tip_length=0.18, tip_width=0.18)
-        cap2 = caption("先頭の「私」の情報は、運ばれるうちに薄れていく（イメージ）", AMBER)
+        cap2 = caption("先頭の「私」の情報は、運ばれるうちに薄れていきます（イメージ）", AMBER)
         self.play(Create(fade), Transform(cap, cap2),
                   *[Indicate(b[0][0], color=AMBER, scale_factor=1.15) for b in bars])
         self.wait(2)
 
         # ── 下段：Self-Attention ───────────────────────────
         sep = Line([-6.8, 0.1, 0], [6.8, 0.1, 0], color=BORDER, stroke_width=2)
-        bot_lbl = jp("Self-Attention：全トークンを一度に見る", 26, GREEN, "BOLD").move_to([-6.6, -0.35, 0],
+        bot_lbl = jp("Attention：すべての単語を一度に参考にする", 26, GREEN, "BOLD").move_to([-6.6, -0.35, 0],
                                                                                           aligned_edge=LEFT)
         tboxes = VGroup()
         for i, (x, t) in enumerate(zip(XS, TOKENS)):
@@ -90,7 +90,7 @@ class RnnVsAttentionScene(Scene):
                                  stroke_color=GREEN_MID if hl else BORDER, stroke_width=3 if hl else 2)
             b.set_fill(GREEN_BG if hl else BG, 1).move_to([x, -2.55, 0])
             tboxes.add(VGroup(b, jp(t, 26, GREEN if hl else TEXT_SUB, "BOLD" if hl else "NORMAL").move_to(b)))
-        cap3 = caption("「食べた」から全トークンへ直接つなぐ。どれだけ離れていても 1 ステップ")
+        cap3 = caption("「食べた」は、すべての単語を直接参考にします。離れていても 1 ステップです")
         self.play(Create(sep), FadeIn(bot_lbl), FadeIn(tboxes), Transform(cap, cap3))
 
         src = tboxes[EAT][0].get_top()
@@ -114,10 +114,10 @@ class RnnVsAttentionScene(Scene):
             labels.add(jp(f"{w:.2f}", 22, color, "BOLD").move_to(lbl_pos))
         self.play(*[Create(a) for a in arcs], *[FadeIn(lb) for lb in labels], run_time=1.6)
         self.wait(1.5)
-        cap4 = caption("5 本を同時に計算する。離れた「私」にも 0.15 で直接届き、合計は 1.00", GREEN)
+        cap4 = caption("参考にする割合を 5 本同時に計算します。離れた「私」も 0.15、合計は 1.00 です", GREEN)
         self.play(Transform(cap, cap4), Indicate(labels[0], color=AMBER), Indicate(labels[4], color=GREEN_MID))
         self.wait(2.5)
 
-        cap5 = caption("RNN の「薄れる」「順番待ち」を、Transformer は Attention だけで解決した", GREEN)
+        cap5 = caption("RNN の「薄れる」「順番待ち」を、Attention は解決しました", GREEN)
         self.play(Transform(cap, cap5))
         self.wait(3)

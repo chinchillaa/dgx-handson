@@ -40,7 +40,7 @@ class EmbeddingScene(Scene):
             color = GREEN if royal else TEXT_SUB
             dots[w] = Dot(p(v), radius=0.09, color=GREEN if royal else MUTED)
             names.add(jp(w, 26, color, "BOLD" if royal else "NORMAL").next_to(dots[w], side[w], buff=0.15))
-        cap = caption("単語は数値ベクトル、つまり空間の 1 点になる（ここでは 2 次元のイメージ）")
+        cap = caption("単語は数字の並び（ベクトル）で、平面上の 1 点として表せます")
         self.play(Create(grid), Create(ax), FadeIn(ax_lbl), FadeIn(cap))
         self.play(LaggedStart(*[GrowFromCenter(d) for d in dots.values()], lag_ratio=0.15), FadeIn(names))
         self.wait(1.5)
@@ -54,7 +54,7 @@ class EmbeddingScene(Scene):
         rank = VGroup(dashed("男性", "王様", GREEN_MID), dashed("女性", "女王", GREEN_MID))
         g_lbl = jp("「性別」方向", 22, AMBER, "BOLD").next_to(gender[0], DOWN, buff=0.2)
         r_lbl = jp("「地位」方向", 22, GREEN_MID, "BOLD").rotate(PI / 2).next_to(rank[0], LEFT, buff=0.2)
-        cap2 = caption("「男性→女性」と「王様→女王」は、ほぼ同じ向きと長さの矢印になる")
+        cap2 = caption("「男性→女性」と「王様→女王」は、ほぼ同じ向きと長さの矢印です")
         self.play(LaggedStart(*[Create(a) for a in gender], lag_ratio=0.3), FadeIn(g_lbl), Transform(cap, cap2))
         self.wait(1)
         self.play(LaggedStart(*[Create(a) for a in rank], lag_ratio=0.3), FadeIn(r_lbl))
@@ -72,11 +72,11 @@ class EmbeddingScene(Scene):
         mid = VEC["王様"] - VEC["男性"]
         steps = [
             (Arrow(p((0, 0)), p(VEC["王様"]), buff=0, color=GREEN_MID, stroke_width=6), eq[0],
-             "原点から「王様」のベクトルへ"),
+             "原点から「王様」のベクトルへ進みます"),
             (Arrow(p(VEC["王様"]), p(mid), buff=0, color=RED, stroke_width=6), eq[1],
-             "「男性」のベクトルを引く（逆向きにたどる）"),
+             "「男性」のベクトルを引きます（逆向きにたどります）"),
             (Arrow(p(mid), p(RESULT), buff=0, color=AMBER, stroke_width=6), eq[2],
-             "「女性」のベクトルを足す（矢印を先端につなぐ）"),
+             "「女性」のベクトルを足します（矢印を先端につなぎます）"),
         ]
         for arrow, term, text in steps:
             self.play(GrowArrow(arrow), FadeIn(term, shift=RIGHT * 0.2), Transform(cap, caption(text)), run_time=1.3)
@@ -84,7 +84,7 @@ class EmbeddingScene(Scene):
         res_dot = Dot(p(RESULT), radius=0.1, color=AMBER).set_z_index(3)
         res_lbl = jp("計算結果", 20, AMBER, "BOLD").next_to(res_dot, DOWN, buff=0.45).shift(RIGHT * 0.75)
         ring = Circle(radius=0.42, color=GREEN, stroke_width=4).move_to(p((RESULT + VEC[NEAREST]) / 2))
-        cap4 = caption(f"着地点にいちばん近い単語は「{NEAREST}」。意味の計算がベクトルの演算でできる", GREEN)
+        cap4 = caption(f"着地点にいちばん近い単語は「{NEAREST}」です。意味の関係を足し算・引き算で扱えます", GREEN)
         self.play(FadeIn(res_dot, scale=1.5), FadeIn(res_lbl))
         self.play(Create(ring), FadeIn(eq[3], shift=RIGHT * 0.2), Transform(cap, cap4))
         self.wait(2.5)
@@ -93,10 +93,10 @@ class EmbeddingScene(Scene):
         net = Arrow(p(VEC["王様"]), p(RESULT), buff=0.12, color=AMBER, stroke_width=7)
         note = VGroup(jp("− v(男性) + v(女性)", 24, AMBER, "BOLD"), jp("＝「性別」方向の矢印", 24, AMBER)) \
             .arrange(DOWN, buff=0.15, aligned_edge=LEFT).next_to(eq, DOWN, buff=0.6, aligned_edge=LEFT)
-        cap5 = caption("引いて足した分は「男性→女性」と同じ矢印。王様をその方向へ動かした")
+        cap5 = caption("引いて足した分は「男性→女性」と同じ矢印です。王様をその方向へ動かしました")
         self.play(gender.animate.set_opacity(1), g_lbl.animate.set_opacity(1), GrowArrow(net),
                   FadeIn(note), Transform(cap, cap5))
         self.wait(2.5)
-        cap6 = caption("実際の埋め込みは数百〜数千次元。この図は 2 次元に描いたイメージ")
+        cap6 = caption("実際は 1 単語が数百〜数千個の数字になります。この図は 2 つの数字で描いたイメージです")
         self.play(Transform(cap, cap6))
         self.wait(3)

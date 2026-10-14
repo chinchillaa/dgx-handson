@@ -5,12 +5,12 @@
 
 | 出力ファイル | シーン | 埋め込み先 | 内容 |
 |---|---|---|---|
-| `ch1_self_attention.mp4` | `scenes/self_attention.py` | `supplement_transformer.html` の Section 2 | Q·Kᵀ → √d_k で割る → softmax → V の加重和を順に計算します。値はハンズオン③ Part 2 の「ネコ・が・サカナ・食べた」と同じです。 |
+| `ch1_self_attention.mp4` | `scenes/self_attention.py` | `supplement_transformer.html` の Section 2 | 「太郎はリンゴを食べた。それは甘かった。」の「それ」について、Q（探しているもの）と K（自分が何者か）の内積で合い具合を求め、√2 で割り、softmax で参考にする割合に直し、V（相手へ渡す情報）を混ぜるまでを追います。値は資料の「計算してみましょう」と同じです。最後に Multi-Head の例（「何を指すか」→ リンゴ、「誰の話か」→ 太郎）を示します。 |
 | `ch1_xor_relu.mp4` | `scenes/xor_relu.py` | `supplement_neural_network.html` の XOR の説明 | 線形変換と ReLU で平面が曲がり、XOR が 1 本の直線で分けられるようになる様子を示します。 |
 | `ch1_gradient_descent.mp4` | `scenes/gradient_descent.py` | `supplement_linear_regression.html` の Section 3 | データに当てはめる直線と、損失の等高線上の軌跡を同時に動かします。データと学習率は資料のコード例と同じです。 |
-| `ch1_embedding.mp4` | `scenes/embedding.py` | `supplement_transformer.html` の前置き（自然言語を「数値」に変換する） | 王様 − 男性 + 女性 を矢印でたどり、女王の近くに着地する様子を 2 次元で示します。4 単語の配置は資料の SVG と同じです。 |
-| `ch1_rnn_vs_attention.mp4` | `scenes/rnn_vs_attention.py` | `supplement_transformer.html` の Section 1 | RNN が隠れ状態を順番に渡して「私」の情報が薄れる様子（イメージ）と、Self-Attention が「食べた」から全トークンへ一度につなぐ様子を比べます。注目度は資料の図と同じです。 |
-| `ch1_causal_mask.mp4` | `scenes/causal_mask.py` | `supplement_transformer.html` の Section 2（因果マスク） | スコアの上三角を −∞ にして softmax を取り、生成時に注目度の三角形が 1 行ずつ伸びる様子を示します。値はハンズオン③ Part 3 と同じです。 |
+| `ch1_embedding.mp4` | `scenes/embedding.py` | `supplement_transformer.html` の前置き（言葉を「数字の並び」に置き換える） | 王様 − 男性 + 女性 を矢印でたどり、女王の近くに着地する様子を 2 次元で示します。4 単語の配置は資料の SVG と同じです。 |
+| `ch1_rnn_vs_attention.mp4` | `scenes/rnn_vs_attention.py` | `supplement_transformer.html` の Section 1 | RNN が隠れ状態を順番に渡して「私」の情報が薄れる様子（イメージ）と、Attention で「食べた」がすべての単語を一度に参考にする様子を比べます。参考にする割合は資料の図と同じです。 |
+| `ch1_causal_mask.mp4` | `scenes/causal_mask.py` | `supplement_transformer.html` の Section 2（因果マスク） | 「太郎はリンゴを食べた。それ」の 7 単語で、合い具合の上三角を −∞ にして softmax を取り、参考にする割合の表が三角形になる様子と、生成時に行が 1 本ずつ増える様子を示します。「は」は 0.14 ずつ → 0.50 ずつ、「それ」はマスクありでもリンゴを 0.99 参考にします。 |
 | `ch1_temperature.mp4` | `scenes/temperature.py` | `supplement_inference_params.html` の Section 1 | T を 1.0 → 0.5 → 0.3 → 2.0 → 1.0 と動かし、logit ÷ T → softmax の確率が鋭くなったり平らになったりする様子を示します。logit と「猫」「犬」…は資料の図と同じです。 |
 | `ch1_top_p.mp4` | `scenes/top_p.py` | `supplement_inference_params.html` の Section 2 | 累積確率が p = 0.9 以上になる 3 位まで残し、4・5 位を除外し、0.92 で再正規化してから 1 回サンプリングします。確率は資料の Top-p の図と同じです。最後に Top-k（k = 3）と対比します。 |
 

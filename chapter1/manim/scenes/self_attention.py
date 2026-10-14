@@ -1,7 +1,8 @@
-"""Self-Attention の計算を 1 ステップずつ追うアニメーション
+"""Attention の計算を 1 ステップずつ追うアニメーション
 
-値はハンズオン③ Part 2（notebooks/ch1_03_llm_inference.ipynb）の
-「ネコ・が・サカナ・食べた」の例と同じ。
+値は supplement_transformer.html の Section 2「計算してみましょう」と同じ。
+例文「太郎はリンゴを食べた。それは甘かった。」の前半 7 トークンで、「それ」の行を計算する。
+Q・K・V は「人か」「食べ物か」の 2 つの数字だけで表す（d_k = 2）。
 """
 import math
 
@@ -10,101 +11,150 @@ from manim import *
 
 from theme import *
 
-TOKENS = ["ネコ", "が", "サカナ", "食べた"]
-FEATURES = ["名詞性", "動詞性", "生き物性", "食べ物性"]
-X = np.array([
-    [1.0, 0.0, 1.0, 0.0],
-    [0.2, 0.0, 0.0, 0.0],
-    [1.0, 0.0, 0.5, 1.0],
-    [0.0, 1.0, 0.0, 0.0],
-])
-W_Q = np.array([[0, 0], [0, 3], [3, 0], [0, 0]], dtype=float)
-W_K = np.array([[0, 0], [0, 0], [3, 0], [0, 3]], dtype=float)
-EAT = 3  # 「食べた」の行
-FISH = 2  # 「サカナ」の列
+TOKENS = ["太郎", "は", "リンゴ", "を", "食べた", "。", "それ"]
+COLS = ["人か", "食べ物か"]
+APPLE, TARO = 2, 0
+Q_SORE = np.array([0.0, 3.0])          # 「それ」は食べ物を探している
+Q_WHO = np.array([3.0, 0.0])           # 「誰の話か」を調べるヘッドの Q
+K = np.zeros((7, 2))
+K[TARO] = [3, 0]                       # 太郎は人である
+K[APPLE] = [0, 3]                      # リンゴは食べ物である
+V = np.zeros((7, 2))
+V[TARO] = [1, 0]
+V[APPLE] = [0, 1]
 
 
 def softmax(s):
-    e = np.exp(s - s.max(axis=1, keepdims=True))
-    return e / e.sum(axis=1, keepdims=True)
+    e = np.exp(s - s.max())
+    return e / e.sum()
+
+
+RAW = K @ Q_SORE                       # 内積（合い具合）: リンゴ 9、ほか 0
+SCALED = RAW / math.sqrt(2)            # √2 で割る: リンゴ 6.36
+WEIGHTS = softmax(SCALED)              # 参考にする割合: リンゴ 0.99、ほか 0.002
+OUT = WEIGHTS @ V                      # 混ぜた結果: (0.00, 0.99)
+W_WHO = softmax(K @ Q_WHO / math.sqrt(2))
+
+
+def ratio(v):
+    """割合の表示。0.01 未満は 0.002 のように 3 桁で見せる"""
+    return f"{v:.3f}" if v < 0.01 else f"{v:.2f}"
+
+
+def col_box(mgrid, j, color=AMBER_BORDER):
+    """行列の j 列目を囲む枠"""
+    col = VGroup(*[row[j] for row in mgrid.cells])
+    return Rectangle(width=col.width + 0.12, height=col.height + 0.12,
+                     stroke_color=color, stroke_width=5).move_to(col)
+
+
+def lines(*texts, size=22, color=TEXT_SUB, weight="NORMAL"):
+    return VGroup(*[jp(t, size, color, weight) for t in texts]).arrange(DOWN, buff=0.16, aligned_edge=LEFT)
 
 
 class SelfAttentionScene(Scene):
     def construct(self):
-        head = title("Self-Attention の計算を 1 ステップずつ追う")
+        head = title("Attention の計算を 1 ステップずつ追う")
         self.play(FadeIn(head))
 
-        # ── 1. 入力 X ─────────────────────────────
-        x_grid = matrix_grid(X, TOKENS, FEATURES, fmt="{:.1f}", label_size=15)
-        x_name = jp("X（埋め込み）", 24, GREEN, "BOLD")
-        x_block = VGroup(x_name, x_grid).arrange(DOWN, buff=0.3).to_edge(LEFT, buff=0.7).shift(DOWN * 0.2)
-        cap = caption("4 トークンの埋め込み X（ハンズオン③ Part 2 と同じ値）")
-        self.play(FadeIn(x_block), FadeIn(cap))
+        # ── 0. 例文 ───────────────────────────────
+        words = TOKENS + ["は", "甘かった", "。"]
+        sent = VGroup(*[jp(w, 34, TEXT, "BOLD") for w in words]).arrange(RIGHT, buff=0.22).shift(UP * 0.4)
+        sent[6].set_color(GREEN)
+        mark = SurroundingRectangle(sent[6], color=GREEN_MID, buff=0.12, stroke_width=4)
+        apple = SurroundingRectangle(sent[APPLE], color=AMBER_BORDER, buff=0.12, stroke_width=4)
+        arrow = CurvedArrow(sent[6].get_top() + UP * 0.2, sent[APPLE].get_top() + UP * 0.2,
+                            angle=PI / 3, color=AMBER, stroke_width=4)
+        q = jp("？", 34, AMBER, "BOLD").next_to(arrow, UP, buff=0.1)
+        cap = caption("「それ」が何を指すかを、計算で確かめます")
+        self.play(FadeIn(sent), FadeIn(cap))
+        self.play(Create(mark))
+        self.play(Create(arrow), FadeIn(q), Create(apple))
         self.wait(1.5)
+        self.play(FadeOut(VGroup(sent, mark, apple, arrow, q)))
 
-        # ── 2. 重み行列なし（Q = K = X）────────────
-        naive = softmax(X @ X.T / math.sqrt(4))
-        n_grid = matrix_grid(naive, TOKENS, TOKENS)
-        n_name = jp("softmax(X Xᵀ / √4)", 24, RED, "BOLD")
-        n_block = VGroup(n_name, n_grid).arrange(DOWN, buff=0.3).to_edge(RIGHT, buff=0.9).shift(DOWN * 0.2)
-        arrow = Arrow(x_block.get_right(), n_block.get_left(), color=MUTED, buff=0.3)
-        cap2 = caption("重み行列なし（Q = K = X）：「食べた」は自分自身（0.35）を一番見てしまう", RED)
-        self.play(GrowArrow(arrow), FadeIn(n_block), Transform(cap, cap2))
-        self.play(Create(row_box(n_grid, EAT)), Create(cell_box(n_grid, EAT, EAT, RED)))
-        self.wait(2.5)
-        self.play(*[FadeOut(m) for m in self.mobjects if m not in (head, x_block, cap)])
-
-        # ── 3. Q = X W_Q, K = X W_K ──────────────────
-        Q, K = X @ W_Q, X @ W_K
-        q_grid = matrix_grid(Q, TOKENS, ["生き物を\n探す", "食べ物を\n探す"], fmt="{:.1f}", vmax=3, label_size=15)
-        k_grid = matrix_grid(K, TOKENS, ["生き物\nです", "食べ物\nです"], fmt="{:.1f}", vmax=3, label_size=15)
-        q_block = VGroup(jp("Q = X W_Q", 24, GREEN, "BOLD"), q_grid).arrange(DOWN, buff=0.3)
-        k_block = VGroup(jp("K = X W_K", 24, GREEN, "BOLD"), k_grid).arrange(DOWN, buff=0.3)
-        qk = VGroup(q_block, k_block).arrange(RIGHT, buff=0.9).shift(RIGHT * 1.6 + DOWN * 0.2)
-        cap3 = caption("W_Q で「何を探すか」、W_K で「自分は何者か」に変換する")
-        self.play(x_block.animate.scale(0.85).to_edge(LEFT, buff=0.5),
-                  FadeIn(q_block, shift=RIGHT), FadeIn(k_block, shift=RIGHT), Transform(cap, cap3))
+        # ── 1. Q と K ─────────────────────────────
+        q_grid = matrix_grid([Q_SORE], ["それ"], COLS, fmt="{:.0f}", vmax=3, cell=1.0, label_size=18)
+        q_block = VGroup(jp("Q：探しているもの", 24, GREEN, "BOLD"), q_grid).arrange(DOWN, buff=0.3)
+        k_grid = matrix_grid(K.T, COLS, TOKENS, fmt="{:.0f}", vmax=3, cell=0.9, label_size=18)
+        k_block = VGroup(jp("K：自分が何者か", 24, GREEN, "BOLD"), k_grid).arrange(DOWN, buff=0.3)
+        VGroup(q_block, k_block).arrange(DOWN, buff=0.6).shift(DOWN * 0.2)
+        cap1 = caption("「それ」は食べ物を探しています（Q）。各単語は自分が何者かを示します（K）")
+        self.play(FadeIn(q_block, shift=DOWN), FadeIn(k_block, shift=UP), Transform(cap, cap1))
         self.wait(1)
-        self.play(Create(row_box(q_grid, EAT)), Create(row_box(k_grid, FISH, GREEN_MID)))
-        cap3b = caption("「食べた」は食べ物を探し（0, 3）、「サカナ」は食べ物だと名乗る（1.5, 3）")
-        self.play(Transform(cap, cap3b))
-        self.wait(2.5)
-
-        # ── 4. スコア Q Kᵀ / √d_k ───────────────────
-        scores = Q @ K.T / math.sqrt(2)
-        s_grid = matrix_grid(scores, TOKENS, TOKENS, vmax=scores.max())
-        s_name = jp("スコア = Q Kᵀ / √2", 24, GREEN, "BOLD")
-        s_block = VGroup(s_name, s_grid).arrange(DOWN, buff=0.3).to_edge(RIGHT, buff=0.9).shift(DOWN * 0.2)
-        self.play(FadeOut(x_block), *[FadeOut(m) for m in self.mobjects if isinstance(m, Rectangle)])
-        self.play(VGroup(q_block, k_block).animate.scale(0.85).to_edge(LEFT, buff=0.6))
-        self.play(FadeIn(s_block, shift=LEFT))
-        hl = cell_box(s_grid, EAT, FISH)
-        cap4 = caption("内積 0×1.5 + 3×3 = 9 を √2 で割って 6.36。似ている組ほどスコアが大きい")
-        self.play(Create(hl), Transform(cap, cap4))
-        self.wait(2.5)
-
-        # ── 5. 行ごとに softmax ───────────────────────
-        weights = softmax(scores)
-        w_grid = matrix_grid(weights, TOKENS, TOKENS).move_to(s_grid, aligned_edge=UP)
-        w_name = jp("注目度 = softmax（行ごと）", 24, GREEN, "BOLD").move_to(s_name)
-        cap5 = caption("各行を合計 1 の注目度に変換：「食べた」は「サカナ」に 0.99 注目する", GREEN)
-        self.play(FadeOut(hl))
-        self.play(Transform(s_grid.grid, w_grid.grid), Transform(s_name, w_name), Transform(cap, cap5),
-                  run_time=1.8)
-        self.play(Create(row_box(w_grid, EAT)), Create(cell_box(w_grid, EAT, FISH, GREEN_MID)))
-        self.wait(2.5)
-
-        # ── 6. Value の加重平均 ───────────────────────
-        out = weights @ X  # W_V は単位行列なので V = X
+        self.play(Create(row_box(q_grid, 0)), Create(col_box(k_grid, APPLE, GREEN_MID)),
+                  Create(col_box(k_grid, TARO, MUTED)))
+        cap1b = caption("リンゴは「食べ物」(0, 3)、太郎は「人」(3, 0) です")
+        self.play(Transform(cap, cap1b))
+        self.wait(2)
         self.play(*[FadeOut(m) for m in self.mobjects if m not in (head, cap)])
-        eq = jp("「食べた」の出力 = 注目度で重み付けした V の和 ≈ 0.99 ×「サカナ」の V", 26, TEXT).shift(UP * 2.5)
-        before = matrix_grid(X[EAT:EAT + 1], ["入力"], FEATURES, fmt="{:.2f}", cell=1.2, label_size=18)
-        after = matrix_grid(out[EAT:EAT + 1], ["出力"], fmt="{:.2f}", cell=1.2, label_size=18)
-        rows = VGroup(before, after).arrange(DOWN, buff=0.7).shift(DOWN * 0.1)
-        after.shift(RIGHT * (before.grid.get_left()[0] - after.grid.get_left()[0]))
-        self.play(FadeIn(eq), FadeIn(before))
-        self.play(TransformFromCopy(before.grid, after.grid), FadeIn(after.row_labels), run_time=1.5)
-        self.play(Create(cell_box(after, 0, 3, AMBER_BORDER)))
-        cap6 = caption("動詞「食べた」のベクトルに、目的語「サカナ」の特徴（食べ物性 0.99 など）が入った", GREEN)
-        self.play(Transform(cap, cap6))
-        self.wait(3)
+
+        # ── 2. 合い具合（内積）と √2 ─────────────────────
+        raw = matrix_grid([RAW], ["内積"], TOKENS, fmt="{:.0f}", vmax=9, cell=1.0, label_size=18)
+        sc = matrix_grid([SCALED], ["÷ √2"], fmt="{:.2f}", vmax=SCALED.max(), cell=1.0, label_size=18)
+        name = jp("合い具合：「それ」の Q と各単語の K の内積", 24, GREEN, "BOLD")
+        stack = VGroup(name, raw, sc).arrange(DOWN, buff=0.45).shift(UP * 0.3)
+        sc.shift(RIGHT * (raw.grid.get_left()[0] - sc.grid.get_left()[0]))
+        calc = jp("リンゴ：0 × 0 + 3 × 3 = 9　　太郎：0 × 3 + 3 × 0 = 0", 24, TEXT_SUB).next_to(stack, DOWN, buff=0.45)
+        cap2 = caption("向きがそろうほど内積は大きくなります。合うのはリンゴだけです")
+        self.play(FadeIn(name), FadeIn(raw), Transform(cap, cap2))
+        self.play(Create(cell_box(raw, 0, APPLE)), FadeIn(calc))
+        self.wait(2)
+        cap2b = caption("√2（約 1.41）で割って、大きくなりすぎないようにします。9 ÷ 1.41 ≈ 6.36")
+        self.play(TransformFromCopy(raw.grid, sc.grid), FadeIn(sc.row_labels), Transform(cap, cap2b), run_time=1.5)
+        self.wait(2)
+
+        # ── 3. softmax で割合に ───────────────────────
+        w = matrix_grid([WEIGHTS], ["割合"], fmt=ratio, cell=1.0, label_size=18).move_to(sc, aligned_edge=LEFT)
+        w.shift(DOWN * (sc.height + 0.45))
+        cap3 = caption("softmax で合計 1 の割合に直します。「それ」はリンゴを 0.99 参考にします", GREEN)
+        self.play(FadeOut(calc))
+        self.play(TransformFromCopy(sc.grid, w.grid), FadeIn(w.row_labels), Transform(cap, cap3), run_time=1.6)
+        self.play(Create(cell_box(w, 0, APPLE, GREEN_MID)))
+        total = jp(f"合計 {WEIGHTS.sum():.2f}", 22, TEXT_SUB).next_to(w.grid, RIGHT, buff=0.3)
+        self.play(FadeIn(total))
+        self.wait(2.5)
+        self.play(*[FadeOut(m) for m in self.mobjects if m not in (head, cap)])
+
+        # ── 4. V を混ぜる ────────────────────────────
+        w_row = matrix_grid([WEIGHTS], ["割合"], TOKENS, fmt=ratio, cell=0.9, font_size=19, label_size=18)
+        v_grid = matrix_grid(V.T, ["V：人か", "V：食べ物か"], fmt="{:.0f}", cell=0.9, label_size=18)
+        v_grid.next_to(w_row, DOWN, buff=0.35).align_to(w_row.grid, RIGHT)
+        v_grid.shift(RIGHT * (w_row.grid.get_left()[0] - v_grid.grid.get_left()[0]))
+        left = VGroup(jp("割合 × V（相手へ渡す情報）", 24, GREEN, "BOLD"), VGroup(w_row, v_grid))
+        left.arrange(DOWN, buff=0.3).to_edge(LEFT, buff=0.6).shift(UP * 0.4)
+        out = matrix_grid([OUT], ["それ"], COLS, fmt="{:.2f}", cell=1.0, label_size=20)
+        out_block = VGroup(jp("混ぜた結果", 24, GREEN, "BOLD"), out).arrange(DOWN, buff=0.3)
+        out_block.to_edge(RIGHT, buff=0.7).align_to(v_grid, DOWN)
+        eq = jp("0.002 × (1, 0) + 0.99 × (0, 1) + …  ≈ (0.00, 0.99)", 24, TEXT_SUB)
+        eq.next_to(left, DOWN, buff=0.45).align_to(left, LEFT)
+        cap4 = caption("割合に応じて、各単語の V を掛けて足し合わせます")
+        self.play(FadeIn(left), Transform(cap, cap4))
+        self.play(Create(col_box(w_row, APPLE, GREEN_MID)), Create(col_box(v_grid, APPLE, GREEN_MID)))
+        self.wait(1)
+        arrow = Arrow(v_grid.get_right(), out_block.get_left(), color=MUTED, buff=0.3)
+        self.play(GrowArrow(arrow), FadeIn(out_block), FadeIn(eq))
+        self.play(Create(cell_box(out, 0, 1, AMBER_BORDER)))
+        cap4b = caption("「それ」に、リンゴの「食べ物である」という情報が入りました", GREEN)
+        self.play(Transform(cap, cap4b))
+        self.wait(2.5)
+        self.play(*[FadeOut(m) for m in self.mobjects if m not in (head, cap)])
+
+        # ── 5. Multi-Head：観点ごとに参考にする単語が変わる ──────────
+        h1 = matrix_grid([WEIGHTS], ["何を指すか"], TOKENS, fmt=ratio, cell=0.95, font_size=20, label_size=18)
+        h2 = matrix_grid([W_WHO], ["誰の話か"], fmt=ratio, cell=0.95, font_size=20, label_size=18)
+        q1 = jp("Q = (0, 3)", 20, TEXT_SUB).next_to(h1.grid, RIGHT, buff=0.3)
+        q2 = jp("Q = (3, 0)", 20, TEXT_SUB).next_to(h2.grid, RIGHT, buff=0.3)
+        heads = VGroup(VGroup(h1, q1), VGroup(h2, q2)).arrange(DOWN, buff=0.35, aligned_edge=RIGHT)
+        name = jp("Multi-Head Attention：観点の違うヘッドを並べる", 24, GREEN, "BOLD")
+        note = lines("※ ヘッドの役割は説明用の例です。実際の役割は学習で決まり、",
+                     "　 人に分かる形ではっきり分かれているとは限りません。", size=20, color=MUTED)
+        VGroup(name, heads, note).arrange(DOWN, buff=0.5).shift(UP * 0.25)
+        cap5 = caption("「何を指すか」のヘッドはリンゴを、「誰の話か」のヘッドは太郎を参考にします")
+        self.play(FadeIn(name), FadeIn(heads[0]), Transform(cap, cap5))
+        self.play(Create(cell_box(h1, 0, APPLE, GREEN_MID)))
+        self.play(FadeIn(heads[1]))
+        self.play(Create(cell_box(h2, 0, TARO, GREEN_MID)))
+        self.wait(1)
+        self.play(FadeIn(note))
+        self.wait(3.5)

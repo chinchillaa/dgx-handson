@@ -43,7 +43,10 @@ def heat(v, vmax=1.0, low=GREEN_BG, high=GREEN_MID):
 
 def matrix_grid(values, row_labels=None, col_labels=None, fmt="{:.2f}", cell=0.9,
                 vmax=1.0, colored=True, font_size=24, label_size=17):
-    """値を色の濃さで示す行列。返り値の .cells[i][j] で各セル（四角と数値）を参照できる"""
+    """値を色の濃さで示す行列。返り値の .cells[i][j] で各セル（四角と数値）を参照できる
+
+    fmt は書式文字列か、値を受け取って文字列を返す関数。
+    """
     rows, cols = len(values), len(values[0])
     grid = VGroup()
     cells = []
@@ -55,7 +58,8 @@ def matrix_grid(values, row_labels=None, col_labels=None, fmt="{:.2f}", cell=0.9
             sq.set_fill(heat(v, vmax) if colored else BG, opacity=1)
             sq.move_to(RIGHT * j * cell + DOWN * i * cell)
             dark = colored and v / vmax > 0.55
-            num = jp(fmt.format(v), size=font_size, color=BG if dark else TEXT).move_to(sq)
+            text = fmt(v) if callable(fmt) else fmt.format(v)
+            num = jp(text, size=font_size, color=BG if dark else TEXT).move_to(sq)
             g = VGroup(sq, num)
             row.append(g)
             grid.add(g)
