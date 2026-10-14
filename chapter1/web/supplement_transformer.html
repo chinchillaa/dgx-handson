@@ -898,6 +898,257 @@
         </p>
       </div>
 
+      <!-- ━━━ Self-Attention の試し場 ━━━ -->
+      <section id="attn-playground" aria-labelledby="attn-title" style="margin-bottom:1.25rem;">
+        <style>
+          #attn-playground .at-sub { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:0.5rem; }
+          #attn-playground .at-presets { display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem; font-size:0.72rem; color:var(--text-muted); margin-bottom:0.9rem; }
+          #attn-playground .at-chip { font-size:0.74rem; padding:0.1rem 0.65rem; border-radius:999px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-sub); cursor:pointer; }
+          #attn-playground .at-chip:hover { background:var(--surface2); }
+          #attn-playground .at-chip[aria-pressed="true"] { background:var(--green); border-color:var(--green); color:#FFFFFF; }
+          #attn-playground .at-controls { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.75rem 1.25rem; align-items:end; margin-bottom:1rem; }
+          #attn-playground .at-toggle { display:inline-flex; align-items:center; gap:0.45rem; font-size:0.8rem; color:var(--text); cursor:pointer; }
+          #attn-playground .at-toggle input { width:1.05rem; height:1.05rem; accent-color:var(--green); }
+          #attn-playground .at-range label { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; font-size:0.8rem; color:var(--text); }
+          #attn-playground .at-range output { font-family:var(--font-mono, monospace); font-weight:700; color:var(--green-mid); font-size:0.8rem; }
+          #attn-playground input[type="range"] { width:100%; accent-color:var(--green); margin-top:0.2rem; }
+          #attn-playground .at-qk { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; margin-bottom:1rem; }
+          #attn-playground table { border-collapse:separate; border-spacing:3px; width:100%; table-layout:fixed; }
+          #attn-playground th { font-size:0.7rem; font-weight:700; color:var(--text-muted); text-align:center; padding:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+          #attn-playground th[scope="row"] { text-align:right; padding-right:0.3rem; color:var(--text-sub); width:3.6rem; }
+          #attn-playground td { text-align:center; font-family:var(--font-mono, monospace); font-size:0.76rem; border-radius:4px; padding:0.25rem 0; }
+          #attn-playground .at-num { width:100%; min-width:0; font-family:var(--font-mono, monospace); font-size:0.78rem; text-align:center; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--text); padding:0.15rem 0; -moz-appearance:textfield; }
+          #attn-playground .at-num::-webkit-inner-spin-button { -webkit-appearance:none; }
+          #attn-playground td.at-in { padding:0; }
+          #attn-playground td.at-masked { background:var(--red-bg); color:var(--red); }
+          #attn-playground td.at-sum { color:var(--text-sub); background:var(--surface2); }
+          #attn-playground tr.at-row { cursor:pointer; }
+          #attn-playground tr.at-row:hover th { color:var(--green); }
+          #attn-playground tr.is-sel th[scope="row"] { color:var(--green); }
+          #attn-playground tr.is-sel td:not(.at-sum) { outline:2px solid #D97706; outline-offset:-2px; }
+          #attn-playground .at-rowbtn { all:unset; cursor:pointer; display:block; width:100%; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+          #attn-playground .at-rowbtn:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; border-radius:3px; }
+          #attn-playground .at-mats { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; }
+          #attn-playground .at-out { margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem; }
+          #attn-playground .at-terms { font-family:var(--font-mono, monospace); font-size:0.74rem; color:var(--text-sub); line-height:1.8; overflow-wrap:anywhere; margin-bottom:0.6rem; }
+          #attn-playground .at-bar { display:grid; grid-template-columns:4.2rem minmax(0, 1fr) 2.6rem; align-items:center; gap:0.5rem; padding:0.15rem 0; font-size:0.78rem; }
+          #attn-playground .at-track { height:0.9rem; background:var(--surface2); border-radius:3px; overflow:hidden; }
+          #attn-playground .at-fill { height:100%; background:#D97706; border-radius:0 3px 3px 0; transition:width 0.2s ease; }
+          #attn-playground .at-bar b { font-family:var(--font-mono, monospace); font-size:0.76rem; text-align:right; }
+          #attn-playground .at-status { font-size:0.82rem; line-height:1.7; border-radius:0 8px 8px 0; padding:0.5rem 0.9rem; margin:0.25rem 0 1rem; background:var(--green-bg); border-left:3px solid var(--green-mid); color:var(--green); }
+          #attn-playground .at-chip:focus-visible, #attn-playground input:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; }
+          @media (max-width: 560px) {
+            #attn-playground .card { padding:1.1rem; }
+            #attn-playground .at-controls, #attn-playground .at-qk, #attn-playground .at-mats { grid-template-columns:minmax(0, 1fr); }
+          }
+        </style>
+
+        <div class="card">
+          <p class="label" style="margin-bottom:0.25rem;">Playground</p>
+          <h3 id="attn-title" class="text-lg font-bold" style="color:var(--text); margin-bottom:0.6rem;">試してみましょう：<wbr>Self-Attention 計算機</h3>
+          <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:1rem;">
+            解説動画と同じ「ネコ・が・サカナ・食べた」の 4 トークンで、$\text{softmax}(QK^\top/\sqrt{d_k})V$ を計算します。
+            初期値はハンズオン③ Part 2-3 と同じ $Q = XW^Q,\ K = XW^K$ で、$V = X$（$W^V$ は単位行列）です。
+            $Q$ と $K$ の数値は書き換えられます。
+            スケーリング、倍率、因果マスクを切り替えて、注目度の行列がどう変わるかを確かめてください。
+          </p>
+
+          <!-- 設定 -->
+          <div class="at-presets" role="group" aria-label="Q と K の初期値">
+            <span>Q・K の値：</span>
+            <button type="button" class="at-chip" data-preset="w" aria-pressed="true">$W^Q, W^K$ で変換（d<sub>k</sub> = 2）</button>
+            <button type="button" class="at-chip" data-preset="naive" aria-pressed="false">重み行列なし Q = K = X（d<sub>k</sub> = 4）</button>
+          </div>
+          <div class="at-controls">
+            <label class="at-toggle" for="attn-scale"><input type="checkbox" id="attn-scale" checked><span>$\sqrt{d_k}$ で割る</span></label>
+            <label class="at-toggle" for="attn-mask"><input type="checkbox" id="attn-mask"><span>因果マスク</span></label>
+            <div class="at-range">
+              <label for="attn-mult"><span>スコアに掛ける倍率</span><output id="attn-mult-out" for="attn-mult">×1.00</output></label>
+              <input type="range" id="attn-mult" min="-2" max="2" step="0.05" value="0" aria-describedby="attn-mult-hint">
+            </div>
+          </div>
+          <p id="attn-mult-hint" style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin:-0.5rem 0 1rem;">
+            倍率は Temperature の逆数にあたります。大きくすると注目が 1 か所に集中し、小さくすると均等に近づきます。
+          </p>
+
+          <!-- Q と K -->
+          <div class="at-qk">
+            <div>
+              <p class="at-sub">Q（何を探すか）</p>
+              <table id="attn-q" aria-label="Q の値"></table>
+            </div>
+            <div>
+              <p class="at-sub">K（自分は何者か）</p>
+              <table id="attn-k" aria-label="K の値"></table>
+            </div>
+          </div>
+
+          <p id="attn-status" class="at-status" aria-live="polite"></p>
+
+          <!-- スコアと重み -->
+          <div class="at-mats">
+            <div>
+              <p class="at-sub" id="attn-score-title">スコア</p>
+              <table id="attn-scores" aria-labelledby="attn-score-title"></table>
+            </div>
+            <div>
+              <p class="at-sub" id="attn-weight-title">注目度（softmax 後）と行の合計</p>
+              <table id="attn-weights" aria-labelledby="attn-weight-title"></table>
+            </div>
+          </div>
+          <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin-top:0.4rem;">
+            行が「見る側」（クエリ）、列が「見られる側」（キー）です。行の名前をクリックすると、下でその行の出力の作られ方を表示します。
+          </p>
+
+          <!-- 出力 -->
+          <div class="at-out">
+            <p class="at-sub" id="attn-out-title">出力</p>
+            <p class="at-terms" id="attn-terms"></p>
+            <div id="attn-bars" role="group" aria-labelledby="attn-out-title"></div>
+          </div>
+        </div>
+
+        <script>
+        (function () {
+          var TOKENS = ['ネコ', 'が', 'サカナ', '食べた'];
+          var FEATURES = ['名詞性', '動詞性', '生き物性', '食べ物性'];
+          // ハンズオン③ Part 2 と同じ入力。V = X（W^V は単位行列）
+          var X = [[1.0, 0.0, 1.0, 0.0], [0.2, 0.0, 0.0, 0.0], [1.0, 0.0, 0.5, 1.0], [0.0, 1.0, 0.0, 0.0]];
+          var WQ = [[0, 0], [0, 3], [3, 0], [0, 0]], WK = [[0, 0], [0, 0], [3, 0], [0, 3]];
+          var QCOLS_W = ['生き物を探す', '食べ物を探す'], KCOLS_W = ['生き物です', '食べ物です'];
+          var n = TOKENS.length;
+          var el = function (id) { return document.getElementById(id); };
+          function matmul(A, B) {
+            return A.map(function (row) {
+              return B[0].map(function (_, j) { return row.reduce(function (s, a, k) { return s + a * B[k][j]; }, 0); });
+            });
+          }
+          function clone(M) { return M.map(function (r) { return r.slice(); }); }
+
+          var Q, K, qCols, kCols, sel = 3;
+          function preset(name) {
+            if (name === 'naive') { Q = clone(X); K = clone(X); qCols = FEATURES; kCols = FEATURES; }
+            else { Q = matmul(X, WQ); K = matmul(X, WK); qCols = QCOLS_W; kCols = KCOLS_W; }
+            document.querySelectorAll('#attn-playground .at-chip').forEach(function (c) {
+              c.setAttribute('aria-pressed', String(c.dataset.preset === name));
+            });
+            buildInputs('attn-q', Q, qCols, 'Q');
+            buildInputs('attn-k', K, kCols, 'K');
+            render();
+          }
+
+          function buildInputs(id, M, cols, name) {
+            var t = el(id), h = '<thead><tr><th></th>';
+            cols.forEach(function (c) { h += '<th scope="col" title="' + c + '">' + c + '</th>'; });
+            h += '</tr></thead><tbody>';
+            M.forEach(function (row, i) {
+              h += '<tr><th scope="row">' + TOKENS[i] + '</th>';
+              row.forEach(function (v, j) {
+                h += '<td class="at-in"><input class="at-num" type="number" step="0.5" value="' + (+v.toFixed(3)) +
+                  '" data-i="' + i + '" data-j="' + j + '" aria-label="' + name + ' ' + TOKENS[i] + ' ' + cols[j] + '"></td>';
+              });
+              h += '</tr>';
+            });
+            t.innerHTML = h + '</tbody>';
+            t.querySelectorAll('input').forEach(function (inp) {
+              inp.addEventListener('input', function () {
+                var v = parseFloat(inp.value);
+                if (!isFinite(v)) return;  // 入力途中（「-」だけなど）は無視する
+                M[+inp.dataset.i][+inp.dataset.j] = v;
+                render();
+              });
+            });
+          }
+
+          // 計算の順序はページの式と同じ: QKᵀ → √d_k で割る（→ 倍率）→ マスク → softmax → 重み × V
+          function compute() {
+            var dk = Q[0].length, useScale = el('attn-scale').checked, mask = el('attn-mask').checked;
+            var mult = Math.pow(2, parseFloat(el('attn-mult').value));
+            var S = [], W = [];
+            for (var i = 0; i < n; i++) {
+              S.push([]);
+              for (var j = 0; j < n; j++) {
+                var dot = 0;
+                for (var k = 0; k < dk; k++) dot += Q[i][k] * K[j][k];
+                var s = (useScale ? dot / Math.sqrt(dk) : dot) * mult;
+                S[i].push(mask && j > i ? -Infinity : s);
+              }
+              var m = Math.max.apply(null, S[i]);
+              var e = S[i].map(function (v) { return v === -Infinity ? 0 : Math.exp(v - m); });
+              var z = e.reduce(function (a, b) { return a + b; }, 0);
+              W.push(e.map(function (v) { return v / z; }));
+            }
+            var O = matmul(W, X);
+            return { S: S, W: W, O: O, dk: dk, useScale: useScale, mult: mult, mask: mask };
+          }
+
+          function heat(v, max) {
+            var t = Math.max(0, Math.min(1, v / max));
+            var bg = 'rgba(13,74,56,' + (0.06 + 0.86 * t).toFixed(3) + ')';
+            return 'background:' + bg + '; color:' + (t > 0.5 ? '#FFFFFF' : 'var(--text)') + ';';
+          }
+          function matrixHTML(M, isWeight) {
+            var finite = [];
+            M.forEach(function (r) { r.forEach(function (v) { if (isFinite(v)) finite.push(Math.abs(v)); }); });
+            var max = isWeight ? 1 : Math.max(1e-9, Math.max.apply(null, finite));
+            var h = '<thead><tr><th></th>';
+            TOKENS.forEach(function (t) { h += '<th scope="col">' + t + '</th>'; });
+            if (isWeight) h += '<th scope="col">合計</th>';
+            h += '</tr></thead><tbody>';
+            M.forEach(function (row, i) {
+              h += '<tr class="at-row' + (i === sel ? ' is-sel' : '') + '" data-row="' + i + '"><th scope="row">' +
+                '<button type="button" class="at-rowbtn" data-row="' + i + '" aria-pressed="' + (i === sel) + '">' + TOKENS[i] + '</button></th>';
+              row.forEach(function (v) {
+                if (v === -Infinity) h += '<td class="at-masked" aria-label="マイナス無限大">−∞</td>';
+                else if (isWeight) h += '<td style="' + heat(v, max) + '">' + v.toFixed(2) + '</td>';
+                else h += '<td style="' + heat(Math.max(0, v), max) + '">' + v.toFixed(2) + '</td>';
+              });
+              if (isWeight) h += '<td class="at-sum">' + row.reduce(function (a, b) { return a + b; }, 0).toFixed(2) + '</td>';
+              h += '</tr>';
+            });
+            return h + '</tbody>';
+          }
+
+          function render() {
+            var r = compute();
+            el('attn-mult-out').textContent = '×' + r.mult.toFixed(2);
+            el('attn-score-title').textContent = 'スコア ' + (r.useScale ? 'QKᵀ / √' + r.dk : 'QKᵀ（割らない）') +
+              (Math.abs(r.mult - 1) > 1e-9 ? ' × ' + r.mult.toFixed(2) : '') + (r.mask ? '（マスク後）' : '');
+            el('attn-scores').innerHTML = matrixHTML(r.S, false);
+            el('attn-weights').innerHTML = matrixHTML(r.W, true);
+            document.querySelectorAll('#attn-playground .at-rowbtn').forEach(function (b) {
+              b.addEventListener('click', function () { sel = +b.dataset.row; render(); });
+            });
+
+            // 選んだ行の出力 = Σ_j 重み_j × V_j
+            var w = r.W[sel], terms = [];
+            w.forEach(function (v, j) { if (v > 0) terms.push(v.toFixed(2) + ' × V(' + TOKENS[j] + ')'); });
+            el('attn-out-title').textContent = '「' + TOKENS[sel] + '」の出力 ＝ 注目度で V を加重和';
+            el('attn-terms').textContent = '= ' + terms.join(' + ');
+            var o = r.O[sel], h = '';
+            FEATURES.forEach(function (f, k) {
+              h += '<div class="at-bar"><span>' + f + '</span><span class="at-track" aria-hidden="true"><span class="at-fill" style="display:block; width:' +
+                (Math.max(0, Math.min(1, o[k])) * 100) + '%;"></span></span><b>' + o[k].toFixed(2) + '</b></div>';
+            });
+            el('attn-bars').innerHTML = h;
+
+            var top = 0;
+            w.forEach(function (v, j) { if (v > w[top]) top = j; });
+            var msg = '「' + TOKENS[sel] + '」がいちばん注目しているのは「' + TOKENS[top] + '」（' + w[top].toFixed(2) + '）です。';
+            if (w[top] > 0.9) msg += 'ほぼ 1 か所に集中しています。';
+            else if (Math.max.apply(null, w) - Math.min.apply(null, w.filter(function (v, j) { return !(r.mask && j > sel); })) < 0.05) msg += '見られるトークンにほぼ均等に注目しています。';
+            if (el('attn-status').textContent !== msg) el('attn-status').textContent = msg;
+          }
+
+          document.querySelectorAll('#attn-playground .at-chip').forEach(function (c) {
+            c.addEventListener('click', function () { preset(c.dataset.preset); });
+          });
+          ['attn-scale', 'attn-mask', 'attn-mult'].forEach(function (id) { el(id).addEventListener('input', render); });
+          preset('w');
+        })();
+        </script>
+      </section>
+
       <!-- Attention Sink -->
       <div class="note-red">
         <p style="font-size:0.83rem; font-weight:700; color:var(--red); margin-bottom:0.3rem;">注意：Attention Sink（注目の吸い込み口）</p>

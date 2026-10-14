@@ -635,6 +635,336 @@
       </div>
     </section>
 
+    <!-- ━━━ スケーリング則の試し場 ━━━ -->
+    <section id="scaling-playground" aria-labelledby="sc-title">
+      <style>
+        #scaling-playground .sc-sub { font-size:0.68rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:0.5rem; }
+        #scaling-playground .sc-controls { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.9rem 1.25rem; }
+        #scaling-playground .sc-ctrl { min-width:0; }
+        #scaling-playground .sc-ctrl label { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; font-size:0.8rem; color:var(--text); }
+        #scaling-playground .sc-ctrl output { font-family:var(--font-mono, monospace); font-weight:700; color:var(--green-mid); font-size:0.82rem; white-space:nowrap; }
+        #scaling-playground input[type="range"] { width:100%; accent-color:var(--green); margin-top:0.2rem; }
+        #scaling-playground .sc-presets { display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem; margin-top:0.75rem; font-size:0.72rem; color:var(--text-muted); }
+        #scaling-playground .sc-chip { font-size:0.74rem; padding:0.05rem 0.6rem; border-radius:999px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-sub); cursor:pointer; }
+        #scaling-playground .sc-chip:hover { background:var(--surface2); }
+        #scaling-playground .sc-chip[aria-pressed="true"] { background:var(--green); border-color:var(--green); color:#FFFFFF; }
+        #scaling-playground .sc-btns { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.9rem 0 0.75rem; }
+        #scaling-playground .sc-btn { font-size:0.8rem; font-weight:700; border-radius:7px; padding:0.4rem 0.85rem; border:1.5px solid var(--green); cursor:pointer; transition:background 0.15s ease; }
+        #scaling-playground .sc-btn-primary { background:var(--green); color:#FFFFFF; }
+        #scaling-playground .sc-btn-primary:hover { background:var(--green-mid); }
+        #scaling-playground .sc-btn-ghost { background:var(--surface); color:var(--green); }
+        #scaling-playground .sc-btn-ghost:hover { background:var(--green-bg); }
+        #scaling-playground .sc-btn:focus-visible, #scaling-playground .sc-chip:focus-visible, #scaling-playground input:focus-visible { outline:2px solid var(--green-mid); outline-offset:2px; }
+        #scaling-playground .sc-metrics { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; margin-bottom:0.75rem; }
+        #scaling-playground .sc-metric { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.45rem 0.7rem; min-width:0; }
+        #scaling-playground .sc-metric span { display:block; font-size:0.66rem; font-weight:700; color:var(--text-muted); }
+        #scaling-playground .sc-metric b { display:block; font-family:var(--font-mono, monospace); font-size:0.9rem; color:var(--text); overflow-wrap:anywhere; }
+        #scaling-playground .sc-plots { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem; }
+        #scaling-playground canvas { display:block; width:100%; aspect-ratio:1 / 1; border:1px solid var(--border); border-radius:6px; background:var(--surface); }
+        #scaling-playground .sc-legend { display:flex; flex-wrap:wrap; gap:0.25rem 0.9rem; font-size:0.7rem; color:var(--text-sub); margin-top:0.35rem; }
+        #scaling-playground .sc-legend i { display:inline-block; width:0.9rem; height:0; vertical-align:middle; margin-right:0.3rem; border-top:2px solid; }
+        #scaling-playground .sc-status { font-size:0.82rem; line-height:1.7; border-radius:0 8px 8px 0; padding:0.5rem 0.9rem; margin-bottom:1rem; }
+        #scaling-playground .sc-status.is-ok { background:var(--green-bg); border-left:3px solid var(--green-mid); color:var(--green); }
+        #scaling-playground .sc-status.is-more-data { background:var(--red-bg); border-left:3px solid #FCA5A5; color:var(--red); }
+        #scaling-playground .sc-status.is-more-model { background:var(--amber-bg); border-left:3px solid var(--amber-border); color:#5C4200; }
+        @media (max-width: 560px) {
+          #scaling-playground .card { padding:1.1rem; }
+          #scaling-playground .sc-controls, #scaling-playground .sc-plots { grid-template-columns:minmax(0, 1fr); }
+          #scaling-playground .sc-metrics { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        }
+      </style>
+
+      <div class="card">
+        <p class="label" style="margin-bottom:0.25rem;">Playground</p>
+        <h2 id="sc-title" class="text-lg font-bold" style="color:var(--text); margin-bottom:0.6rem;">試してみましょう：<wbr>同じ計算量で、損失が最も下がる配分</h2>
+        <p style="font-size:0.85rem; color:var(--text-sub); line-height:1.8; margin-bottom:1.25rem;">
+          パラメータ数 $N$ と学習トークン数 $D$ を動かすと、Section 3 のべき乗則で予測した損失と、学習の計算量 $C \approx 6ND$ が変わります。
+          計算量を固定したまま $N$ と $D$ の配分だけを変えたとき、損失が最小になる点（★）も同時に示します。
+          GPT-3・Chinchilla・Llama のボタンで実在のモデルの配分を読み込み、★からどれだけ離れているかを比べてください。
+        </p>
+
+        <!-- 操作 -->
+        <div class="sc-controls">
+          <div class="sc-ctrl">
+            <label for="sc-n"><span>パラメータ数 $N$</span><output id="sc-n-out" for="sc-n">—</output></label>
+            <input type="range" id="sc-n" min="7" max="12" step="0.01" value="9.09">
+          </div>
+          <div class="sc-ctrl">
+            <label for="sc-d"><span>学習トークン数 $D$</span><output id="sc-d-out" for="sc-d">—</output></label>
+            <input type="range" id="sc-d" min="9" max="14" step="0.01" value="12.95">
+          </div>
+        </div>
+        <div class="sc-presets" role="group" aria-label="実在のモデルの配分">
+          <span>実在のモデル：</span>
+          <button type="button" class="sc-chip" data-n="175e9" data-d="300e9" data-place="above" aria-pressed="false">GPT-3 175B</button>
+          <button type="button" class="sc-chip" data-n="280e9" data-d="300e9" data-place="below" aria-pressed="false">Gopher 280B</button>
+          <button type="button" class="sc-chip" data-n="70e9" data-d="1.4e12" aria-pressed="false">Chinchilla 70B</button>
+          <button type="button" class="sc-chip" data-n="8e9" data-d="15e12" aria-pressed="false">LLaMA 3 8B</button>
+          <button type="button" class="sc-chip" data-n="1.23e9" data-d="9e12" aria-pressed="true">Llama-3.2-1B（HO-3）</button>
+        </div>
+        <div class="sc-btns">
+          <button type="button" id="sc-to-opt" class="sc-btn sc-btn-primary">同じ計算量で ★ に移る</button>
+          <button type="button" id="sc-to-20" class="sc-btn sc-btn-ghost">同じ計算量で 1:20 に移る</button>
+        </div>
+
+        <div class="sc-metrics">
+          <div class="sc-metric"><span>予測損失 L</span><b id="sc-m-loss">—</b></div>
+          <div class="sc-metric"><span>計算量 C ≈ 6ND</span><b id="sc-m-c">—</b></div>
+          <div class="sc-metric"><span>D / N（1 パラメータあたり）</span><b id="sc-m-ratio">—</b></div>
+          <div class="sc-metric"><span>★ の N ／ D</span><b id="sc-m-opt">—</b></div>
+          <div class="sc-metric"><span>★ の損失</span><b id="sc-m-optloss">—</b></div>
+          <div class="sc-metric"><span>★ の D / N</span><b id="sc-m-optratio">—</b></div>
+        </div>
+        <p id="sc-status" class="sc-status is-ok" aria-live="polite"></p>
+
+        <!-- 図 -->
+        <div class="sc-plots">
+          <div>
+            <p class="sc-sub">同じ計算量での損失（横軸は N）</p>
+            <canvas id="sc-iso" role="img" aria-label="計算量を固定したとき、パラメータ数ごとの予測損失の曲線"></canvas>
+            <div class="sc-legend" aria-hidden="true">
+              <span><i style="border-color:#1A6B52;"></i>同じ計算量の曲線</span>
+              <span>● 現在の配分</span>
+              <span>★ 損失が最小</span>
+              <span><i style="border-color:#A8A29E; border-top-style:dashed;"></i>D = 20N</span>
+            </div>
+          </div>
+          <div>
+            <p class="sc-sub">N と D の配分（両軸とも対数）</p>
+            <canvas id="sc-plane" role="img" aria-label="横軸をパラメータ数、縦軸をトークン数にした図。損失が最小になる配分の線と、実在のモデルの位置"></canvas>
+            <div class="sc-legend" aria-hidden="true">
+              <span><i style="border-color:#0D4A38;"></i>計算量ごとの最小点</span>
+              <span><i style="border-color:#A8A29E; border-top-style:dashed;"></i>D = 20N</span>
+              <span><i style="border-color:#D97706; border-top-style:dotted;"></i>同じ計算量</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.6; margin-top:0.75rem;">
+          ※ 損失は $L = 1.82 + 482.0 / N^{0.348} + 2085 / D^{0.366}$ で計算しています。
+          これは Chinchilla 論文（Hoffmann et al., 2022）の Approach 3 の式を、Epoch AI が同じデータで当てはめ直した値です（Besiroglu et al., 2024）。
+          論文本文の丸めた定数では最適な $D/N$ が約 90 になり、論文の他の 2 つの方法（約 20）と食い違うため、当てはめ直した値を使っています。
+          この式は Chinchilla のデータと Transformer の系列への当てはめなので、損失の絶対値は参考値です。
+          データの質やトークナイザーが違う Llama などのモデルと、損失の値を直接比べることはできません。
+        </p>
+      </div>
+
+      <script>
+      (function () {
+        // L(N, D) = E + A / N^α + B / D^β（Besiroglu et al., 2024 による Chinchilla Approach 3 の再推定）
+        var E = 1.8172, A = 482.01, B = 2085.43, AL = 0.3478, BE = 0.3658;
+        var G = Math.pow(AL * A / (BE * B), 1 / (AL + BE));
+        var N_RANGE = [7, 12], D_RANGE = [9, 14];
+        function loss(n, d) { return E + A / Math.pow(n, AL) + B / Math.pow(d, BE); }
+        // C を固定したときの最小点: N* = G (C/6)^(β/(α+β))、D* = (C/6) / N*
+        function optimum(c) { var n = G * Math.pow(c / 6, BE / (AL + BE)); return { n: n, d: c / 6 / n }; }
+
+        var el = function (id) { return document.getElementById(id); };
+        var nEl = el('sc-n'), dEl = el('sc-d'), cvI = el('sc-iso'), cvP = el('sc-plane');
+        var chips = Array.prototype.slice.call(document.querySelectorAll('#scaling-playground .sc-chip'));
+        var N = 1.23e9, D = 9e12;
+
+        // 12 億、9 兆のように日本語の単位で書く
+        function ja(x) {
+          var units = [[1e12, '兆'], [1e8, '億'], [1e4, '万']];
+          for (var i = 0; i < units.length; i++) {
+            if (x >= units[i][0]) {
+              var v = x / units[i][0];
+              return (v >= 100 ? Math.round(v) : v >= 10 ? v.toFixed(0) : v.toFixed(1)) + ' ' + units[i][1];
+            }
+          }
+          return String(Math.round(x));
+        }
+        var SUP = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '-': '⁻' };
+        function sci(x) {
+          var e = Math.floor(Math.log10(x)), m = x / Math.pow(10, e);
+          if (m >= 9.95) { m = 1; e++; }
+          return m.toFixed(1) + '×10' + String(e).split('').map(function (ch) { return SUP[ch]; }).join('');
+        }
+        function ratio(r) { return r >= 100 ? Math.round(r).toLocaleString('en-US') : r.toFixed(1); }
+
+        // ── 描画の共通処理（勾配降下法の試し場と同じ） ──
+        function fit(cv) {
+          var r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+          var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+          if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+          var ctx = cv.getContext('2d');
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          return { ctx: ctx, w: r.width, h: r.height };
+        }
+        var PAD = { l: 40, r: 10, t: 10, b: 28 };
+        function axes(c, xr, yr, xl, yl, xt, yt) {
+          var ctx = c.ctx, pw = c.w - PAD.l - PAD.r, ph = c.h - PAD.t - PAD.b;
+          var sx = function (v) { return PAD.l + (v - xr[0]) / (xr[1] - xr[0]) * pw; };
+          var sy = function (v) { return PAD.t + (1 - (v - yr[0]) / (yr[1] - yr[0])) * ph; };
+          ctx.font = '10px system-ui, sans-serif';
+          ctx.fillStyle = '#A8A29E'; ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          xt.forEach(function (t) {
+            ctx.beginPath(); ctx.moveTo(sx(t[0]), PAD.t); ctx.lineTo(sx(t[0]), PAD.t + ph); ctx.stroke();
+            ctx.fillText(t[1], sx(t[0]), PAD.t + ph + 3);
+          });
+          ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+          yt.forEach(function (t) {
+            ctx.beginPath(); ctx.moveTo(PAD.l, sy(t[0])); ctx.lineTo(PAD.l + pw, sy(t[0])); ctx.stroke();
+            ctx.fillText(t[1], PAD.l - 4, sy(t[0]));
+          });
+          ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+          ctx.fillText(xl, PAD.l + pw, PAD.t + ph + 27);
+          ctx.save(); ctx.translate(10, PAD.t); ctx.rotate(-Math.PI / 2);
+          ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(yl, 0, 0); ctx.restore();
+          return { sx: sx, sy: sy, pw: pw, ph: ph };
+        }
+        function clip(c, a) { c.ctx.save(); c.ctx.beginPath(); c.ctx.rect(PAD.l, PAD.t, a.pw, a.ph); c.ctx.clip(); }
+        function star(ctx, x, y, r) {
+          ctx.beginPath();
+          for (var k = 0; k < 10; k++) {
+            var ang = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.45 : r;
+            ctx.lineTo(x + rr * Math.cos(ang), y + rr * Math.sin(ang));
+          }
+          ctx.closePath();
+          ctx.fillStyle = '#FFFFFF'; ctx.fill();
+          ctx.strokeStyle = '#1C1917'; ctx.lineWidth = 1.2; ctx.stroke();
+        }
+        function dot(ctx, x, y) {
+          ctx.fillStyle = '#D97706'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        function logTicks(r) {
+          var t = [];
+          for (var e = Math.ceil(r[0]); e <= r[1]; e++) t.push([e, '10' + String(e).split('').map(function (ch) { return SUP[ch]; }).join('')]);
+          return t;
+        }
+
+        // 左の図: 計算量 C を固定し、N を動かしたときの損失（D = C / 6N）
+        function drawIso(c0, opt) {
+          var c = fit(cvI), ctx = c.ctx;
+          ctx.clearRect(0, 0, c.w, c.h);
+          var lo = Math.log10(opt.n) - 2.5, hi = Math.log10(opt.n) + 2.5;
+          lo = Math.min(lo, Math.log10(N) - 0.3); hi = Math.max(hi, Math.log10(N) + 0.3);
+          var lOpt = loss(opt.n, opt.d), lCur = loss(N, D);
+          var yMin = Math.floor((lOpt - 0.05) * 20) / 20, yMax = Math.max(lOpt + 0.6, lCur + 0.1);
+          var ys = []; for (var y = Math.ceil(yMin * 10) / 10; y <= yMax; y += yMax - yMin > 1.2 ? 0.5 : 0.1) ys.push([y, y.toFixed(1)]);
+          var a = axes(c, [lo, hi], [yMin, yMax], 'N', '損失', logTicks([lo, hi]), ys);
+          clip(c, a);
+          // D = 20N の位置（N = sqrt(C / 120)）
+          var n20 = Math.sqrt(c0 / 120);
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = '#A8A29E'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(a.sx(Math.log10(n20)), PAD.t); ctx.lineTo(a.sx(Math.log10(n20)), PAD.t + a.ph); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#1A6B52'; ctx.lineWidth = 2; ctx.beginPath();
+          for (var i = 0; i <= 200; i++) {
+            var lx = lo + (hi - lo) * i / 200, n = Math.pow(10, lx), l = loss(n, c0 / 6 / n);
+            i ? ctx.lineTo(a.sx(lx), a.sy(l)) : ctx.moveTo(a.sx(lx), a.sy(l));
+          }
+          ctx.stroke();
+          star(ctx, a.sx(Math.log10(opt.n)), a.sy(lOpt), 7);
+          dot(ctx, a.sx(Math.log10(N)), a.sy(lCur));
+          ctx.restore();
+          // 計算量の表示は曲線と重ならないよう、白地を敷いて下端の中央に置く
+          var txt = 'C = ' + sci(c0) + ' FLOPs';
+          ctx.font = '10px system-ui, sans-serif';
+          var tw = ctx.measureText(txt).width, tx = PAD.l + a.pw / 2, ty = PAD.t + a.ph - 16;
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(tx - tw / 2 - 4, ty - 2, tw + 8, 14);
+          ctx.fillStyle = '#57534E'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.fillText(txt, tx, ty);
+        }
+
+        // 右の図: N–D 平面。計算量ごとの最小点の線、D = 20N、同じ計算量の線、実在のモデル
+        function drawPlane(c0, opt) {
+          var c = fit(cvP), ctx = c.ctx;
+          ctx.clearRect(0, 0, c.w, c.h);
+          var a = axes(c, N_RANGE, D_RANGE, 'N', 'D', logTicks(N_RANGE), logTicks(D_RANGE));
+          clip(c, a);
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = '#A8A29E'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(a.sx(N_RANGE[0]), a.sy(N_RANGE[0] + Math.log10(20))); ctx.lineTo(a.sx(N_RANGE[1]), a.sy(N_RANGE[1] + Math.log10(20))); ctx.stroke();
+          ctx.setLineDash([2, 3]); ctx.strokeStyle = '#D97706';
+          var k = Math.log10(c0 / 6);  // log D = k − log N
+          ctx.beginPath(); ctx.moveTo(a.sx(N_RANGE[0]), a.sy(k - N_RANGE[0])); ctx.lineTo(a.sx(N_RANGE[1]), a.sy(k - N_RANGE[1])); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#0D4A38'; ctx.lineWidth = 2; ctx.beginPath();
+          for (var lc = 14; lc <= 28; lc += 0.1) {
+            var o = optimum(Math.pow(10, lc));
+            lc > 14 ? ctx.lineTo(a.sx(Math.log10(o.n)), a.sy(Math.log10(o.d))) : ctx.moveTo(a.sx(Math.log10(o.n)), a.sy(Math.log10(o.d)));
+          }
+          ctx.stroke();
+          ctx.font = '10px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+          chips.forEach(function (ch) {
+            var n = parseFloat(ch.dataset.n), d = parseFloat(ch.dataset.d), x = a.sx(Math.log10(n)), y = a.sy(Math.log10(d));
+            ctx.fillStyle = '#57534E';
+            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+            var label = ch.textContent.replace('（HO-3）', ''), place = ch.dataset.place;
+            if (place) {
+              // GPT-3 と Gopher はトークン数が同じなので、ラベルを点の下に 2 段で並べる
+              ctx.textAlign = 'right';
+              ctx.fillText(label, x + 4, place === 'above' ? y + 11 : y + 23);
+              return;
+            }
+            var right = x + ctx.measureText(label).width + 8 > PAD.l + a.pw;
+            ctx.textAlign = right ? 'right' : 'left';
+            ctx.fillText(label, right ? x - 5 : x + 5, y);
+          });
+          star(ctx, a.sx(Math.log10(opt.n)), a.sy(Math.log10(opt.d)), 7);
+          dot(ctx, a.sx(Math.log10(N)), a.sy(Math.log10(D)));
+          ctx.restore();
+        }
+
+        function render() {
+          var c0 = 6 * N * D, opt = optimum(c0), l = loss(N, D), lOpt = loss(opt.n, opt.d), r = D / N, rOpt = opt.d / opt.n;
+          el('sc-n-out').textContent = ja(N);
+          el('sc-d-out').textContent = ja(D);
+          el('sc-m-loss').textContent = l.toFixed(3);
+          el('sc-m-c').textContent = sci(c0);
+          el('sc-m-ratio').textContent = ratio(r);
+          el('sc-m-opt').textContent = ja(opt.n) + ' ／ ' + ja(opt.d);
+          el('sc-m-optloss').textContent = lOpt.toFixed(3);
+          el('sc-m-optratio').textContent = ratio(rOpt);
+          chips.forEach(function (ch) {
+            ch.setAttribute('aria-pressed', String(Math.abs(Math.log10(parseFloat(ch.dataset.n) / N)) < 0.004 && Math.abs(Math.log10(parseFloat(ch.dataset.d) / D)) < 0.004));
+          });
+
+          var st = el('sc-status'), gap = l - lOpt, msg, cls;
+          if (gap < 0.005) {
+            cls = 'is-ok';
+            msg = 'この計算量ではほぼ最適な配分です（★との損失の差 ' + gap.toFixed(3) + '）。';
+          } else if (r < rOpt) {
+            cls = 'is-more-data';
+            msg = 'パラメータに対してデータが足りません。同じ計算量でモデルを ' + ja(opt.n) + ' に縮めてデータを増やすと、損失は ' + gap.toFixed(3) + ' 下がります。';
+          } else {
+            cls = 'is-more-model';
+            msg = 'パラメータに対してデータが多い配分です。同じ計算量なら ' + ja(opt.n) + ' のモデルのほうが損失は ' + gap.toFixed(3) + ' 低くなります。ただし、小さいモデルは推論が安いので、あえてこの配分を選ぶこともあります。';
+          }
+          st.className = 'sc-status ' + cls;
+          if (st.textContent !== msg) st.textContent = msg;
+
+          drawIso(c0, opt);
+          drawPlane(c0, opt);
+        }
+
+        function setND(n, d) {
+          N = n; D = d;
+          nEl.value = Math.log10(n); dEl.value = Math.log10(d);
+          render();
+        }
+        nEl.addEventListener('input', function () { N = Math.pow(10, parseFloat(nEl.value)); render(); });
+        dEl.addEventListener('input', function () { D = Math.pow(10, parseFloat(dEl.value)); render(); });
+        chips.forEach(function (ch) { ch.addEventListener('click', function () { setND(parseFloat(ch.dataset.n), parseFloat(ch.dataset.d)); }); });
+        // 範囲外にはみ出す配分は、スライダーの端に収める
+        function clampND(n, d) {
+          var cn = Math.min(Math.pow(10, N_RANGE[1]), Math.max(Math.pow(10, N_RANGE[0]), n));
+          var cd = Math.min(Math.pow(10, D_RANGE[1]), Math.max(Math.pow(10, D_RANGE[0]), d));
+          setND(cn, cd);
+        }
+        el('sc-to-opt').addEventListener('click', function () { var o = optimum(6 * N * D); clampND(o.n, o.d); });
+        el('sc-to-20').addEventListener('click', function () { var n = Math.sqrt(6 * N * D / 120); clampND(n, 20 * n); });
+        var resizeTimer = null;
+        window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 100); });
+
+        setND(1.23e9, 9e12);
+      })();
+      </script>
+    </section>
+
     <!-- ━━━ Section 4：事前学習済みモデルの活用 ━━━ -->
     <section>
       <div class="section-rule">
