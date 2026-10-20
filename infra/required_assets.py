@@ -13,6 +13,7 @@ MODELS = [
     ("meta-llama/Meta-Llama-3-8B",             "第2章 SFT / DPO / 評価", True),
     ("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "第2章 RAG 埋め込み", False),
     ("bert-base-multilingual-cased",           "第2章 BERTScore",       False),
+    ("Qwen/Qwen2.5-7B-Instruct",               "第3章 エージェント",    False),
 ]
 
 # (name, split, 用途)

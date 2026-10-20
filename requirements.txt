@@ -19,6 +19,7 @@ langchain-text-splitters
 langchain-huggingface
 langchain-chroma
 langgraph
+grandalf            # LangGraph のグラフを文字で図示する（draw_ascii）。第3章
 
 # ベクトルDB・埋め込み
 chromadb

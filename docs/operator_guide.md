@@ -283,6 +283,7 @@ bash infra/multiuser/handson.sh start
 | 第1章 | 6GB（既定） | 5GB（既定） | ― |
 | 第2章 SFT / DPO | 8GB | 14GB | 2本（既定） |
 | 第2章 RAG / 評価 | SFT / DPO と同じ値のまま（評価は 8B を読む。RAG の 1B はこの上限に収まる） | | ― |
+| 第3章 | SFT / DPO と同じ値のまま（Qwen2.5-7B を 4bit で読む。暫定値） | | ― |
 
 ### 4-3. 第2章の学習の順番待ち
 

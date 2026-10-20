@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-10-20（10/9〜10/14 の第1章の推敲・解説動画・試し場を記録し、第2章ノートブックの実態を反映）
+> 最終更新：2026-10-20（第2章のノートブックをすべて書き直し、第3章に着手。DGX での実行はどちらも未）
 
 ---
 
@@ -27,7 +27,7 @@ DGX Spark（GB10・統合メモリ 128GB・GPU 1基）上で、最大10人が同
 |---|---|---|
 | 第1章 | 機械学習(AI)の仕組み | **完成**（2026-10-14 に推敲・解説動画 8 本・試し場 5 か所を追加） |
 | 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成**。ノートブック・演習・解答は 2026-10-20 に書き直し済み（DGX での実行は未） |
-| 第3章 | AI エージェントを作ろう | 未着手 |
+| 第3章 | AI エージェントを作ろう | **着手**（2026-10-20）。設計判断・共通部品 `agent_kit.py`・ハンズオン①（ReAct）まで。②〜④と Web 資料は未 |
 
 ---
 
@@ -94,7 +94,12 @@ dgx-handson/
 │   ├── notebooks/ch2_04_evaluation.ipynb         🔶 書き直し済み（31 セル）。DGX での実行・出力の保存は未
 │   ├── exercises/ex_04_evaluation.ipynb          🔶 穴埋め 4 問（assert 自己チェック付き）
 │   └── solutions/sol_04_evaluation.ipynb         🔶 解答
-├── chapter3/  （空ディレクトリ + .gitkeep のみ）
+├── chapter3/
+│   ├── agent_kit.py                              🔶 共通部品（LocalChatModel・parse_tool_calls・TraceHandler・run_python・workspace_path）
+│   ├── notebooks/ch3_01_react_agent.ipynb        🔶 ハンズオン① ReAct（37 セル）。DGX での実行・出力の保存は未
+│   ├── exercises/ex_01_react_agent.ipynb         🔶 穴埋め 4 問（assert 自己チェック付き）
+│   ├── solutions/sol_01_react_agent.ipynb        🔶 解答
+│   └── web/                                      📝 未作成（index・supplement・quiz）
 ├── docs/
 │   ├── operator_guide.md                             ✅ 開催側の手順書
 │   └── participant_guide.md                          ✅ 参加者向けの手順書
@@ -103,6 +108,7 @@ dgx-handson/
     ├── predownload.sh                                ✅ 全章のモデル・データセット事前ダウンロード
     ├── required_assets.py                            ✅ 事前取得するモデル・データセットの一覧
     ├── check_env.py                                  ✅ 環境確認（GPU・パッケージ・オフライン読み込み・起動条件）
+    ├── dev/                                          ✅ 偽のモデルでノートブックを検証する道具（クラウドの作業環境向け。README 参照）
     └── multiuser/
         ├── setup_account.sh                          ✅ 参加者用アカウント handson の作成
         ├── deploy.sh                                 ✅ 教材・.venv・モデルを /opt/handson に配置
@@ -366,6 +372,56 @@ dolly-15k-ja は、オフラインではハブのキャッシュから読めな�
 
 ---
 
+## 第3章の着手（2026-10-20）
+
+### ユーザーと決めたこと
+
+DESIGN.md 第3章の「当日の環境に合わせた決定」の表に記録した。要点は次の 3 つ。
+
+| 項目 | 決定 |
+|---|---|
+| エージェントの LLM | `Qwen/Qwen2.5-7B-Instruct`（4bit）。`required_assets.py` に追加（gated ではない） |
+| ツール | すべてローカルの模擬ツール（検索は第2章の `rag_docs`、気象 API・DB は模擬 API） |
+| 観測性 | 自作のトレース（`agent_kit.TraceHandler`）。LangSmith は使わない |
+
+### 調べて分かったこと
+
+- `langchain_huggingface.ChatHuggingFace` は、ローカルのモデル（`HuggingFacePipeline`）では `bind_tools()` してもツールの定義をプロンプトに渡さず、出力からツール呼び出しも読み取らない（langchain-huggingface 1.2.3 で確認）。そこで `agent_kit.LocalChatModel` を作った。チャットテンプレートに `tools=` を渡し、出力の `<tool_call>{...}</tool_call>` を読んで `AIMessage.tool_calls` にする
+- `graph.get_graph().draw_ascii()` には `grandalf` が必要 → `requirements.txt` に追加。`draw_mermaid_png()` はインターネット（mermaid.ink）を使うので使わない
+
+### ハンズオン① ReAct（`ch3_01_react_agent.ipynb`）
+
+| Part | 内容 |
+|---|---|
+| 1 | ツールなしの LLM に、手順書の質問と計算（1〜1000 で 7 でも 11 でも割り切れない数 = 780）を聞く |
+| 2 | **ツール呼び出しの正体**: `@tool` の説明書（JSON）がプロンプトに書き込まれる様子、モデルが `<tool_call>` を文字列で書く様子、プログラムが読んで実行し `tool` メッセージで返す 1 周を、手で書く |
+| 3 | 同じ処理を `LocalChatModel` で |
+| 4 | `StateGraph(MessagesState)` + `ToolNode` + `tools_condition` でループを組み、`draw_ascii()` で図にする |
+| 5 | 検索・Python 実行・ファイル読み書き（`chapter3/workspace/` に閉じ込める）の 5 ツールで、3 つのタスク |
+| 6 | トレースで LLM 回数・トークン数・時間を読む。`recursion_limit` で止まる様子 |
+
+演習は、ツールの定義・`<tool_call>` の読み取り・グラフの組み立て・トレースの集計の 4 問。LLM の回答の正否に依存しない自己チェックにした。
+
+### 検証
+
+| 対象 | 結果 |
+|---|---|
+| `agent_kit.py` | ✅ `infra/dev/test_agent_kit.py`（台本どおりに `<tool_call>` を返すモデルで、読み取り → ToolNode で実行 → 結果をプロンプトに戻す → 最終回答、トレースの集計、`run_python` のタイムアウト、作業ディレクトリの外へのアクセス拒否） |
+| `ch3_01_react_agent.ipynb`・`sol_01_react_agent.ipynb` | ✅ 偽の Qwen（Qwen2.5 の形式をまねたチャットテンプレート）で全セル実行・エラー 0。ランダム重みなのでツールは呼ばれず、ループの部分は上の単体テストで確認 |
+
+**未確認**: 本物の Qwen2.5-7B-Instruct のチャットテンプレートで、ツールの説明書の出方と `<tool_call>` の書き方が想定どおりか。DGX で Part 2 を実行して確かめること。
+
+### 第3章の残り
+
+| 項目 | 内容 |
+|---|---|
+| ハンズオン② 外部 API の tool 登録 | 模擬の気象 API（`WEATHER_API_KEY` を環境変数で渡す）と模擬の社内 DB（SQLite）。エージェントが正しいツールを選ぶかを確かめる |
+| ハンズオン③ Planner + Executor | Qwen が計画を立て、各ステップを実行し、第2章の SFT 済み 8B が文章を書く。メモリ（8B + 7B の 4bit）が 14GB に収まるかは要確認 |
+| ハンズオン④ エラーリカバリ | 誤った引数名・存在しないエンドポイント・型の不一致を返す模擬ツール。`invalid_tool_calls` とツールのエラーを、エラーメッセージとして LLM に返して自己修正させる |
+| Web 資料 | `index.html`・補足資料・クイズ |
+
+---
+
 ## 残タスク
 
 ### 開催方式
@@ -382,7 +438,7 @@ dolly-15k-ja は、オフラインではハブのキャッシュから読めな�
 | 貸与 VM からの接続確認 | 運営者の VM（10.1.3.219）から handson でログインできることを確認（2026-10-06）。同じ VM では VS Code の自動ポート転送が 8800/8801 を確保していたため、ssh -L は bind で失敗した（参加者の VM では VS Code を使わない限り起きない） |
 | ログイン時の URL 表示（`welcome.sh`） | 実装済み（2026-10-06）。貸与 VM から handson でログインすると、接続元の IP から参加者番号を決めてトークン付き URL を表示し、待機してトンネルを保つ（ForceCommand。参加者は DGX のシェルを使えなくなる）。参加者の SSH コマンドから `-N` を外した。`deploy.sh` → `sudo restrict_ssh.sh 10.1.3.219 10.1.3.{221..230}` で反映済み（2026-10-06 13:34）。運営者の VM（10.1.3.219）の PowerShell から接続し、「登録されていません」の表示が文字化けせずに出ること、その接続のトンネルで教材ページ（localhost:8800）が開けることを確認。PR #7 で main にマージ済み（2026-10-06）。**未確認: 貸与 VM（10.1.3.221〜230）からの p01〜p10 の表示**（2026-10-06 時点で、これらの VM からの SSH の記録は auth.log・journal ともになし。リハーサルで確認する） |
 | 運営者の VM を参加者に渡すかの判断 | 未（渡すなら運営者の情報を消す） |
-| 第2章の書き直しに伴う DGX 側の更新 | **未**（2026-10-20 追加）。`bash infra/setup.sh`（bitsandbytes・langchain-text-splitters・langchain-huggingface・langchain-chroma を追加）→ `bash infra/predownload.sh`（埋め込みモデルを `paraphrase-multilingual-MiniLM-L12-v2` に変更）→ `deploy.sh --models` → `check_env.py` |
+| 第2章の書き直しに伴う DGX 側の更新 | **未**（2026-10-20 追加）。`bash infra/setup.sh`（bitsandbytes・langchain-text-splitters・langchain-huggingface・langchain-chroma・grandalf を追加）→ `bash infra/predownload.sh`（埋め込みモデルを `paraphrase-multilingual-MiniLM-L12-v2` に変更、第3章の `Qwen/Qwen2.5-7B-Instruct` を追加）→ `deploy.sh --models` → `check_env.py` |
 | 第2章ノートブックの DGX での実行と出力の保存 | **未**。クラウド環境では HF に接続できず、ランダム重みの小さなモデルで「最後までエラーなく動くこと」だけを確認した。本物のモデルでの出力・数値は未確認 |
 
 ### chapter2・chapter3
@@ -390,7 +446,7 @@ dolly-15k-ja は、オフラインではハブのキャッシュから読めな�
 | 章 | 状態 |
 |---|---|
 | 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答・スクリプトを 2026-10-20 にすべて書き直し済み。**DGX での実行と出力の保存は未** |
-| 第3章（AI エージェント） | 未着手 |
+| 第3章（AI エージェント） | ハンズオン①まで作成（DGX での実行は未）。②〜④・Web 資料は未。詳しくは「第3章の着手」 |
 
 ---
 

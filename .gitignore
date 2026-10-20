@@ -17,6 +17,8 @@ __pycache__/
 *.log
 wandb/
 outputs/
+# 第3章のエージェントが書き込む作業ディレクトリ
+chapter3/workspace/
 
 # OS
 .DS_Store
@@ -27,3 +29,6 @@ data/
 chapter1/solutions/data/
 # 第2章の RAG の検索対象（小さなテキスト）は管理する
 !chapter2/data/
+
+# 偽のモデルによる検証環境（infra/dev）
+.dev/
