@@ -114,6 +114,7 @@ REQUIRED_PACKAGES = [
     ('ipywidgets',          '8.0.0',  False, None),
     ('trl',                 '0.7.0',  True,  None),
     ('peft',                '0.6.0',  True,  None),
+    ('bitsandbytes',        '0.45.0', True,  None),
     ('langchain',           '0.1.0',  True,  None),
     ('langchain-text-splitters', '0.3.0', True, 'langchain_text_splitters'),
     ('langchain-huggingface',    '0.1.0', True, 'langchain_huggingface'),

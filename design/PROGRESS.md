@@ -82,10 +82,14 @@ dgx-handson/
 │   ├── notebooks/ch2_03_rag.ipynb                🔶 書き直し済み（35 セル）。DGX での実行・出力の保存は未
 │   ├── exercises/ex_03_rag.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
 │   ├── solutions/sol_03_rag.ipynb                🔶 解答
-│   ├── notebooks/ch2_0{1,2,4}_*.ipynb            📝 下書き（2026-06-26 作成。未実行で出力なし）
-│   ├── exercises/ex_0{1,2,4}_*.ipynb             📝 下書き（TODO 穴埋めのみ。自己チェックなし）
-│   ├── solutions/sol_0{1,2,4}_*.ipynb            📝 下書き（4〜7 セル。未実行）
-│   └── scripts/train_{sft,dpo}.py                📝 下書き（gpu_queue.sh 経由の実行に対応済み・未実行）
+│   ├── notebooks/ch2_01_sft.ipynb                🔶 書き直し済み（33 セル）。DGX での実行・出力の保存は未
+│   ├── exercises/ex_01_sft.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
+│   ├── solutions/sol_01_sft.ipynb                🔶 解答
+│   ├── scripts/train_sft.py                      🔶 書き直し済み（引数で rank・更新回数を指定。outputs/sft_lora_r{rank} に保存）
+│   ├── notebooks/ch2_0{2,4}_*.ipynb              📝 下書き（2026-06-26 作成。未実行で出力なし）
+│   ├── exercises/ex_0{2,4}_*.ipynb               📝 下書き（TODO 穴埋めのみ。自己チェックなし）
+│   ├── solutions/sol_0{2,4}_*.ipynb              📝 下書き（4〜5 セル。未実行）
+│   └── scripts/train_dpo.py                      📝 下書き（gpu_queue.sh 経由の実行に対応済み・未実行）
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 ├── docs/
 │   ├── operator_guide.md                             ✅ 開催側の手順書
@@ -300,6 +304,20 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 
 ノートブックの数値（当たり率・回答）を断定する文は書いていない。DGX で実行したら、出力を見て本文の「〜のはずです」を確かめること。
 
+### ハンズオン① SFT（2026-10-20）
+
+| 決めたこと | 理由 |
+|---|---|
+| データを `prompt` / `completion` の組にして `SFTTrainer` に渡す | trl 1.x はこの形式だと **回答の部分だけで損失を計算** する（終了トークンも含む）。ノートブックで、1 件目のどこを学習するかを表示して確かめる |
+| dolly の列名は `input`/`context`・`output`/`response` の両方を見る | 下書きは `context`・`response` だけを見ていた。kunishou 版は `input`・`output` の可能性があり（**DGX で `raw.column_names` を要確認**）、その場合は空の文脈・空の回答で学習していた |
+| 学習前の回答（Part 2）と学習後の回答（Part 7）を同じプロンプトで並べる | DESIGN.md 第2章の「同一の入力で出力を並べる」。ベースモデルが止まらずに次の `### 指示:` を書き始める様子と比べる |
+| SFT 後に参加者手順書の質問をする（Part 7-2） | 「SFT は答え方、知識は RAG」を体験させ、ハンズオン③・④につなぐ |
+| `report_to='none'` にし、`log_history` の損失・正解率・学習率をグラフにする | 当日は `WANDB_MODE=offline`（`handson.sh`）で wandb の画面が使えない。DESIGN.md 第2章の「wandb でログを監視」からの変更。`index.html`・`supplement_sft.html` の wandb の記述も直した |
+| アダプタを `chapter2/outputs/sft_lora_r{rank}` に保存 | 下書きは時刻つきのディレクトリで、DPO・評価から見つけられなかった。スクリプト `train_sft.py` も同じ場所に保存する（`--rank`・`--max-steps` などを引数で指定） |
+| `requirements.txt`・`check_env.py` に `bitsandbytes` を追加 | 下書きは QLoRA なのに bitsandbytes が一覧になかった。**GB10（aarch64・CUDA 13）で 4bit 読み込みが動くかは未確認** |
+
+学習時間の「約15分」は目安で、実測していない（60 回更新 × 16 件 × 最大 512 トークン）。リハーサルで測ること。
+
 ### 検証の方法と限界
 
 クラウドの作業環境からは Hugging Face に接続できない。そこで、本物と同じ repo_id で **ランダム重みの小さなモデル**（Llama・BERT・sentence-transformers）を作って HF キャッシュの形で置き、`HF_HUB_OFFLINE=1` で `jupyter nbconvert --execute` した。確かめたのは「現行のライブラリで最後までエラーなく動くこと」だけで、回答の中身や当たり率の値は意味を持たない。
@@ -308,6 +326,11 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 |---|---|
 | `ch2_03_rag.ipynb` | ✅ 全セル実行・エラー 0 |
 | `sol_03_rag.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
+| `ch2_01_sft.ipynb` | ✅ 全セル実行・エラー 0（CPU・量子化なし。trl 1.16・peft 0.21） |
+| `sol_01_sft.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
+| `scripts/train_sft.py` | ✅ `--max-steps 20` で学習・保存まで |
+
+dolly-15k-ja は、オフラインではハブのキャッシュから読めないため、テストのときだけ IPython の起動スクリプトで `load_dataset` を偽の JSON に差し替えた。bitsandbytes（4bit）の経路は CPU では通らないので未検証。
 
 ---
 
@@ -327,14 +350,14 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 | 貸与 VM からの接続確認 | 運営者の VM（10.1.3.219）から handson でログインできることを確認（2026-10-06）。同じ VM では VS Code の自動ポート転送が 8800/8801 を確保していたため、ssh -L は bind で失敗した（参加者の VM では VS Code を使わない限り起きない） |
 | ログイン時の URL 表示（`welcome.sh`） | 実装済み（2026-10-06）。貸与 VM から handson でログインすると、接続元の IP から参加者番号を決めてトークン付き URL を表示し、待機してトンネルを保つ（ForceCommand。参加者は DGX のシェルを使えなくなる）。参加者の SSH コマンドから `-N` を外した。`deploy.sh` → `sudo restrict_ssh.sh 10.1.3.219 10.1.3.{221..230}` で反映済み（2026-10-06 13:34）。運営者の VM（10.1.3.219）の PowerShell から接続し、「登録されていません」の表示が文字化けせずに出ること、その接続のトンネルで教材ページ（localhost:8800）が開けることを確認。PR #7 で main にマージ済み（2026-10-06）。**未確認: 貸与 VM（10.1.3.221〜230）からの p01〜p10 の表示**（2026-10-06 時点で、これらの VM からの SSH の記録は auth.log・journal ともになし。リハーサルで確認する） |
 | 運営者の VM を参加者に渡すかの判断 | 未（渡すなら運営者の情報を消す） |
-| 第2章の書き直しに伴う DGX 側の更新 | **未**（2026-10-20 追加）。`bash infra/setup.sh`（langchain-text-splitters・langchain-huggingface・langchain-chroma を追加）→ `bash infra/predownload.sh`（埋め込みモデルを `paraphrase-multilingual-MiniLM-L12-v2` に変更）→ `deploy.sh --models` → `check_env.py` |
+| 第2章の書き直しに伴う DGX 側の更新 | **未**（2026-10-20 追加）。`bash infra/setup.sh`（bitsandbytes・langchain-text-splitters・langchain-huggingface・langchain-chroma を追加）→ `bash infra/predownload.sh`（埋め込みモデルを `paraphrase-multilingual-MiniLM-L12-v2` に変更）→ `deploy.sh --models` → `check_env.py` |
 | 第2章ノートブックの DGX での実行と出力の保存 | **未**。クラウド環境では HF に接続できず、ランダム重みの小さなモデルで「最後までエラーなく動くこと」だけを確認した。本物のモデルでの出力・数値は未確認 |
 
 ### chapter2・chapter3
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG（ch2_03・ex_03・sol_03）は 2026-10-20 に書き直し済み（DGX での実行は未）。SFT・DPO・評価は 2026-06-26 の下書きのまま（現行の trl では動かない） |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG・SFT は 2026-10-20 に書き直し済み（DGX での実行は未）。DPO・評価は 2026-06-26 の下書きのまま（現行の trl では動かない） |
 | 第3章（AI エージェント） | 未着手 |
 
 ---

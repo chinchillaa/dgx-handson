@@ -10,6 +10,7 @@ transformers
 datasets
 trl
 peft
+bitsandbytes        # QLoRA（4bit 量子化）。第2章 SFT / DPO
 
 # LLMアプリケーションフレームワーク
 langchain
