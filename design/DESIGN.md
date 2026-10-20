@@ -305,7 +305,7 @@ GB10 では、**cgroup のメモリ上限は GPU に確保したメモリを数�
 | 第1章 LLM 推論 | `meta-llama/Llama-3.2-1B-Instruct` |
 | 第2章 SFT / DPO / 評価 | `meta-llama/Meta-Llama-3-8B` |
 | 第2章 SFT | `kunishou/databricks-dolly-15k-ja` |
-| 第2章 RAG 埋め込み | `sentence-transformers/all-MiniLM-L6-v2` |
+| 第2章 RAG 埋め込み | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`（日本語対応。`all-MiniLM-L6-v2` は英語専用のため 2026-10-20 に変更） |
 | 第2章 BERTScore | `bert-base-multilingual-cased` |
 | 第1章 | MNIST |
 

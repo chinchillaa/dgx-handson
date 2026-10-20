@@ -11,7 +11,7 @@ import os
 MODELS = [
     ("meta-llama/Llama-3.2-1B-Instruct",       "第1章 LLM 推論",        True),
     ("meta-llama/Meta-Llama-3-8B",             "第2章 SFT / DPO / 評価", True),
-    ("sentence-transformers/all-MiniLM-L6-v2", "第2章 RAG 埋め込み",    False),
+    ("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "第2章 RAG 埋め込み", False),
     ("bert-base-multilingual-cased",           "第2章 BERTScore",       False),
 ]
 

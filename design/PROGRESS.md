@@ -33,7 +33,7 @@ DGX Spark（GB10・統合メモリ 128GB・GPU 1基）上で、最大10人が同
 
 ## ファイル一覧
 
-✅ = 完成、📝 = 下書き（未実行・未検証）
+✅ = 完成、🔶 = 書き直し済み・DGX での実行は未、📝 = 下書き（未実行・未検証）
 
 ```
 dgx-handson/
@@ -78,9 +78,13 @@ dgx-handson/
 │   │   ├── supplement_rag.html                   ✅ RAG 補足（チャンクサイズ情報量目安つき）
 │   │   ├── supplement_evaluation.html            ✅ 評価指標補足（ROUGE・BERTScore・LLM-as-judge）
 │   │   └── quiz_ch2.html                         ✅ 第2章 理解確認クイズ
-│   ├── notebooks/ch2_0{1..4}_*.ipynb             📝 下書き（2026-06-26 作成。12〜16 セル、未実行で出力なし）
-│   ├── exercises/ex_0{1..4}_*.ipynb              📝 下書き（TODO 穴埋めのみ。自己チェックなし）
-│   ├── solutions/sol_0{1..4}_*.ipynb             📝 下書き（4〜7 セル。未実行）
+│   ├── data/rag_docs/                            ✅ RAG の検索対象（参加者手順書の写し＋機械学習の解説 3 本）
+│   ├── notebooks/ch2_03_rag.ipynb                🔶 書き直し済み（35 セル）。DGX での実行・出力の保存は未
+│   ├── exercises/ex_03_rag.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
+│   ├── solutions/sol_03_rag.ipynb                🔶 解答
+│   ├── notebooks/ch2_0{1,2,4}_*.ipynb            📝 下書き（2026-06-26 作成。未実行で出力なし）
+│   ├── exercises/ex_0{1,2,4}_*.ipynb             📝 下書き（TODO 穴埋めのみ。自己チェックなし）
+│   ├── solutions/sol_0{1,2,4}_*.ipynb            📝 下書き（4〜7 セル。未実行）
 │   └── scripts/train_{sft,dpo}.py                📝 下書き（gpu_queue.sh 経由の実行に対応済み・未実行）
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 ├── docs/
@@ -267,6 +271,46 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 
 ---
 
+## 第2章ノートブックの書き直し（2026-10-20〜）
+
+2026-06-26 の下書きは、現行のライブラリ（transformers 5.x・trl 1.x・langchain 1.x）では動かなかった。ハンズオンごとに書き直している。
+
+### 下書きで見つかった問題
+
+| 対象 | 問題 |
+|---|---|
+| 全体 | `SFTConfig(max_seq_length=…)`・`DPOConfig(max_prompt_length=…)`・`SFTTrainer(tokenizer=…)` は trl 1.x で廃止（`max_length`・`processing_class` に変わった）。`langchain.text_splitter`・`langchain.schema` は langchain 1.x で削除 |
+| RAG | 埋め込みモデル `all-MiniLM-L6-v2` は英語専用なのに、「日本語にも対応」と書いていた |
+| RAG | 生成モデルが「ELYZA または gpt2-ja」で、事前取得の一覧にない（当日はオフラインなので動かない）。しかもプロンプトを作るだけで生成していなかった |
+| RAG | `chunk_size` は `length_function=len`（文字数）なのに「256 / 512 / 1024 token」と説明していた |
+| RAG | `Chroma.from_documents()` を同じ名前で再実行すると、同じチャンクが二重に入る |
+| 評価 | 回答も LLM-as-judge も手書きのダミーで、DESIGN.md の「3 条件で回答させて採点する」になっていなかった |
+| 演習 | 自己チェックがなく、正解したかどうか分からない |
+
+### ハンズオン③ RAG（2026-10-20）
+
+| 決めたこと | 理由 |
+|---|---|
+| 検索対象に **参加者手順書の写し**（`chapter2/data/rag_docs/handson_participant_guide.md`）を加えた | LLM が事前学習で読んでいない知識なので、「RAG なしでは答えられず、RAG ありなら答えられる」差がはっきり出る。DESIGN.md 1.3 のプロダクト例「社内ドキュメント QA」にも合う。写しなので、`docs/participant_guide.md` を変えたら写しも更新する（`rag_docs/README.md` に記載） |
+| 埋め込みを `paraphrase-multilingual-MiniLM-L12-v2` に変更 | 日本語対応で、e5 系のような `query:` / `passage:` の接頭辞が要らず、説明が簡単。`required_assets.py`・DESIGN.md 4.5 の表・`supplement_rag.html` のコード例も更新 |
+| 生成は `Llama-3.2-1B-Instruct`（第1章と同じ） | 取得済みで、第2章 RAG の上限（RAM 6GB / GPU 5GB）に収まる |
+| チャンクの大きさは Llama のトークナイザで数える（`from_huggingface_tokenizer`） | DESIGN.md の「256 / 512 / 1024 token」をそのまま実験できる |
+| 検索の良し悪しを **当たり率**（hit rate@k）で測る | 7 問の質問と「答えが書かれた箇所の文字列」の組を用意し、上位 k 件に含まれるかで判定。chunk_size × k の表を作る。DESIGN.md の「評価を感覚ではなく指標で」に合わせた |
+| `build_vectorstore()` で `reset_collection()` してから入れる | セルの再実行で二重に入るのを防ぐ |
+
+ノートブックの数値（当たり率・回答）を断定する文は書いていない。DGX で実行したら、出力を見て本文の「〜のはずです」を確かめること。
+
+### 検証の方法と限界
+
+クラウドの作業環境からは Hugging Face に接続できない。そこで、本物と同じ repo_id で **ランダム重みの小さなモデル**（Llama・BERT・sentence-transformers）を作って HF キャッシュの形で置き、`HF_HUB_OFFLINE=1` で `jupyter nbconvert --execute` した。確かめたのは「現行のライブラリで最後までエラーなく動くこと」だけで、回答の中身や当たり率の値は意味を持たない。
+
+| 対象 | 結果（transformers 5.20・langchain 1.4・langchain-chroma 1.1・chromadb 1.5） |
+|---|---|
+| `ch2_03_rag.ipynb` | ✅ 全セル実行・エラー 0 |
+| `sol_03_rag.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
+
+---
+
 ## 残タスク
 
 ### 開催方式
@@ -283,12 +327,14 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 | 貸与 VM からの接続確認 | 運営者の VM（10.1.3.219）から handson でログインできることを確認（2026-10-06）。同じ VM では VS Code の自動ポート転送が 8800/8801 を確保していたため、ssh -L は bind で失敗した（参加者の VM では VS Code を使わない限り起きない） |
 | ログイン時の URL 表示（`welcome.sh`） | 実装済み（2026-10-06）。貸与 VM から handson でログインすると、接続元の IP から参加者番号を決めてトークン付き URL を表示し、待機してトンネルを保つ（ForceCommand。参加者は DGX のシェルを使えなくなる）。参加者の SSH コマンドから `-N` を外した。`deploy.sh` → `sudo restrict_ssh.sh 10.1.3.219 10.1.3.{221..230}` で反映済み（2026-10-06 13:34）。運営者の VM（10.1.3.219）の PowerShell から接続し、「登録されていません」の表示が文字化けせずに出ること、その接続のトンネルで教材ページ（localhost:8800）が開けることを確認。PR #7 で main にマージ済み（2026-10-06）。**未確認: 貸与 VM（10.1.3.221〜230）からの p01〜p10 の表示**（2026-10-06 時点で、これらの VM からの SSH の記録は auth.log・journal ともになし。リハーサルで確認する） |
 | 運営者の VM を参加者に渡すかの判断 | 未（渡すなら運営者の情報を消す） |
+| 第2章の書き直しに伴う DGX 側の更新 | **未**（2026-10-20 追加）。`bash infra/setup.sh`（langchain-text-splitters・langchain-huggingface・langchain-chroma を追加）→ `bash infra/predownload.sh`（埋め込みモデルを `paraphrase-multilingual-MiniLM-L12-v2` に変更）→ `deploy.sh --models` → `check_env.py` |
+| 第2章ノートブックの DGX での実行と出力の保存 | **未**。クラウド環境では HF に接続できず、ランダム重みの小さなモデルで「最後までエラーなく動くこと」だけを確認した。本物のモデルでの出力・数値は未確認 |
 
 ### chapter2・chapter3
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答・スクリプトは 2026-06-26 の下書きのみ（未実行・未検証）。仕上げが必要（実行結果の保存、演習の自己チェック、RAG の生成モデルの差し替えなど） |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG（ch2_03・ex_03・sol_03）は 2026-10-20 に書き直し済み（DGX での実行は未）。SFT・DPO・評価は 2026-06-26 の下書きのまま（現行の trl では動かない） |
 | 第3章（AI エージェント） | 未着手 |
 
 ---

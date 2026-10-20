@@ -14,6 +14,9 @@ peft
 # LLMアプリケーションフレームワーク
 langchain
 langchain-community
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
 langgraph
 
 # ベクトルDB・埋め込み
