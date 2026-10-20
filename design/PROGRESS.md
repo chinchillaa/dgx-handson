@@ -26,7 +26,7 @@ DGX Spark（GB10・統合メモリ 128GB・GPU 1基）上で、最大10人が同
 | 章 | テーマ | 状態 |
 |---|---|---|
 | 第1章 | 機械学習(AI)の仕組み | **完成**（2026-10-14 に推敲・解説動画 8 本・試し場 5 か所を追加） |
-| 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成**。ノートブック・演習・解答は下書きのみ（未実行・未検証） |
+| 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成**。ノートブック・演習・解答は 2026-10-20 に書き直し済み（DGX での実行は未） |
 | 第3章 | AI エージェントを作ろう | 未着手 |
 
 ---
@@ -91,9 +91,9 @@ dgx-handson/
 │   ├── exercises/ex_02_dpo.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
 │   ├── solutions/sol_02_dpo.ipynb                🔶 解答
 │   ├── scripts/train_dpo.py                      🔶 書き直し済み（引数で beta・更新回数を指定。outputs/dpo_lora_beta{beta} に保存）
-│   ├── notebooks/ch2_04_evaluation.ipynb         📝 下書き（2026-06-26 作成。回答も採点もダミー）
-│   ├── exercises/ex_04_evaluation.ipynb          📝 下書き（TODO 穴埋めのみ。自己チェックなし）
-│   └── solutions/sol_04_evaluation.ipynb         📝 下書き
+│   ├── notebooks/ch2_04_evaluation.ipynb         🔶 書き直し済み（31 セル）。DGX での実行・出力の保存は未
+│   ├── exercises/ex_04_evaluation.ipynb          🔶 穴埋め 4 問（assert 自己チェック付き）
+│   └── solutions/sol_04_evaluation.ipynb         🔶 解答
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 ├── docs/
 │   ├── operator_guide.md                             ✅ 開催側の手順書
@@ -332,6 +332,19 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 | `rewards/chosen`・`rewards/rejected`・`rewards/margins`・`rewards/accuracies` をグラフにする | DPO の学習ログの読み方。最初の損失が ln 2 ≈ 0.693 になる理由も説明する |
 | 保存は `save_pretrained(..., selected_adapters=['default'])` | そのまま保存すると参照用の `ref` も書き出される |
 
+### ハンズオン④ 評価（2026-10-20）
+
+| 決めたこと | 理由 |
+|---|---|
+| 10 問を「一般 5 問」と「参加者手順書 5 問」に分ける | 一般の質問は 3 条件の差が出にくく、手順書の質問は RAG だけが答えられるはず。手法選定の判断基準（知識が要るなら RAG）を数字で確かめられる |
+| 3 条件の回答を実際に生成する（下書きは手書きのダミー） | 1 つの 8B（4bit）+ SFT アダプタで、「素の LLM」は `disable_adapter()`、「RAG あり」は `### 文脈:` に検索結果を入れる。8B を 2 つ読まずに済む。どの条件も最初の `###` の手前で切って比べる |
+| ROUGE-L は文字単位のトークナイザで計算する | `rouge_score` の既定は英数字以外を捨てる。日本語では同じ文どうしでも 0 点、英字が混ざると「AI」だけで 1.000 点になる（`supplement_evaluation.html` の例がそうだった）。ページのコード例を直し、実際の出力（0.727 / 0.566 / 0.727）を載せた |
+| BERTScore は `model_type='bert-base-multilingual-cased'` を明示する | `lang='ja'` でも同じモデルが選ばれるが（`lang2model` は既定値つきの辞書）、どのモデルで測ったかを明示するため |
+| LLM-as-judge は `Llama-3.2-1B-Instruct` の「1」〜「5」の確率から期待値を出す | 書かせると形式がばらつく。期待値なら毎回同じ値で、細かい差も出る。下書きは文字の重なりで点を付けるダミー関数だった |
+| 採点の前に、採点役を確かめる（模範解答・無関係・正反対の 3 例） | 1B の採点役は弱い。点数は参考値と明記した |
+| 演習は ROUGE-L の LCS を自分で実装し、「正反対」（否定を足しただけの回答）にだまされる指標を探す | 文字単位の ROUGE-L は「言い換え」0.253 に対し「正反対」0.914（実測）。指標が何を測っているかを体感させる |
+| 第2章は通して SFT と同じ上限（RAM 8GB / GPU 14GB）で進める | 評価で 8B を読むため。DESIGN.md 4.3・運営者ガイド 4-2 の表を更新。`index.html` の 2-4 のバッジを「CPU可」から「GPU必須」に変更 |
+
 ### 検証の方法と限界
 
 クラウドの作業環境からは Hugging Face に接続できない。そこで、本物と同じ repo_id で **ランダム重みの小さなモデル**（Llama・BERT・sentence-transformers）を作って HF キャッシュの形で置き、`HF_HUB_OFFLINE=1` で `jupyter nbconvert --execute` した。確かめたのは「現行のライブラリで最後までエラーなく動くこと」だけで、回答の中身や当たり率の値は意味を持たない。
@@ -346,6 +359,8 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 | `ch2_02_dpo.ipynb` | ✅ 全セル実行・エラー 0（SFT のアダプタあり。`ref` アダプタが作られることを確認） |
 | `sol_02_dpo.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
 | `scripts/train_dpo.py` | ✅ `--max-steps 10` で学習・保存まで（保存先に `ref` が含まれないことを確認） |
+| `ch2_04_evaluation.ipynb` | ✅ 全セル実行・エラー 0（SFT のアダプタあり） |
+| `sol_04_evaluation.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
 
 dolly-15k-ja は、オフラインではハブのキャッシュから読めないため、テストのときだけ IPython の起動スクリプトで `load_dataset` を偽の JSON に差し替えた。bitsandbytes（4bit）の経路は CPU では通らないので未検証。
 
@@ -374,7 +389,7 @@ dolly-15k-ja は、オフラインではハブのキャッシュから読めな�
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG・SFT・DPO は 2026-10-20 に書き直し済み（DGX での実行は未）。評価は 2026-06-26 の下書きのまま（回答も採点もダミー） |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答・スクリプトを 2026-10-20 にすべて書き直し済み。**DGX での実行と出力の保存は未** |
 | 第3章（AI エージェント） | 未着手 |
 
 ---

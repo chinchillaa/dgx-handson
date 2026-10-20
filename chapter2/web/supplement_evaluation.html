@@ -28,6 +28,12 @@
     .section-heading { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--green); margin-bottom: 1.5rem; }
     .section-number { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--green); color: white; border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
     pre { border-radius: 0.5rem; overflow-x: auto; }
+    .output-block {
+      background: var(--code-out); border-radius: 0 0 8px 8px; padding: 0.75rem 1rem;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace; font-size: 0.75rem;
+      color: #D4D4D8; line-height: 1.65;
+    }
+    .output-label { font-size: 0.65rem; color: #71717A; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
     code.hljs { border-radius: 0.5rem; font-size: 0.82rem; }
     .key-point { border-left: 3px solid var(--green); padding-left: 1rem; margin: 1rem 0; }
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
@@ -103,9 +109,16 @@
         $$\text{ROUGE-L} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
         <p class="text-sm mt-3" style="color: var(--text-sub);">Precision: 生成文中に参照文と共通する LCS の割合 / Recall: 参照文中に生成文と共通する LCS の割合。LCS は「順番を保ったまま共通して出てくる最長の並び」です。</p>
       </div>
-      <pre><code class="language-python">from rouge_score import rouge_scorer
+      <pre style="border-radius: 0.5rem 0.5rem 0 0; margin-bottom: 0;"><code class="language-python">from rouge_score import rouge_scorer
 
-scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=False)
+
+class CharTokenizer:
+    """日本語用: 空白以外の 1 文字を 1 トークンとして扱う"""
+    def tokenize(self, text):
+        return [c for c in text if not c.isspace()]
+
+
+scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], tokenizer=CharTokenizer())
 
 reference = "機械学習は大量のデータからパターンを学習するAIの手法です"
 hypothesis = "機械学習はデータからパターンを見つけ出すAI技術です"
@@ -114,6 +127,18 @@ scores = scorer.score(reference, hypothesis)
 print(f"ROUGE-1: {scores['rouge1'].fmeasure:.3f}")
 print(f"ROUGE-2: {scores['rouge2'].fmeasure:.3f}")
 print(f"ROUGE-L: {scores['rougeL'].fmeasure:.3f}")</code></pre>
+      <div class="output-block">
+        <div class="output-label">出力</div>
+        ROUGE-1: 0.727<br>
+        ROUGE-2: 0.566<br>
+        ROUGE-L: 0.727
+      </div>
+      <div class="card mt-4">
+        <p class="text-sm"><strong>日本語では、トークナイザを必ず指定します。</strong>
+        <code>rouge_score</code> の既定のトークナイザは、英数字以外の文字を捨ててから単語に分けます。
+        この例を既定のまま計算すると、日本語がすべて捨てられて「AI」だけが残り、ROUGE-L は <strong>1.000（満点）</strong> になります。
+        文字単位（<code>CharTokenizer</code>）で数えるのが、日本語でのいちばん簡単な対処です。</p>
+      </div>
     </section>
 
     <!-- BERTScore -->
@@ -141,7 +166,8 @@ print(f"ROUGE-L: {scores['rougeL'].fmeasure:.3f}")</code></pre>
 references  = ["機械学習は大量のデータからパターンを学習するAIの手法です"]
 hypotheses  = ["機械学習はデータからパターンを見つけ出すAI技術です"]
 
-P, R, F1 = score(hypotheses, references, lang="ja", verbose=True)
+# lang="ja" でも多言語 BERT が選ばれるが、どのモデルで測ったかが分かるよう明示する
+P, R, F1 = score(hypotheses, references, model_type="bert-base-multilingual-cased")
 print(f"BERTScore F1: {F1.mean().item():.3f}")</code></pre>
     </section>
 

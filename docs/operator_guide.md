@@ -271,10 +271,10 @@ GB10 は CPU と GPU がメモリを共有しています。`status` の RAM 列
 ```bash
 bash infra/multiuser/handson.sh stop
 
-# 第2章 SFT / DPO（Llama-3-8B QLoRA）
+# 第2章（SFT / DPO / RAG / 評価。Llama-3-8B を QLoRA で読む）
 HANDSON_RAM_GB=8 HANDSON_GPU_GB=14 HANDSON_GPU_SLOTS=2 bash infra/multiuser/handson.sh start
 
-# 第1章・第2章 RAG に戻す（既定値）
+# 第1章に戻す（既定値）
 bash infra/multiuser/handson.sh start
 ```
 
@@ -282,7 +282,7 @@ bash infra/multiuser/handson.sh start
 |---|---|---|---|
 | 第1章 | 6GB（既定） | 5GB（既定） | ― |
 | 第2章 SFT / DPO | 8GB | 14GB | 2本（既定） |
-| 第2章 RAG / 評価 | 既定値。評価で 8B を読むなら SFT と同じ値 | | ― |
+| 第2章 RAG / 評価 | SFT / DPO と同じ値のまま（評価は 8B を読む。RAG の 1B はこの上限に収まる） | | ― |
 
 ### 4-3. 第2章の学習の順番待ち
 
