@@ -1,199 +1,133 @@
 #!/usr/bin/env python3
 """
 第2章 DPO 学習スクリプト
-SFT 済みモデルに DPOTrainer で preference alignment を適用する
+SFT 済みのアダプタに、DPOTrainer で好みのデータを学習させる（ch2_02_dpo.ipynb と同じ処理）
 
 使用方法（JupyterLab のターミナルで、自分の作業ディレクトリ直下から）:
-  gpu_queue.sh python chapter2/scripts/train_dpo.py \
-      --sft_model_path ./outputs/sft_<timestamp>
+  gpu_queue.sh python chapter2/scripts/train_dpo.py --beta 0.1 --max-steps 60
 
   gpu_queue.sh は同時に走る学習の本数を制限する（ノートブックの gpu_slot() と同じ枠）。
   枠が埋まっていれば空くまで待つ。ターミナルのプロセスはサーバー側で動くので、
   ブラウザを閉じたり SSH が切れたりしても学習は続く（JupyterLab が止まらない限り）。
 
+入力:
+  --sft-dir    SFT のアダプタ（既定 chapter2/outputs/sft_lora_r16。なければベースモデルに新しい LoRA を付ける）
+  --data       好みのデータ（既定 chapter2/data/dpo_preference.json。prompt・chosen・rejected のリスト）
+
+出力（chapter2/outputs/dpo_lora_beta{beta}/）:
+  adapter_model.safetensors など  学習した LoRA アダプタ（ch2_04 で読み込める）
+  log_history.json                 損失・報酬などの学習ログ
+
 環境変数:
-  HF_HOME               HuggingFace キャッシュパス（当日は運営側で設定済み）
-  WANDB_PROJECT         wandb プロジェクト名（デフォルト: dgx-handson-dpo）
+  HF_HOME   HuggingFace キャッシュパス（当日は運営側で設定済み）
 """
 
-import os
 import argparse
 import json
+from pathlib import Path
+
 import torch
-from datetime import datetime
 from datasets import Dataset
+from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig, TaskType, get_peft_model
-from trl import DPOTrainer, DPOConfig
+from trl import DPOConfig, DPOTrainer
 
-# ── 環境設定 ─────────────────────────────────────────────────────────────
-os.environ.setdefault("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
-os.environ.setdefault("WANDB_PROJECT", "dgx-handson-dpo")
-
-# ── ハイパーパラメータ ───────────────────────────────────────────────────
-LORA_RANK    = 8
-LORA_ALPHA   = 16
-LEARNING_RATE= 5e-5
-BETA         = 0.1      # DPO の KL ペナルティ係数
-MAX_SEQ_LEN  = 512
-BATCH_SIZE   = 2
-GRAD_ACCUM   = 4
-NUM_EPOCHS   = 1
-MAX_STEPS    = 50       # デモ用に短縮
+MODEL_NAME = "meta-llama/Meta-Llama-3-8B"
+CH2_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_ROOT = CH2_DIR / "outputs"
 
 
-# ── サンプル preference データセット ──────────────────────────────────────
-# 本来は participants が手動で作成するデータ。ここはデモ用のサンプルを使用。
-SAMPLE_PREFERENCE_DATA = [
-    {
-        "prompt": "Python でリストを逆順にする方法を教えてください。",
-        "chosen": (
-            "Python でリストを逆順にするには主に 2 つの方法があります。\n\n"
-            "**1. `reversed()` 関数を使う**\n```python\nmy_list = [1, 2, 3, 4, 5]\n"
-            "reversed_list = list(reversed(my_list))\nprint(reversed_list)  # [5, 4, 3, 2, 1]\n```\n\n"
-            "**2. スライスを使う**\n```python\nreversed_list = my_list[::-1]\n```\n\n"
-            "元のリストを変更せず新しいリストを返します。元のリスト自体を変更したい場合は "
-            "`my_list.reverse()` を使ってください。"
-        ),
-        "rejected": (
-            "リストを逆にするには reverse を使います。my_list.reverse() と書けば逆になります。"
-        ),
-    },
-    {
-        "prompt": "機械学習における過学習（overfitting）とは何ですか？",
-        "chosen": (
-            "過学習とは、モデルが訓練データに過度に適合してしまい、未知のデータ（テストデータ）に対して"
-            "うまく予測できなくなる現象です。\n\n"
-            "**原因**\n- モデルの複雑さに対してデータが少ない\n- 学習回数が多すぎる\n\n"
-            "**対策**\n- 正則化（L1/L2）\n- ドロップアウト\n- データ拡張\n- 早期終了（Early Stopping）\n\n"
-            "損失曲線で「訓練損失は下がるがバリデーション損失が上がり始める」パターンが過学習のサインです。"
-        ),
-        "rejected": (
-            "過学習は訓練データを覚えすぎることです。テストで悪い結果になります。"
-            "たくさんデータを集めれば解決します。"
-        ),
-    },
-    {
-        "prompt": "Git の rebase と merge の違いを教えてください。",
-        "chosen": (
-            "どちらもブランチの変更を統合する操作ですが、履歴の形が異なります。\n\n"
-            "**merge**\n```\nA---B---C  main\n     \\\n      D---E  feature\n          ↓\nA---B---C---M  (マージコミット M が作られる)\n     \\      /\n      D---E\n```\n"
-            "履歴が分岐のまま残り、いつ何とマージしたかが明確になります。\n\n"
-            "**rebase**\n```\nA---B---C  main\n         \\\n          D'--E'  (feature のコミットが main の先頭に積み直される)\n```\n"
-            "履歴が一直線になりすっきりしますが、コミット ID が変わります。\n\n"
-            "**使い分け**: チーム開発では merge が安全。個人ブランチの整理には rebase が有効です。"
-        ),
-        "rejected": (
-            "rebase はコミットを移動させます。merge はブランチをくっつけます。どちらも同じことができます。"
-        ),
-    },
-]
-
-
-def load_preference_data(data_path: str | None) -> Dataset:
-    """JSON ファイルまたはサンプルデータから preference dataset を読み込む"""
-    if data_path and os.path.exists(data_path):
-        with open(data_path) as f:
-            records = json.load(f)
-        print(f"カスタム preference データを読み込み: {len(records)} 件 ({data_path})")
-    else:
-        records = SAMPLE_PREFERENCE_DATA
-        print(f"サンプル preference データを使用: {len(records)} 件")
-        print("  ヒント: --data_path で自作の JSON を指定できます")
-
-    return Dataset.from_list(records)
+def parse_args():
+    p = argparse.ArgumentParser(description="SFT 済みのアダプタに DPO をかける")
+    p.add_argument("--sft-dir", type=Path, default=OUTPUT_ROOT / "sft_lora_r16", help="SFT のアダプタ")
+    p.add_argument("--data", type=Path, default=CH2_DIR / "data" / "dpo_preference.json", help="好みのデータ（JSON）")
+    p.add_argument("--beta", type=float, default=0.1, help="参照モデルから離れすぎないためのブレーキ（既定 0.1）")
+    p.add_argument("--max-steps", type=int, default=60, help="重みを更新する回数（既定 60）")
+    p.add_argument("--lr", type=float, default=5e-5, help="学習率（既定 5e-5）")
+    p.add_argument("--output-dir", type=Path, default=None, help="保存先（既定 chapter2/outputs/dpo_lora_beta{beta}）")
+    return p.parse_args()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="DPO 学習スクリプト")
-    parser.add_argument("--sft_model_path", type=str, default=None,
-                        help="SFT 済みモデルのパス（省略時はベースモデルを使用）")
-    parser.add_argument("--data_path", type=str, default=None,
-                        help="preference データ JSON ファイルのパス")
-    args = parser.parse_args()
+    args = parse_args()
+    output_dir = args.output_dir or OUTPUT_ROOT / f"dpo_lora_beta{args.beta}"
 
-    base_model = args.sft_model_path or "meta-llama/Meta-Llama-3-8B"
-    output_dir = f"./outputs/dpo_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    records = json.loads(args.data.read_text(encoding="utf-8"))
+    dataset = Dataset.from_list(records)
 
     print("=" * 60)
-    print("DPO 学習スクリプト開始")
-    print(f"  ベースモデル: {base_model}")
-    print(f"  beta        : {BETA}")
-    print(f"  出力先      : {output_dir}")
+    print("DPO 学習スクリプト")
+    print(f"  モデル       : {MODEL_NAME}")
+    print(f"  SFT アダプタ : {args.sft_dir}")
+    print(f"  好みのデータ : {args.data}（{len(dataset)} 組）")
+    print(f"  beta         : {args.beta}  更新回数: {args.max_steps}  学習率: {args.lr}")
+    print(f"  保存先       : {output_dir}")
     print("=" * 60)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"\n使用デバイス: {device}")
+    if device == "cpu":
+        print("⚠️  GPU が見つかりません。8B モデルの学習には GPU が必要です")
 
-    # ── 量子化設定 ────────────────────────────────────────────────────
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-    ) if device == "cuda" else None
-
-    # ── モデル・トークナイザー読み込み ────────────────────────────────
-    print("\nモデルを読み込み中...")
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        quantization_config=bnb_config,
-        device_map="auto" if device == "cuda" else None,
-        torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-        trust_remote_code=True,
-    )
-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+    # ── モデル（4bit + SFT のアダプタ）────────────────────────────────
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, clean_up_tokenization_spaces=False)
     tokenizer.pad_token = tokenizer.eos_token
+    if device == "cuda":
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+        )
+        base = AutoModelForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_config, device_map="auto")
+        base = prepare_model_for_kbit_training(base)
+    else:
+        base = AutoModelForCausalLM.from_pretrained(MODEL_NAME, dtype=torch.float32)
 
-    # ── LoRA 設定 ──────────────────────────────────────────────────────
-    lora_config = LoraConfig(
-        task_type=TaskType.CAUSAL_LM,
-        r=LORA_RANK,
-        lora_alpha=LORA_ALPHA,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-        bias="none",
-    )
-    model = get_peft_model(model, lora_config)
+    if (args.sft_dir / "adapter_config.json").exists():
+        # 参照モデルには、DPOTrainer がこのアダプタのコピー（ref）を作って使う
+        model = PeftModel.from_pretrained(base, args.sft_dir, is_trainable=True)
+    else:
+        print(f"⚠️  {args.sft_dir} が見つからないため、ベースモデルに新しい LoRA を付けます（参照モデルはベースモデル）")
+        model = get_peft_model(base, LoraConfig(
+            task_type="CAUSAL_LM", r=16, lora_alpha=32, lora_dropout=0.05, bias="none",
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        ))
     model.print_trainable_parameters()
 
-    # ── データセット読み込み ────────────────────────────────────────────
-    dataset = load_preference_data(args.data_path)
-
-    # ── 学習設定 ───────────────────────────────────────────────────────
-    training_args = DPOConfig(
-        output_dir=output_dir,
-        num_train_epochs=NUM_EPOCHS,
-        max_steps=MAX_STEPS,
-        per_device_train_batch_size=BATCH_SIZE,
-        gradient_accumulation_steps=GRAD_ACCUM,
-        learning_rate=LEARNING_RATE,
-        beta=BETA,
-        bf16=device == "cuda",
-        logging_steps=5,
-        save_steps=25,
-        save_total_limit=2,
-        report_to="wandb",
-        run_name=f"dpo-beta{BETA}",
-        max_length=MAX_SEQ_LEN,
-        max_prompt_length=256,
-    )
-
+    # ── 学習 ───────────────────────────────────────────────────────────
     trainer = DPOTrainer(
         model=model,
-        args=training_args,
+        args=DPOConfig(
+            output_dir=str(output_dir / "checkpoints"),
+            beta=args.beta,
+            max_steps=args.max_steps,
+            per_device_train_batch_size=2,
+            gradient_accumulation_steps=2,
+            learning_rate=args.lr,
+            lr_scheduler_type="cosine",
+            warmup_steps=0.1,
+            max_length=512,
+            gradient_checkpointing=True,
+            bf16=device == "cuda",
+            logging_steps=5,
+            save_strategy="no",
+            report_to="none",    # 当日はオフライン。ログは log_history.json に保存する
+        ),
         train_dataset=dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
     )
-
-    # ── 学習実行 ───────────────────────────────────────────────────────
-    print("\nDPO 学習を開始します...")
+    print("\n学習を始めます...")
     trainer.train()
 
-    print("\nアダプタを保存中...")
-    trainer.save_model(output_dir)
+    # ── 保存（参照モデル用のコピー ref は保存しない）──────────────────
+    model.save_pretrained(output_dir, selected_adapters=["default"])
     tokenizer.save_pretrained(output_dir)
-    print(f"保存完了: {output_dir}")
-    print("\n学習完了！SFT モデルと出力を比較してみてください。")
+    (output_dir / "log_history.json").write_text(json.dumps(trainer.state.log_history, indent=1))
+    print(f"\n保存しました: {output_dir}")
+    print(f"{'step':>5} {'loss':>7} {'margin':>8} {'正解率':>6}")
+    for h in trainer.state.log_history:
+        if "rewards/margins" in h:
+            print(f"{h['step']:>5} {h['loss']:>7.3f} {h['rewards/margins']:>+8.3f} {h['rewards/accuracies']:>6.2f}")
 
 
 if __name__ == "__main__":

@@ -86,10 +86,14 @@ dgx-handson/
 │   ├── exercises/ex_01_sft.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
 │   ├── solutions/sol_01_sft.ipynb                🔶 解答
 │   ├── scripts/train_sft.py                      🔶 書き直し済み（引数で rank・更新回数を指定。outputs/sft_lora_r{rank} に保存）
-│   ├── notebooks/ch2_0{2,4}_*.ipynb              📝 下書き（2026-06-26 作成。未実行で出力なし）
-│   ├── exercises/ex_0{2,4}_*.ipynb               📝 下書き（TODO 穴埋めのみ。自己チェックなし）
-│   ├── solutions/sol_0{2,4}_*.ipynb              📝 下書き（4〜5 セル。未実行）
-│   └── scripts/train_dpo.py                      📝 下書き（gpu_queue.sh 経由の実行に対応済み・未実行）
+│   ├── data/dpo_preference.json                  ✅ DPO の好みデータ 8 組
+│   ├── notebooks/ch2_02_dpo.ipynb                🔶 書き直し済み（27 セル）。DGX での実行・出力の保存は未
+│   ├── exercises/ex_02_dpo.ipynb                 🔶 穴埋め 4 問（assert 自己チェック付き）
+│   ├── solutions/sol_02_dpo.ipynb                🔶 解答
+│   ├── scripts/train_dpo.py                      🔶 書き直し済み（引数で beta・更新回数を指定。outputs/dpo_lora_beta{beta} に保存）
+│   ├── notebooks/ch2_04_evaluation.ipynb         📝 下書き（2026-06-26 作成。回答も採点もダミー）
+│   ├── exercises/ex_04_evaluation.ipynb          📝 下書き（TODO 穴埋めのみ。自己チェックなし）
+│   └── solutions/sol_04_evaluation.ipynb         📝 下書き
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 ├── docs/
 │   ├── operator_guide.md                             ✅ 開催側の手順書
@@ -318,6 +322,16 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 
 学習時間の「約15分」は目安で、実測していない（60 回更新 × 16 件 × 最大 512 トークン）。リハーサルで測ること。
 
+### ハンズオン② DPO（2026-10-20）
+
+| 決めたこと | 理由 |
+|---|---|
+| ハンズオン①のアダプタ（`outputs/sft_lora_r16`）を `PeftModel.from_pretrained(..., is_trainable=True)` で読み、その続きから DPO する | 下書きはベースモデルに新しい LoRA を付けていて、「SFT モデルに DPO」になっていなかった。trl 1.x は、アダプタ付きのモデルを渡すとアダプタのコピー（`ref`）を作り、**SFT 後のモデルを参照モデル** にする。アダプタがなければベースモデルに新しい LoRA を付けて続ける |
+| 好みのデータを `chapter2/data/dpo_preference.json`（8 組）に置き、ノートブックとスクリプトで共有する | テーマは「社内 QA アシスタントの答え方」（結論から具体的に／知らないことは知らないと言う／パスワードは断る）。DESIGN.md の「5〜10 件を手で作らせる」に合わせ、本編で 1 組以上、演習で 3 組を参加者が追加する |
+| 学習データにない 1 組で `log π(chosen) − log π(rejected)` を学習前後で測る | 補足資料 2-2 の「参照モデル 40% → 学習中 60%」の考え方を、本物のモデルの数値で確かめる。演習の課題 2 でこの関数を実装し、`labels` を付けた損失から求めた値と一致するかで自己チェックする |
+| `rewards/chosen`・`rewards/rejected`・`rewards/margins`・`rewards/accuracies` をグラフにする | DPO の学習ログの読み方。最初の損失が ln 2 ≈ 0.693 になる理由も説明する |
+| 保存は `save_pretrained(..., selected_adapters=['default'])` | そのまま保存すると参照用の `ref` も書き出される |
+
 ### 検証の方法と限界
 
 クラウドの作業環境からは Hugging Face に接続できない。そこで、本物と同じ repo_id で **ランダム重みの小さなモデル**（Llama・BERT・sentence-transformers）を作って HF キャッシュの形で置き、`HF_HUB_OFFLINE=1` で `jupyter nbconvert --execute` した。確かめたのは「現行のライブラリで最後までエラーなく動くこと」だけで、回答の中身や当たり率の値は意味を持たない。
@@ -329,6 +343,9 @@ DESIGN.md の「アニメーション・動的エフェクトは使用しない�
 | `ch2_01_sft.ipynb` | ✅ 全セル実行・エラー 0（CPU・量子化なし。trl 1.16・peft 0.21） |
 | `sol_01_sft.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
 | `scripts/train_sft.py` | ✅ `--max-steps 20` で学習・保存まで |
+| `ch2_02_dpo.ipynb` | ✅ 全セル実行・エラー 0（SFT のアダプタあり。`ref` アダプタが作られることを確認） |
+| `sol_02_dpo.ipynb` | ✅ 全セル実行・自己チェック 4 件通過 |
+| `scripts/train_dpo.py` | ✅ `--max-steps 10` で学習・保存まで（保存先に `ref` が含まれないことを確認） |
 
 dolly-15k-ja は、オフラインではハブのキャッシュから読めないため、テストのときだけ IPython の起動スクリプトで `load_dataset` を偽の JSON に差し替えた。bitsandbytes（4bit）の経路は CPU では通らないので未検証。
 
@@ -357,7 +374,7 @@ dolly-15k-ja は、オフラインではハブのキャッシュから読めな�
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG・SFT は 2026-10-20 に書き直し済み（DGX での実行は未）。DPO・評価は 2026-06-26 の下書きのまま（現行の trl では動かない） |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。RAG・SFT・DPO は 2026-10-20 に書き直し済み（DGX での実行は未）。評価は 2026-06-26 の下書きのまま（回答も採点もダミー） |
 | 第3章（AI エージェント） | 未着手 |
 
 ---
