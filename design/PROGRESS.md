@@ -1,7 +1,7 @@
 # dgx-handson 進捗記録
 
 > 別セッションの Claude Code がすぐに作業を再開するための引き継ぎドキュメント。
-> 最終更新：2026-09-03（HO-3 を30分のコア版＋付録に分割）
+> 最終更新：2026-10-20（10/9〜10/14 の第1章の推敲・解説動画・試し場を記録し、第2章ノートブックの実態を反映）
 
 ---
 
@@ -25,18 +25,23 @@ DGX Spark（GB10・統合メモリ 128GB・GPU 1基）上で、最大10人が同
 
 | 章 | テーマ | 状態 |
 |---|---|---|
-| 第1章 | 機械学習(AI)の仕組み | **完成** |
-| 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成・説明改善済み** |
+| 第1章 | 機械学習(AI)の仕組み | **完成**（2026-10-14 に推敲・解説動画 8 本・試し場 5 か所を追加） |
+| 第2章 | AI を「強く」する（SFT・DPO・RAG） | **Web 資料完成**。ノートブック・演習・解答は下書きのみ（未実行・未検証） |
 | 第3章 | AI エージェントを作ろう | 未着手 |
 
 ---
 
-## 完成済みファイル
+## ファイル一覧
+
+✅ = 完成、📝 = 下書き（未実行・未検証）
 
 ```
 dgx-handson/
 ├── .gitignore
 ├── requirements.txt                              ✅ 全章共通パッケージ
+├── .claude/skills/tech-writing/                  ✅ 日本語技術文書の推敲規約（Web 資料・PR・手順書に適用）
+├── assets/
+│   └── web-theme.css                             ✅ 全 Web 資料の共通テーマ（配色変数・フォント。各ページの <style> の後に読み込む）
 ├── design/
 │   ├── DESIGN.md                                 ✅ 設計仕様書（変更不可）
 │   └── PROGRESS.md                               ✅ このファイル
@@ -47,8 +52,11 @@ dgx-handson/
 │   │   ├── supplement_neural_network.html        ✅ XOR問題・NN構造・活性化関数・PyTorch autograd（XOR 学習の試し場つき）
 │   │   ├── supplement_transformer.html           ✅ 埋め込み・Self-Attention・Transformerブロック・LLMへのつながり（Self-Attention 計算機の試し場つき）
 │   │   ├── supplement_pretraining.html           ✅ 自己教師あり学習・CLM・スケーリング則・活用方法（スケーリング則の試し場つき）
-│   │   ├── supplement_inference_params.html      ✅ Temperature・Top-p/k・generate()パラメータ設定
-│   │   └── quiz_ch1.html                         ✅ 理解確認クイズ（選択式5・穴埋め5・記述式3）JS採点付き
+│   │   ├── supplement_inference_params.html      ✅ Temperature・Top-p/k・generate()パラメータ設定（サンプリングの試し場つき）
+│   │   ├── ml_quadratic_demo.html                ✅ 学習過程の可視化デモ（index.html からリンク）
+│   │   ├── quiz_ch1.html                         ✅ 理解確認クイズ（18問）JS採点付き
+│   │   └── media/                                ✅ 解説動画 8 本（MP4）とポスター画像（JPEG）。manim で生成
+│   ├── manim/                                    ✅ 解説動画の生成元（scenes/*.py・Makefile・environment.yml・README.md）
 │   ├── notebooks/
 │   │   ├── ch1_01_linear_regression.ipynb        ✅ NumPy勾配降下・学習率実験（解説用）
 │   │   ├── ch1_02_mnist_nn.ipynb                 ✅ PyTorch 2層NN・MNIST分類（解説用）
@@ -63,13 +71,17 @@ dgx-handson/
 │       ├── sol_02_mnist_nn.ipynb                 ✅ HO-2 解答
 │       └── sol_03_llm_inference.ipynb            ✅ HO-3 解答（実行検証済み・自己チェック9件通過）
 ├── chapter2/
-│   └── web/
-│       ├── index.html                            ✅ 第2章トップ・手法選定フレームワーク
-│       ├── supplement_sft.html                   ✅ SFT・LoRA・QLoRA 補足（4×4行列の数値例つき）
-│       ├── supplement_dpo.html                   ✅ DPO 補足（参照モデル・損失関数図解・動的デモつき）
-│       ├── supplement_rag.html                   ✅ RAG 補足（チャンクサイズ情報量目安つき）
-│       ├── supplement_evaluation.html            ✅ 評価指標補足（ROUGE・BERTScore・LLM-as-judge）
-│       └── quiz_ch2.html                         ✅ 第2章 理解確認クイズ
+│   ├── web/
+│   │   ├── index.html                            ✅ 第2章トップ・手法選定フレームワーク
+│   │   ├── supplement_sft.html                   ✅ SFT・LoRA・QLoRA 補足（4×4行列の数値例つき）
+│   │   ├── supplement_dpo.html                   ✅ DPO 補足（参照モデル・損失関数図解・動的デモつき）
+│   │   ├── supplement_rag.html                   ✅ RAG 補足（チャンクサイズ情報量目安つき）
+│   │   ├── supplement_evaluation.html            ✅ 評価指標補足（ROUGE・BERTScore・LLM-as-judge）
+│   │   └── quiz_ch2.html                         ✅ 第2章 理解確認クイズ
+│   ├── notebooks/ch2_0{1..4}_*.ipynb             📝 下書き（2026-06-26 作成。12〜16 セル、未実行で出力なし）
+│   ├── exercises/ex_0{1..4}_*.ipynb              📝 下書き（TODO 穴埋めのみ。自己チェックなし）
+│   ├── solutions/sol_0{1..4}_*.ipynb             📝 下書き（4〜7 セル。未実行）
+│   └── scripts/train_{sft,dpo}.py                📝 下書き（gpu_queue.sh 経由の実行に対応済み・未実行）
 ├── chapter3/  （空ディレクトリ + .gitkeep のみ）
 ├── docs/
 │   ├── operator_guide.md                             ✅ 開催側の手順書
@@ -80,6 +92,10 @@ dgx-handson/
     ├── required_assets.py                            ✅ 事前取得するモデル・データセットの一覧
     ├── check_env.py                                  ✅ 環境確認（GPU・パッケージ・オフライン読み込み・起動条件）
     └── multiuser/
+        ├── setup_account.sh                          ✅ 参加者用アカウント handson の作成
+        ├── deploy.sh                                 ✅ 教材・.venv・モデルを /opt/handson に配置
+        ├── restrict_ssh.sh                           ✅ handson の SSH を貸与 VM からの接続とトンネルに制限
+        ├── welcome.sh                                ✅ ログイン時に接続元 IP から参加者番号を決めて URL を表示
         ├── handson.sh                                ✅ 参加者ごとの JupyterLab の起動・停止・URL 発行・教材配布
         ├── ipython_startup.py                        ✅ GPU メモリ上限 + gpu_slot()
         └── gpu_queue.sh                              ✅ スクリプト学習の同時実行制御
@@ -195,6 +211,62 @@ sudo なしの共有アカウント `user01` で最大10人が同時に参加す
 
 ---
 
+## 第1章 Web 資料の推敲・解説動画・試し場（2026-10-09〜10-14）
+
+第1章の Web 資料を推敲し、解説動画と試し場（ページ内で値を動かせるデモ）を加えた。PR #9 で main にマージ済み。
+
+### 推敲と誤りの訂正（2026-10-09）
+
+`.claude/skills/tech-writing` の規約で 8 ページを推敲した（です・ます調、文の分割、用語の統一、太字は結論と用語の初出だけ）。あわせて次の誤りを直した。
+
+| ページ | 訂正内容 |
+|---|---|
+| 線形回帰 | 出力例を実行結果（初期損失 145.37 など）に差し替え。学習率の表を実測の挙動に修正 |
+| `ml_quadratic_demo.html` | 学習率の初期値 0.05 は発散するため 0.01 に変更。収束していないときに「収束完了」を出さない |
+| 推論パラメータ | Temperature / Top-p の図の値、repetition_penalty の式、do_sample の既定値の説明 |
+| 事前学習 | Chinchilla の比較相手（Gopher）、Llama の学習コスト |
+| Transformer | 注目度の図の値の矛盾、Bahdanau 論文の記述、「銀行」の例 |
+| クイズ | 後から表示する解説の数式が描画されない |
+
+### 解説動画（manim）
+
+`chapter1/manim/` に 8 シーンを置き、`make` で 1080p30 の MP4 とポスター画像を `chapter1/web/media/` に書き出す。シーンと埋め込み先の対応は `chapter1/manim/README.md` の表を参照。
+
+- 動画内の数値は、資料のコード例とハンズオン③と同じ式で計算している。資料の数値を変えたら動画も作り直すこと
+- DGX（aarch64）では `pip install manim` が失敗する（glcontext / manimpango のビルド済みバイナリがない）。conda-forge（micromamba）で環境を作る
+- LaTeX は入れていない。動画内は `Text` だけを使い、`MathTex` は使わない
+- 配色は `scenes/theme.py` と `assets/web-theme.css` の両方で定義している。テーマを変えるときは両方を直す
+
+### 試し場（2026-10-09・10-14）
+
+| ページ | 試し場の内容 |
+|---|---|
+| `supplement_linear_regression.html` | 勾配降下法。損失の地形（2D 等高線／3D 曲面）上で学習率による収束・振動・発散を確かめる。データはコード例と同じ `np.random.seed(42)` の 50 点 |
+| `supplement_neural_network.html` | XOR を 2 層 NN で学習。活性化関数とノード数で決定境界が変わる |
+| `supplement_transformer.html` | 「太郎はリンゴを食べた。それは甘かった。」の 7 単語で Self-Attention を計算。2 つのヘッドを切り替えられる |
+| `supplement_pretraining.html` | スケーリング則。N と D から損失と計算量を求め、最適な配分と実在モデルを比べる。定数は Epoch AI の再当てはめ値（Besiroglu et al., 2024）。Hoffmann et al. の丸めた定数では最適な D/N が約 90 になり、本文の約 1:20 と食い違うため |
+| `supplement_inference_params.html` | temperature / top_k / top_p を動かしてサンプリングを試す |
+
+### Attention の説明の書き直し（2026-10-14）
+
+`supplement_transformer.html` を高校数学（ベクトルと内積）だけで読めるように書き直し、ハンズオン③のノートブックの説明もそろえた。
+
+- 例文を「太郎はリンゴを食べた。それは甘かった。」に統一。「それ」がリンゴを 99% 参考にするまでを手計算の表で追う
+- 用語: Q・K・V は「探しているもの・自分が何者か・相手へ渡す情報」、QKᵀ は「合い具合」、softmax 後は「参考にする割合」
+- 表記: 1 単語ぶんは小文字 $q_i, k_i, v_i$（ベクトル）、全単語を積んだものは大文字 $Q, K, V$（行列）。$d_k$ は Key ベクトルの次元数
+- Multi-Head の例: 「食べた」の Head 1「誰が食べた？」→ 太郎、Head 2「何を食べた？」→ リンゴ（説明用の例である旨を注記）
+- 専門的な内容（固定次元ボトルネック、Pre-Norm、RMSNorm、SwiGLU、RoPE、Attention Sink など）は削らず「もっと詳しく」に移した
+- `ch1_03_llm_inference.ipynb` は説明文・コメント・表示文字列・グラフのラベルだけを変え（変数名・関数名は変更なし）、GPU で再実行して出力を保存した
+- 動画 `ch1_self_attention` と `ch1_causal_mask` を同じ例で作り直した
+
+> **注**：ノートブックのミニチュア（「ネコ が サカナ 食べた」）はそのまま残っている。Web 資料の例（太郎・リンゴ）とは別の例だが、ノートブックの数値（食べた → サカナ 0.99 など）は変えていない。
+
+### DESIGN.md との関係
+
+DESIGN.md の「アニメーション・動的エフェクトは使用しない」に対し、解説動画と試し場はユーザーの指示で追加した（第2章 DPO のデモと同じ扱い）。静的な図と本文だけでも内容が読めるように書いている。
+
+---
+
 ## 残タスク
 
 ### 開催方式
@@ -216,7 +288,7 @@ sudo なしの共有アカウント `user01` で最大10人が同時に参加す
 
 | 章 | 状態 |
 |---|---|
-| 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答は未作成 |
+| 第2章（SFT・DPO・RAG） | Web 資料完成。ノートブック・演習・解答・スクリプトは 2026-06-26 の下書きのみ（未実行・未検証）。仕上げが必要（実行結果の保存、演習の自己チェック、RAG の生成モデルの差し替えなど） |
 | 第3章（AI エージェント） | 未着手 |
 
 ---
@@ -226,28 +298,24 @@ sudo なしの共有アカウント `user01` で最大10人が同時に参加す
 supplement ページは `supplement_linear_regression.html` のデザインを**完全に踏襲**する。
 新規ファイルを作るときは同ファイルをテンプレートとして参照すること。
 
-### カラー変数（`<style>` の `:root` に定義）
+### カラー変数
+
+2026-07-06 から、配色変数・フォント・質感は `assets/web-theme.css` で一元管理している。
+各ページは自分の `<style>` の**後に** Google Fonts と `../../assets/web-theme.css` を読み込み、同じ変数を上書きする。
+ページ内 `<style>` の `:root` にも旧値が残っているが、実際に効くのは `web-theme.css` の値。**配色を変えるときは `web-theme.css` と `chapter1/manim/scenes/theme.py` を直す。**
+
+主な変数（値は `web-theme.css` が正）:
 
 ```css
---bg:           #F7F5F0   /* ページ背景（ウォームオフホワイト） */
---surface:      #FFFFFF   /* カード背景 */
---surface2:     #F0EDE6   /* 薄いサーフェス */
---border:       #DDD8CE   /* 通常ボーダー */
---border-strong:#C5BFB2   /* 強調ボーダー */
---text:         #1C1917   /* 本文テキスト */
---text-sub:     #57534E   /* サブテキスト */
---text-muted:   #A8A29E   /* ミュートテキスト */
---green:        #0D4A38   /* メインアクセント（ディープフォレストグリーン） */
---green-mid:    #1A6B52   /* 中間グリーン */
---green-bg:     #EAF3EF   /* グリーン背景 */
---green-border: #A7CBB9   /* グリーンボーダー */
---amber:        #7C5C00   /* 注意色 */
---amber-bg:     #FFF8E6
---amber-border: #E8C96A
---red:          #991B1B   /* 警告色 */
---red-bg:       #FEF2F2
---code-bg:      #18181B   /* コードブロック背景 */
---code-out:     #27272A   /* 出力ブロック背景 */
+--bg / --surface / --surface2            /* 背景・カード・薄いサーフェス */
+--border / --border-strong               /* ボーダー */
+--text / --text-sub / --text-muted       /* テキスト */
+--green / --green-mid / --green-bg / --green-border   /* メインアクセント（ディープフォレストグリーン #0D4A38） */
+--amber / --amber-bg / --amber-border / --amber-text  /* 注意 */
+--red / --red-bg / --red-border          /* 警告 */
+--code-bg / --code-out                   /* コードブロック・出力 */
+--font-body / --font-display / --font-mono
+--shadow-sm / --shadow-card / --shadow-hover
 ```
 
 ### CDN
@@ -270,11 +338,19 @@ supplement ページは `supplement_linear_regression.html` のデザインを**
 
 ### フォント
 
-システムフォントスタックを使用（外部フォント CDN は使わない）:
+`web-theme.css` の変数で指定する。Google Fonts から読み込み、読めないときはシステムフォントに落ちる。
 
-```css
-font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
-             "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif;
+| 変数 | フォント |
+|---|---|
+| `--font-body` | Zen Kaku Gothic New → ヒラギノ角ゴ・游ゴシック・メイリオ |
+| `--font-display`（見出し） | Zen Old Mincho → ヒラギノ明朝・游明朝 |
+| `--font-mono` | IBM Plex Mono → SF Mono・Menlo・Consolas |
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/web-theme.css">
 ```
 
 ### 主要コンポーネントクラス
@@ -295,8 +371,8 @@ font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
 
 ### DESIGN.md の制約（厳守）
 
-- アニメーション・動的エフェクト禁止（印刷・PDF出力を想定）
-- 外部 CDN 以外の依存を持たない（単体で動作）
+- アニメーション・動的エフェクト禁止（印刷・PDF出力を想定）。例外: 第1章の解説動画・試し場、第2章 DPO のデモはユーザー指示で追加済み
+- 外部 CDN 以外の依存を持たない（例外: 共通テーマ `assets/web-theme.css` と `media/` の動画）
 - `pip` コマンド禁止 → `uv pip` を使用
 - `device="cuda"` の固定禁止 → `torch.cuda.is_available()` で分岐
 - `openai` パッケージ禁止 → HuggingFace + LangChain に統一
