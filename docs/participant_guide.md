@@ -27,6 +27,25 @@
 | 教材ページの URL | `http://localhost:8800/`（全員共通） |
 | SSH のパスワード | 運営から別途お知らせします |
 
+**VM ごとの SSH コマンド**
+
+接続先は全員同じ DGX（`10.1.3.220`）です。VM の IP（10.1.3.221〜230）ではないので注意してください。人によって違うのは JupyterLab の番号（8801〜8810）だけです。
+
+| 参加者番号 | 貸与 VM | VM の中で実行する SSH コマンド | JupyterLab の URL |
+|---|---|---|---|
+| p01 | 1号機（10.1.3.221） | `ssh -L 8801:localhost:8801 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8801/lab?token=…` |
+| p02 | 2号機（10.1.3.222） | `ssh -L 8802:localhost:8802 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8802/lab?token=…` |
+| p03 | 3号機（10.1.3.223） | `ssh -L 8803:localhost:8803 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8803/lab?token=…` |
+| p04 | 4号機（10.1.3.224） | `ssh -L 8804:localhost:8804 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8804/lab?token=…` |
+| p05 | 5号機（10.1.3.225） | `ssh -L 8805:localhost:8805 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8805/lab?token=…` |
+| p06 | 6号機（10.1.3.226） | `ssh -L 8806:localhost:8806 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8806/lab?token=…` |
+| p07 | 7号機（10.1.3.227） | `ssh -L 8807:localhost:8807 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8807/lab?token=…` |
+| p08 | 8号機（10.1.3.228） | `ssh -L 8808:localhost:8808 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8808/lab?token=…` |
+| p09 | 9号機（10.1.3.229） | `ssh -L 8809:localhost:8809 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8809/lab?token=…` |
+| p10 | 10号機（10.1.3.230） | `ssh -L 8810:localhost:8810 -L 8800:localhost:8800 handson@10.1.3.220` | `http://localhost:8810/lab?token=…` |
+
+トークン（`token=` の後ろ）は SSH でログインしたときに表示されます。教材ページは全員 `http://localhost:8800/` です。
+
 > **URL（トークン）は自分専用です。** 他の人には教えないでください。知られると、あなたの JupyterLab を他の人が開けてしまいます。
 
 ---
@@ -149,6 +168,7 @@ gpu_queue.sh python chapter2/scripts/train_sft.py
 | 症状 | 対処 |
 |---|---|
 | 手順 1 で `Connection closed by 10.1.3.220 port 22` や `kex_exchange_identification` と表示される | 会社の PC で実行していませんか。SSH は**貸与 VM の中で**実行してください。VM の中でも出る場合は講師に声をかけてください |
+| 手順 1 で `Connection refused` や `Connection timed out` と表示され、つながらない | SSH コマンドの接続先（`handson@` の後ろ）が、自分の VM の IP（10.1.3.221〜230）になっていませんか。接続先は全員 **`10.1.3.220`**（DGX）です。「VM ごとの SSH コマンド」の表のとおりに実行してください |
 | ブラウザで「接続できません」と表示される | ① **VM の中のブラウザ**で開いているか確認してください（会社の PC のブラウザでは開けません）。② 手順 1 の SSH のウィンドウが開いたままか確認し、閉じていたら、もう一度実行します |
 | 手順 1 で `bind [127.0.0.1]:8801: Permission denied` や `bind: Address already in use` と表示される | VM の中で、その番号がすでに使われています。① SSH のウィンドウを2つ開いていないか、② VS Code で DGX につないでいないか（VS Code が同じ番号を自動で転送していることがあります）を確認してください。どのプログラムが使っているかは、PowerShell の `netstat -ano \| findstr LISTENING \| findstr :8801` で末尾の番号を調べ、`Get-Process -Id <番号>` で確認できます。それでも解決しないときは、`-L 9801:localhost:8801` のように左側の番号を変え、ブラウザでは `http://localhost:9801/lab?token=...` を開いてください（8800 のときは `-L 9800:localhost:8800` と `http://localhost:9800/`） |
 | 教材ページで数式が崩れる・リンクが開けない | JupyterLab の中で HTML を開いていないか確認してください。教材ページは `http://localhost:8800/` から開きます |
